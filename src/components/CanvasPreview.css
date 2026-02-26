@@ -29,8 +29,8 @@
 .dbadge {
   font-family: 'Saans Mono', 'DM Mono', monospace;
   font-size: 11px;
-  color: #EEFF8C;
-  background: rgba(238,255,140,.08);
+  color: var(--text);
+  background: rgba(128,128,128,.1);
   padding: 2px 7px;
   letter-spacing: .04em;
 }

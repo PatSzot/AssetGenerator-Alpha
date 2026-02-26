@@ -3,34 +3,36 @@
   height: 100vh;
   overflow: hidden;
 
-  /* ── Dark mode (default) */
-  --bg:        #000d05;
-  --surface:   #000d05;
-  --border:    #091a0d;
-  --text:      #f2fff6;
-  --text-dim:  rgba(242,255,246,0.35);
-  --label:     rgba(0,255,100,0.55);
-  --hover-bd:  rgba(0,255,100,0.3);
-  --input-bg:  rgba(0,0,0,0.4);
+  /* ── Dark mode (default)
+     All text pairs verified ≥ 4.5:1 on their respective surfaces        */
+  --bg:        #060e07;   /* near-black canvas area                        */
+  --surface:   #0d1a10;   /* sidebar / toolbar (distinct from --bg)        */
+  --border:    #1f4030;   /* input/button borders, decorative dividers     */
+  --text:      #f0f5f2;   /* primary text  — ~16:1 on surface              */
+  --text-dim:  #8db49a;   /* secondary/label text — ~6.4:1 on surface      */
+  --label:     #45c06a;   /* section headers — ~6.4:1 on surface           */
+  --hover-bd:  #356045;   /* hover border highlight                        */
+  --input-bg:  rgba(0,0,0,0.28);
   --logo:      #00ff64;
-  --accent:    #00ff64;
-  --accent-hv: #00d454;
+  --accent:    #00ff64;   /* neon: used for bg fills & active borders      */
+  --accent-hv: #00dc55;
 
   background: var(--bg);
   color: var(--text);
 }
 
-/* ── Light mode overrides */
+/* ── Light mode overrides
+   Neutral white — minimal green tint, high contrast throughout           */
 .app.light {
-  --bg:        #f0fef5;
-  --surface:   #e6fbee;
-  --border:    rgba(0,20,8,0.1);
-  --text:      #000d05;
-  --text-dim:  rgba(0,13,5,0.4);
-  --label:     #004d20;
-  --hover-bd:  rgba(0,13,5,0.25);
-  --input-bg:  rgba(255,255,255,0.85);
-  --logo:      #000d05;
-  --accent:    #00ff64;
-  --accent-hv: #00e05a;
+  --bg:        #f4f4f4;   /* off-white page background                     */
+  --surface:   #ffffff;   /* pure white sidebar / toolbar                  */
+  --border:    #c8c8c8;   /* neutral gray borders (visible)                */
+  --text:      #141414;   /* near-black — ~16:1 on surface                 */
+  --text-dim:  #6b6b6b;   /* secondary text — ~4.7:1 on white              */
+  --label:     #444444;   /* section headers — ~9.5:1 on white             */
+  --hover-bd:  #999999;
+  --input-bg:  #ffffff;
+  --logo:      #141414;
+  --accent:    #006b28;   /* dark green — ~8:1 on white (safe for text)    */
+  --accent-hv: #005220;
 }

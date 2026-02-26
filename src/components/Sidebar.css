@@ -209,8 +209,8 @@
 /* ── Export buttons */
 .btn-ex {
   width: 100%;
-  background: var(--accent);
-  color: #000d05;
+  background: #00ff64;
+  color: #060e07;
   border: none;
   padding: 11px;
   font-family: 'Saans', sans-serif;
@@ -221,7 +221,7 @@
   margin-bottom: 5px;
   transition: background .15s;
 }
-.btn-ex:hover { background: var(--accent-hv); }
+.btn-ex:hover { background: #00dc55; }
 
 .btn-all {
   width: 100%;
