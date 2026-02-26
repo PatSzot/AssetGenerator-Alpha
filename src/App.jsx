@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
   roleCompany: 'CMO, Carta',
   ctaText:     'See AirOps in Action',
   colorMode:   'green',
-  showCTA:     true,
+  showCTA:     false,
   dims:        { w: 1080, h: 1080 },
 }
 
