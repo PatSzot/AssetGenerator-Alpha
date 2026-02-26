@@ -73,6 +73,9 @@
   overflow: hidden;
   box-shadow: 0 0 0 1px var(--border), 0 20px 60px rgba(0,0,0,.4);
 }
+.app.light .canvas-scaler {
+  box-shadow: 0 0 0 1px var(--border);
+}
 
 .canvas-scaler canvas {
   display: block;
