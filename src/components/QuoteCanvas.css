@@ -1,0 +1,59 @@
+.canvas-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.canvas-scaler {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 24px 80px rgba(0,0,0,0.7);
+}
+
+.canvas-scaler canvas {
+  display: block;
+}
+
+.canvas-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.canvas-size-label {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-right: 4px;
+}
+
+.btn-action {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-action:hover {
+  opacity: 0.88;
+}
+
+.btn-action:active {
+  transform: scale(0.97);
+}
+
+.btn-copy {
+  background: #1e1e2e;
+  color: #9ca3af;
+  border: 1px solid #2a2a3e;
+}
+
+.btn-download {
+  background: #4f46e5;
+  color: #fff;
+}
