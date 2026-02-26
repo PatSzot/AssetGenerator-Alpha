@@ -5,26 +5,18 @@
 }
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #0f0f13;
-  color: #e8e8f0;
-  font-size: 15px;
+  font-family: 'Saans', sans-serif;
+  background: #060f09;
+  color: #F8FFFA;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 #root {
-  min-height: 100vh;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-input, textarea, select {
-  font-family: inherit;
+  height: 100vh;
 }

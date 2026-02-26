@@ -1,74 +1,76 @@
-import { useState, useCallback } from 'react'
-import QuoteCanvas from './components/QuoteCanvas'
-import QuoteForm from './components/QuoteForm'
-import StyleControls from './components/StyleControls'
+import { useState, useCallback, useEffect } from 'react'
+import Sidebar from './components/Sidebar'
+import CanvasPreview from './components/CanvasPreview'
+import { loadFonts } from './utils/loadFonts'
+import { drawCanvas } from './utils/drawCanvas'
 import './App.css'
 
-const DEFAULT_STATE = {
-  // Content
-  quoteText: 'The best way to predict the future is to create it.',
-  authorName: 'Peter Drucker',
-  authorTitle: '',
-
-  // Canvas dimensions
-  canvasWidth: 1080,
-  canvasHeight: 1080,
-
-  // Background
-  bgType: 'solid',          // 'solid' | 'gradient'
-  bgColor: '#1a1a2e',
-  bgGradientStart: '#1a1a2e',
-  bgGradientEnd: '#16213e',
-  bgGradientAngle: 135,
-
-  // Quote text
-  quoteFont: 'Georgia',
-  quoteFontSize: 52,
-  quoteColor: '#ffffff',
-  quoteStyle: 'italic',     // 'normal' | 'italic'
-  quoteAlign: 'center',     // 'left' | 'center'
-  showQuotationMarks: true,
-
-  // Author text
-  authorFont: 'Inter',
-  authorFontSize: 28,
-  authorColor: '#a0a8c0',
-
-  // Accent
-  accentColor: '#e94560',
-  showAccentLine: true,
-
-  // Padding
-  padding: 80,
+const DEFAULT_SETTINGS = {
+  quote:       '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
+  firstName:   'Nicole',
+  lastName:    'Baer',
+  roleCompany: 'CMO, Carta',
+  ctaText:     'See AirOps in Action',
+  colorMode:   'green',
+  showCTA:     true,
+  dims:        { w: 1080, h: 1080 },
 }
 
 export default function App() {
-  const [settings, setSettings] = useState(DEFAULT_STATE)
+  const [settings, setSettings]   = useState(DEFAULT_SETTINGS)
+  const [fontsReady, setFontsReady] = useState(false)
+
+  useEffect(() => {
+    loadFonts()
+      .then(() => setFontsReady(true))
+      .catch(() => { /* fonts failed — fall back to system fonts, already handled */ })
+  }, [])
 
   const update = useCallback((key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }))
   }, [])
 
-  const reset = useCallback(() => setSettings(DEFAULT_STATE), [])
+  // Export a single JPEG at the given dimensions
+  const exportJpeg = useCallback((w, h, filename) => {
+    const ew = w ?? settings.dims.w
+    const eh = h ?? settings.dims.h
+    const ec = document.createElement('canvas')
+    drawCanvas(ec, { ...settings, dims: { w: ew, h: eh } }, fontsReady)
+    const a = document.createElement('a')
+    a.download = filename ?? `airops-quote-${settings.colorMode}-${ew}x${eh}.jpg`
+    a.href = ec.toDataURL('image/jpeg', 0.95)
+    a.click()
+  }, [settings, fontsReady])
+
+  // Export all 4 preset sizes with a staggered delay (avoids browser download throttle)
+  const exportAll = useCallback(() => {
+    const presets = [
+      [1080, 1080, 'sq'],
+      [1080, 1350, 'p45'],
+      [1080, 1920, 's916'],
+      [1920, 1080, 'l169'],
+    ]
+    presets.forEach(([w, h, label], i) => {
+      setTimeout(
+        () => exportJpeg(w, h, `airops-quote-${settings.colorMode}-${label}-${w}x${h}.jpg`),
+        i * 350,
+      )
+    })
+  }, [exportJpeg, settings.colorMode])
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Quote Asset Generator</h1>
-        <p className="app-subtitle">Create shareable quote graphics for social media</p>
-      </header>
-
-      <main className="app-main">
-        <aside className="app-sidebar">
-          <QuoteForm settings={settings} update={update} />
-          <StyleControls settings={settings} update={update} />
-          <button className="btn-reset" onClick={reset}>Reset to Defaults</button>
-        </aside>
-
-        <section className="app-canvas-area">
-          <QuoteCanvas settings={settings} />
-        </section>
-      </main>
+      <Sidebar
+        settings={settings}
+        update={update}
+        fontsReady={fontsReady}
+        onExport={exportJpeg}
+        onExportAll={exportAll}
+      />
+      <CanvasPreview
+        settings={settings}
+        fontsReady={fontsReady}
+      />
     </div>
   )
 }
