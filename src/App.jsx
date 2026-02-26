@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
 export default function App() {
   const [settings, setSettings]   = useState(DEFAULT_SETTINGS)
   const [fontsReady, setFontsReady] = useState(false)
+  const [uiMode, setUiMode]         = useState('dark')
 
   useEffect(() => {
     loadFonts()
@@ -59,13 +60,15 @@ export default function App() {
   }, [exportJpeg, settings.colorMode])
 
   return (
-    <div className="app">
+    <div className={`app${uiMode === 'light' ? ' light' : ''}`}>
       <Sidebar
         settings={settings}
         update={update}
         fontsReady={fontsReady}
         onExport={exportJpeg}
         onExportAll={exportAll}
+        uiMode={uiMode}
+        onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
       />
       <CanvasPreview
         settings={settings}
