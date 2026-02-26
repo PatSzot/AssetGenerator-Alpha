@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS = {
 export default function App() {
   const [settings, setSettings]   = useState(DEFAULT_SETTINGS)
   const [fontsReady, setFontsReady] = useState(false)
-  const [uiMode, setUiMode]         = useState('dark')
+  const [uiMode, setUiMode]         = useState('light')
 
   useEffect(() => {
     loadFonts()
