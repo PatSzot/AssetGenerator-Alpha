@@ -176,7 +176,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
 
   if (showCTA) {
     const ctaH = 104, ctaR = ctaH / 2;
-    ctx.font = `600 40px ${sans}`;
+    ctx.font = `500 40px ${sans}`;
     ctx.letterSpacing = '0px';
     const ctaTW = ctx.measureText(ctaText).width;
     const ctaW  = ctaTW + 96;
