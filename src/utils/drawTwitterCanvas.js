@@ -60,56 +60,34 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
 
   const metricsStr = `${tweetLikes || '0'} Likes  ·  ${tweetRetweets || '0'} Retweets  ·  ${tweetReplies || '0'} Replies`.toUpperCase()
 
-  // ── Sizes (scale with format)
-  const avatarSz  = isLand ? 64  : 88
-  const nameSz    = isLand ? 40  : 52
-  const handleSz  = isLand ? 28  : 36
-  const metricsSz = isLand ? 24  : 30
+  // ── Sizes
+  const avatarSz  = isLand ? 52  : 68
+  const nameSz    = isLand ? 36  : 46
+  const handleSz  = isLand ? 24  : 30
+  const metricsSz = isLand ? 18  : 22
   const footerH   = 100
 
   const authorH       = avatarSz
   const metricsH      = metricsSz * 1.4
-  const gapTextAuthor = isStory ? 64 : 48
-  const gapAuthorMet  = 28
-  const gapMetFooter  = 40
-  const availH = ch - padY * 2 - footerH - authorH - metricsH - gapTextAuthor - gapAuthorMet - gapMetFooter
+  const gapAuthorText = isStory ? 56 : 40
+  const gapTextMet    = isStory ? 56 : 40
+  const gapMetFooter  = 32
 
-  // ── Tweet text — auto-shrink
-  const BASE_T = isLand ? 52 : 68
-  let tFont = BASE_T
-  let tLines
+  const availH = ch - padY * 2 - footerH - authorH - metricsH - gapAuthorText - gapTextMet - gapMetFooter
 
-  ctx.textBaseline = 'top'
-  for (let f = BASE_T; f >= 28; f -= 1) {
-    ctx.font = `500 ${f}px ${sans}`
-    ctx.letterSpacing = '0px'
-    tLines = wrapText(ctx, tweetText, innerW)
-    if (tLines.length * f * 1.2 <= availH) { tFont = f; break }
-  }
-
-  ctx.font = `500 ${tFont}px ${sans}`
-  ctx.letterSpacing = '0px'
-  tLines = wrapText(ctx, tweetText, innerW)
-
-  const tLH = tFont * 1.2
   let y = padY
-  ctx.fillStyle = M.text
-  ctx.textBaseline = 'top'
-  tLines.forEach((line, i) => ctx.fillText(line, pad, y + i * tLH))
-  y += tLines.length * tLH + gapTextAuthor
 
-  // ── Author row
+  // ── Author row (top)
   const cx = pad + avatarSz / 2
   const cy = y   + avatarSz / 2
 
-  // Background circle (always drawn)
+  // Background circle
   ctx.beginPath()
   ctx.arc(cx, cy, avatarSz / 2, 0, Math.PI * 2)
   ctx.fillStyle = M.pill
   ctx.fill()
 
   if (profileImage) {
-    // Clip to circle and draw profile photo
     ctx.save()
     ctx.beginPath()
     ctx.arc(cx, cy, avatarSz / 2, 0, Math.PI * 2)
@@ -117,7 +95,6 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     ctx.drawImage(profileImage, pad, y, avatarSz, avatarSz)
     ctx.restore()
   } else {
-    // Fallback: initials
     ctx.font = `500 ${Math.round(avatarSz * 0.38)}px ${sans}`
     ctx.letterSpacing = '0px'
     ctx.fillStyle = M.pillText
@@ -142,14 +119,39 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.fillStyle = M.pillText
   ctx.fillText(authorHandle, nameX, nameY + nameSz * 1.15)
 
-  y += avatarSz + gapAuthorMet
+  y += avatarSz + gapAuthorText
 
-  // ── Metrics
+  // ── Tweet text — auto-shrink
+  const BASE_T = isLand ? 52 : 68
+  let tFont = BASE_T
+  let tLines
+
+  ctx.textBaseline = 'top'
+  for (let f = BASE_T; f >= 28; f -= 1) {
+    ctx.font = `500 ${f}px ${sans}`
+    ctx.letterSpacing = '0px'
+    tLines = wrapText(ctx, tweetText, innerW)
+    if (tLines.length * f * 1.2 <= availH) { tFont = f; break }
+  }
+
+  ctx.font = `500 ${tFont}px ${sans}`
+  ctx.letterSpacing = '0px'
+  tLines = wrapText(ctx, tweetText, innerW)
+
+  const tLH = tFont * 1.2
+  ctx.fillStyle = M.text
+  ctx.textBaseline = 'top'
+  tLines.forEach((line, i) => ctx.fillText(line, pad, y + i * tLH))
+  y += tLines.length * tLH + gapTextMet
+
+  // ── Metrics (smaller, reduced opacity)
+  ctx.globalAlpha = 0.4
   ctx.font = `500 ${metricsSz}px ${mono}`
   ctx.letterSpacing = '0.05em'
-  ctx.fillStyle = M.pillText
+  ctx.fillStyle = M.text
   ctx.textBaseline = 'top'
   ctx.fillText(metricsStr, pad, y)
+  ctx.globalAlpha = 1
 
   // ── Footer: AirOps logo
   const logoH   = 56
