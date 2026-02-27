@@ -57,9 +57,11 @@ function RotationDial({ value, onChange }) {
   )
 }
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRefleuron }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onRefleuron }) {
   const { dims } = settings
-  const fileInputRef = useRef(null)
+  const fileInputRef        = useRef(null)
+  const richPhotoInputRef   = useRef(null)
+  const richLogoInputRef    = useRef(null)
 
   return (
     <div className="sidebar">
@@ -91,6 +93,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             onChange={e => update('templateType', e.target.value)}
           >
             <option value="quote">Quote Block</option>
+            <option value="richquote">Rich Quote Block</option>
             <option value="twitter">Twitter Post</option>
           </select>
         </div>
@@ -139,6 +142,96 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <div className="ttrack" />
               <div className="tthumb" />
             </label>
+          </div>
+
+          <div className="div" />
+        </>}
+
+        {/* Content — Rich Quote Block */}
+        {settings.templateType === 'richquote' && <>
+          <div className="sec">Quote</div>
+
+          <div className="field">
+            <label>Quote Text</label>
+            <textarea
+              value={settings.richQuoteText}
+              onChange={e => update('richQuoteText', e.target.value)}
+            />
+          </div>
+
+          <div className="div" />
+
+          <div className="sec">Speaker</div>
+
+          <div className="field">
+            <label>First Name</label>
+            <input type="text" value={settings.richFirstName} onChange={e => update('richFirstName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Last Name</label>
+            <input type="text" value={settings.richLastName} onChange={e => update('richLastName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Title &amp; Company</label>
+            <input type="text" value={settings.richRoleCompany} onChange={e => update('richRoleCompany', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Headshot Photo</label>
+            <input
+              ref={richPhotoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onRichProfileImageChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => richPhotoInputRef.current?.click()}>
+              {settings.richProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            </button>
+            {settings.richProfileImage && (
+              <button className="btn-clear-photo" onClick={() => onRichProfileImageChange(null)}>
+                ✕ Remove photo
+              </button>
+            )}
+          </div>
+
+          <div className="div" />
+
+          <div className="sec">Company Logo</div>
+
+          <div className="field">
+            <label>Logo (SVG or PNG, black/dark version)</label>
+            <input
+              ref={richLogoInputRef}
+              type="file"
+              accept="image/svg+xml,image/png,image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onRichCompanyLogoChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => richLogoInputRef.current?.click()}>
+              {settings.richCompanyLogo ? '↺ Replace Logo' : '↑ Upload Logo'}
+            </button>
+            {settings.richCompanyLogo && (
+              <button className="btn-clear-photo" onClick={() => onRichCompanyLogoChange(null)}>
+                ✕ Remove logo
+              </button>
+            )}
           </div>
 
           <div className="div" />
@@ -255,7 +348,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {(() => {
           const modes = settings.templateType === 'twitter'
             ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
-            : ['green', 'pink', 'yellow', 'blue']
+            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote: light modes only
           return (
             <div className="mode-grid mode-grid-wide">
               {modes.map(m => (

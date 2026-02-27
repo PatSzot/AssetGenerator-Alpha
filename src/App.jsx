@@ -4,6 +4,7 @@ import CanvasPreview from './components/CanvasPreview'
 import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
+import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -23,6 +24,13 @@ const DEFAULT_SETTINGS = {
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
   showFloralia:       false,
+  // Rich Quote template
+  richQuoteText:    '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
+  richFirstName:    'Alex',
+  richLastName:     'Rodmell',
+  richRoleCompany:  'Growth, Venn',
+  richProfileImage:  null,
+  richCompanyLogo:   null,
   decorationStyle:    'fill',
   decorationRotation: 0,
 }
@@ -32,8 +40,10 @@ export default function App() {
   const [fontsReady, setFontsReady] = useState(false)
   const [uiMode, setUiMode]         = useState('light')
 
-  const profileImageRef  = useRef(null)
-  const floraliaDotsRef  = useRef([])
+  const profileImageRef      = useRef(null)
+  const richProfileImageRef  = useRef(null)
+  const richCompanyLogoRef   = useRef(null)
+  const floraliaDotsRef      = useRef([])
   const [floraliaReady, setFloraliaReady] = useState(0)
 
   useEffect(() => {
@@ -51,8 +61,8 @@ export default function App() {
   const update = useCallback((key, value) => {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
-      // If switching back to quote, reset any dark colour mode to its light base
-      if (key === 'templateType' && value === 'quote' && next.colorMode.startsWith('dark-')) {
+      // Rich Quote and Quote Block don't support dark modes — reset if switching to them
+      if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
       return next
@@ -80,9 +90,24 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
+  const handleRichProfileImageChange = useCallback((dataUrl) => {
+    if (!dataUrl) { richProfileImageRef.current = null; update('richProfileImage', null); return }
+    const img = new Image()
+    img.onload = () => { richProfileImageRef.current = img; update('richProfileImage', dataUrl) }
+    img.src = dataUrl
+  }, [update])
+
+  const handleRichCompanyLogoChange = useCallback((dataUrl) => {
+    if (!dataUrl) { richCompanyLogoRef.current = null; update('richCompanyLogo', null); return }
+    const img = new Image()
+    img.onload = () => { richCompanyLogoRef.current = img; update('richCompanyLogo', dataUrl) }
+    img.src = dataUrl
+  }, [update])
+
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
-    else drawCanvas(canvas, s, fontsReady)
+    if (s.templateType === 'twitter')    drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'richquote') drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
+    else                                     drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
@@ -91,7 +116,9 @@ export default function App() {
     const s  = { ...settings, dims: { w: ew, h: eh } }
     const ec = document.createElement('canvas')
     draw(ec, s)
-    const prefix = settings.templateType === 'twitter' ? 'airops-tweet' : 'airops-quote'
+    const prefix = settings.templateType === 'twitter' ? 'airops-tweet'
+      : settings.templateType === 'richquote'          ? 'airops-richquote'
+      : 'airops-quote'
     const a = document.createElement('a')
     a.download = filename ?? `${prefix}-${settings.colorMode}-${ew}x${eh}.jpg`
     a.href = ec.toDataURL('image/jpeg', 0.95)
@@ -105,7 +132,9 @@ export default function App() {
       [1080, 1920, 's916'],
       [1920, 1080, 'l169'],
     ]
-    const prefix = settings.templateType === 'twitter' ? 'airops-tweet' : 'airops-quote'
+    const prefix = settings.templateType === 'twitter'    ? 'airops-tweet'
+      : settings.templateType === 'richquote' ? 'airops-richquote'
+      : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(
         () => exportJpeg(w, h, `${prefix}-${settings.colorMode}-${label}-${w}x${h}.jpg`),
@@ -125,6 +154,8 @@ export default function App() {
         uiMode={uiMode}
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
         onProfileImageChange={handleProfileImageChange}
+        onRichProfileImageChange={handleRichProfileImageChange}
+        onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onRefleuron={handleRefleuron}
       />
       <CanvasPreview
