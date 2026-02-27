@@ -45,15 +45,15 @@ export function generateFleuronDots() {
 
     for (let i = 0; i < steps; i++) {
       ca += (Math.random() - 0.5) * 0.28         // gentle organic curve
-      cx += Math.cos(ca) * 7
-      cy += Math.sin(ca) * 7
+      cx += Math.cos(ca) * 11
+      cy += Math.sin(ca) * 11
 
       // Core vine dot
       dot(cx, cy)
       // Second dot for vine width
-      if (Math.random() < 0.55) dot(cx + (Math.random() - 0.5) * 7, cy + (Math.random() - 0.5) * 7)
+      if (Math.random() < 0.55) dot(cx + (Math.random() - 0.5) * 9, cy + (Math.random() - 0.5) * 9)
       // Occasional stray dot (texture)
-      if (Math.random() < 0.18) dot(cx + (Math.random() - 0.5) * 13, cy + (Math.random() - 0.5) * 13)
+      if (Math.random() < 0.18) dot(cx + (Math.random() - 0.5) * 16, cy + (Math.random() - 0.5) * 16)
 
       // Spawn sub-branch
       if (depth < 3 && Math.random() < 0.036) {
@@ -104,7 +104,7 @@ export function renderFleuronToCanvas(dots, tr, tg, tb) {
 
   // Batch all dots into a single path for performance
   ctx.beginPath()
-  const R = 3.2
+  const R = 1.6
   dots.forEach(({ x, y }) => {
     ctx.moveTo(x + R, y)
     ctx.arc(x, y, R, 0, Math.PI * 2)
