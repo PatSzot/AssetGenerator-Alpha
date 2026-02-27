@@ -205,8 +205,8 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
 
   // ── Footer: AirOps logo (outside box, on brand background)
   // Non-story: logo bottom aligns with guide x (40px from edge), matching quote template
-  // Story: keep existing vertical positioning
+  // Story: 40px below the bottom edge of the white box
   const logoBmp = buildLogo(logoColor, logoH)
-  const footerY = isStory ? ch - padY - logoH : ch - guideX - logoH
+  const footerY = isStory ? boxY + boxH + 40 : ch - guideX - logoH
   ctx.drawImage(logoBmp, guideX, footerY)
 }
