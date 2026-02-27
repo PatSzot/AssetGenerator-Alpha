@@ -78,7 +78,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
 
   // ── Vertical guide lines (Figma: x=40 and x=w-40, full height)
   ctx.strokeStyle = M.lineColor;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(pad, 0);      ctx.lineTo(pad, ch);      ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cw - pad, 0); ctx.lineTo(cw - pad, ch); ctx.stroke();
 
@@ -173,13 +173,14 @@ export function drawCanvas(canvas, settings, fontsReady) {
 
   // ── Footer: logo (left) + CTA pill (right)
   const logoH   = 56;
-  const logoBmp = buildLogo(M.text, logoH);
+  const logoW   = Math.round(784 * logoH / 252);
+  const logoBmp = buildLogo(M.text, Math.round(logoH * dpr));
   // Non-story: logo bottom aligns with guide x (40px from edge)
   // Story: keep existing vertical positioning
   const logoY = isStory
     ? ch - padY - Math.max(logoH, 104) + (Math.max(logoH, 104) - logoH) / 2
     : ch - pad - logoH;
-  ctx.drawImage(logoBmp, pad, logoY);
+  ctx.drawImage(logoBmp, pad, logoY, logoW, logoH);
 
   if (showCTA) {
     const ctaH = 104, ctaR = ctaH / 2;

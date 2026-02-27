@@ -180,7 +180,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
 
   // ── Guide lines drawn ON TOP of box so they're never interrupted
   ctx.strokeStyle = lineColor
-  ctx.lineWidth = 1.5
+  ctx.lineWidth = 2
 
   // Vertical guides — stroke shifted outward by half lineWidth so the inner
   // edge of the stroke sits exactly at x=40 and nothing inside bleeds over it
@@ -262,12 +262,19 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   // ── Footer: AirOps logo (outside box, on brand background)
   // Non-story: logo bottom aligns with guide x (40px from edge), matching quote template
   // Story: 40px below the bottom edge of the white box
-  const logoBmp = buildLogo(logoColor, logoH)
+  // Build at dpr× so the bitmap is sharp in the scaled context; draw at CSS dimensions.
+  const logoW   = Math.round(784 * logoH / 252)
+  const logoBmp = buildLogo(logoColor, Math.round(logoH * dpr))
   const footerY = isStory ? boxY + boxH + 40 : ch - guideX - logoH
-  // In inverted decoration mode, clear dots behind the logo so it reads cleanly
+  // In inverted decoration mode, clear dots behind the logo.
+  // Snap the fill rect to the dot grid so no dots are partially clipped at its edges.
   if (settings.showFloralia && settings.decorationStyle === 'inverted') {
+    const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
+    const fy = Math.floor(footerY / stepCanvas) * stepCanvas
+    const fh = Math.ceil((footerY + logoH - fy) / stepCanvas) * stepCanvas
+    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas
     ctx.fillStyle = bgColor
-    ctx.fillRect(guideX, footerY, logoBmp.width, logoBmp.height)
+    ctx.fillRect(guideX, fy, fw, fh)
   }
-  ctx.drawImage(logoBmp, guideX, footerY)
+  ctx.drawImage(logoBmp, guideX, footerY, logoW, logoH)
 }
