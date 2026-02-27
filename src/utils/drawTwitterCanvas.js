@@ -58,7 +58,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   if (settings.showFleuron && fleuronImages) {
     const fc = fleuronImages[colorMode]
     if (fc?.width > 0) {
-      const scale = Math.max(cw / fc.width, ch / fc.height)
+      const scale = Math.max(cw / fc.width, ch / fc.height) * 2.0
       const dw = fc.width  * scale
       const dh = fc.height * scale
       ctx.globalAlpha = 0.2
