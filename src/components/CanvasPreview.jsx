@@ -26,9 +26,17 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
     return () => window.removeEventListener('resize', updateScale)
   }, [updateScale])
 
-  // Redraw canvas whenever settings or font-readiness changes
+  // Redraw at 2× buffer so physical pixels are 1:1 on retina screens.
+  // After drawing, pin the CSS size to the original dims — this stops the
+  // 2× buffer from blowing out the layout before the CSS transform applies.
   useEffect(() => {
-    if (canvasRef.current) draw(canvasRef.current, settings)
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const { w, h } = settings.dims
+    draw(canvas, { ...settings, dims: { w: w * dpr, h: h * dpr } })
+    canvas.style.width  = `${w}px`
+    canvas.style.height = `${h}px`
   }, [settings, draw])
 
   const { w, h } = settings.dims
