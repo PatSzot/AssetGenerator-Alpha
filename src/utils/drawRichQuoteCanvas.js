@@ -8,8 +8,8 @@ const PHOTO_BG = {
   blue:   '#00000e',
 }
 
-// ── Draw photo region: dark bg + grayscale/contrast photo via lighter blend
-function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode, dpr) {
+// ── Draw photo region: dark bg + stipple image via plus-lighter blend (matches Figma)
+function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode) {
   const darkBg = PHOTO_BG[colorMode] ?? '#001408'
 
   ctx.fillStyle = darkBg
@@ -17,23 +17,14 @@ function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode, dpr) {
 
   if (!profileImage) return
 
-  // Render grayscale + contrast to a sharp offscreen canvas
-  const off = document.createElement('canvas')
-  off.width  = Math.round(w * dpr)
-  off.height = Math.round(h * dpr)
-  const oc = off.getContext('2d')
-  oc.scale(dpr, dpr)
-  oc.filter = 'grayscale(1) invert(1) contrast(1.6) brightness(1.05)'
-
   // Aspect-fill the photo region
   const s  = Math.max(w / (profileImage.naturalWidth  || 1), h / (profileImage.naturalHeight || 1))
   const iw = profileImage.naturalWidth  * s
   const ih = profileImage.naturalHeight * s
-  oc.drawImage(profileImage, (w - iw) / 2, (h - ih) / 2, iw, ih)
 
   ctx.save()
   ctx.globalCompositeOperation = 'lighter'
-  ctx.drawImage(off, x, y, w, h)
+  ctx.drawImage(profileImage, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih)
   ctx.restore()
 }
 
@@ -208,7 +199,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     strokeLine(ctx, splitX, 0, splitX, ch)
     strokeLine(ctx, splitX, photoH, cw, photoH)
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode, dpr)
+    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 53,
       ...contentArgs, nameSz: 120, quoteSzBase: 64, quoteLH: 1.2 })
@@ -225,7 +216,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     strokeLine(ctx, splitX, rowY, splitX, rowY + headshotRowH)
     strokeLine(ctx, 0, rowY + headshotRowH, cw, rowY + headshotRowH)
 
-    drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode, dpr)
+    drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
     drawContent(ctx, { x: 0, y: topPad, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
@@ -248,7 +239,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     strokeLine(ctx, 0, contentH, cw, contentH)
     strokeLine(ctx, splitX, contentH, splitX, ch)
 
-    drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode, dpr)
+    drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
     drawContent(ctx, { x: 0, y: 0, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
@@ -262,7 +253,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     strokeLine(ctx, splitX, 0, splitX, ch)
     strokeLine(ctx, splitX, photoH, cw, photoH)
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode, dpr)
+    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
