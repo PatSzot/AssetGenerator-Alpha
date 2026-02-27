@@ -29,9 +29,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
 
   const boxPadX  = isLand ? 52 : 64
   const boxPadY  = isLand ? 52 : 64
-  const boxX     = guideX
   const boxW     = cw - guideX * 2
-  const contentX = boxX + boxPadX
   const contentW = boxW - boxPadX * 2
 
   // ── Background
@@ -93,13 +91,15 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const tLH  = tFont * 1.2
   const textH = tLines.length * tLH
 
-  // ── Compute box dimensions
-  const boxH = boxPadY + authorH + gapAuthorText + textH + dateGap + dateH + boxPadY
-  const boxY = padY
+  // ── Compute box dimensions — centred on canvas
+  const boxH     = boxPadY + authorH + gapAuthorText + textH + dateGap + dateH + boxPadY
+  const boxY     = Math.round((ch - boxH) / 2)
+  const boxXC    = Math.round((cw - boxW) / 2)   // symmetric with guideX, but explicit
+  const contentX = boxXC + boxPadX
 
-  // ── Draw white content box
+  // ── Draw white content box (centred)
   ctx.fillStyle = '#ffffff'
-  ctx.fillRect(boxX, boxY, boxW, boxH)
+  ctx.fillRect(boxXC, boxY, boxW, boxH)
 
   // ── Guide lines drawn ON TOP of box so they're never interrupted
   ctx.strokeStyle = M.lineColor
@@ -109,9 +109,9 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.beginPath(); ctx.moveTo(guideX, 0);        ctx.lineTo(guideX, ch);        ctx.stroke()
   ctx.beginPath(); ctx.moveTo(cw - guideX, 0);   ctx.lineTo(cw - guideX, ch);   ctx.stroke()
 
-  // Horizontal guides at top and bottom of box (full canvas width)
-  ctx.beginPath(); ctx.moveTo(0, boxY);           ctx.lineTo(cw, boxY);           ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, boxY + boxH);    ctx.lineTo(cw, boxY + boxH);    ctx.stroke()
+  // Horizontal guides at top and bottom of box (full canvas width, responsive to centred position)
+  ctx.beginPath(); ctx.moveTo(0, boxY);        ctx.lineTo(cw, boxY);        ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(0, boxY + boxH); ctx.lineTo(cw, boxY + boxH); ctx.stroke()
 
   // ── Content inside box
   let y = boxY + boxPadY
