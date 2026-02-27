@@ -11,7 +11,7 @@ const DARK_MODES = {
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
-export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, floraliaDots) {
+export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, floralia) {
   const {
     colorMode,
     dims,
@@ -55,25 +55,49 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, cw, ch)
 
-  // ── Fleuron font fill (rendered at canvas resolution — always crisp)
-  if (settings.showFloralia && floraliaDots?.length > 0) {
-    const scale = Math.max(cw, ch) * 1.5
-    const offX  = (cw - scale) / 2
-    const offY  = (ch - scale) / 2
-    const dotR  = Math.max(cw, ch) * 0.0022
-    ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
-    ctx.globalAlpha = 0.35
-    ctx.beginPath()
-    floraliaDots.forEach(({ x, y }) => {
-      const px = offX + x * scale
-      const py = offY + y * scale
-      if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
-        ctx.moveTo(px + dotR, py)
-        ctx.arc(px, py, dotR, 0, Math.PI * 2)
-      }
-    })
-    ctx.fill()
-    ctx.globalAlpha = 1
+  // ── Decoration (fleuron font fill)
+  if (settings.showFloralia && floralia?.insideDots) {
+    const scale  = Math.max(cw, ch) * 1.5
+    const offX   = (cw - scale) / 2
+    const offY   = (ch - scale) / 2
+    const dotR   = Math.max(cw, ch) * 0.0022
+    const accent = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
+
+    const drawDots = (dots, alpha) => {
+      ctx.fillStyle   = accent
+      ctx.globalAlpha = alpha
+      ctx.beginPath()
+      dots.forEach(({ x, y }) => {
+        const px = offX + x * scale
+        const py = offY + y * scale
+        if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+          ctx.moveTo(px + dotR, py)
+          ctx.arc(px, py, dotR, 0, Math.PI * 2)
+        }
+      })
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    if (settings.decorationStyle === 'inverted') {
+      // Dot grid covers entire canvas, solid glyph shapes cut through
+      drawDots(floralia.outsideDots, 0.28)
+      // Solid glyph shapes on top of the dot grid
+      ctx.fillStyle    = accent
+      ctx.globalAlpha  = 0.7
+      ctx.textBaseline = 'middle'
+      ctx.textAlign    = 'center'
+      floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
+        ctx.font = `${fontSizeNorm * scale}px Floralia`
+        ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
+      })
+      ctx.textAlign    = 'left'
+      ctx.textBaseline = 'top'
+      ctx.globalAlpha  = 1
+    } else {
+      // Dot fill inside glyph shapes only
+      drawDots(floralia.insideDots, 0.35)
+    }
   }
 
   // ── Placeholder when nothing entered
@@ -231,5 +255,10 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   // Story: 40px below the bottom edge of the white box
   const logoBmp = buildLogo(logoColor, logoH)
   const footerY = isStory ? boxY + boxH + 40 : ch - guideX - logoH
+  // In inverted decoration mode, clear dots behind the logo so it reads cleanly
+  if (settings.showFloralia && settings.decorationStyle === 'inverted') {
+    ctx.fillStyle = bgColor
+    ctx.fillRect(guideX, footerY, logoBmp.width, logoBmp.height)
+  }
   ctx.drawImage(logoBmp, guideX, footerY)
 }

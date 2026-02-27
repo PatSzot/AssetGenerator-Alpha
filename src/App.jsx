@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS = {
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
   showFloralia:     false,
+  decorationStyle:  'fill',
 }
 
 export default function App() {

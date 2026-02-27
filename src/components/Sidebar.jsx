@@ -174,6 +174,14 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <div className="tthumb" />
             </label>
           </div>
+          {settings.showFloralia && (
+            <div className="field">
+              <select value={settings.decorationStyle} onChange={e => update('decorationStyle', e.target.value)}>
+                <option value="fill">Glyph fill</option>
+                <option value="inverted">Inverted</option>
+              </select>
+            </div>
+          )}
           <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
 
           <div className="div" />

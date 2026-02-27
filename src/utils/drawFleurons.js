@@ -13,6 +13,11 @@ export const STIPPLE_COLORS = {
 // ── Fleuron font fill — render Floralia glyphs to an offscreen canvas,
 //    sample filled pixels on a regular grid, return normalised [0,1] coords.
 //    Must be called AFTER fonts are loaded (Floralia added to document.fonts).
+//
+//    Returns { insideDots, outsideDots, glyphs }
+//      insideDots  — dots inside glyph shapes  (for 'fill' style)
+//      outsideDots — dots outside glyph shapes (for 'inverted' style)
+//      glyphs      — metadata to re-render the solid glyph at any canvas size
 export function generateFleuronFontDots() {
   const SIZE = 2000
   const oc  = document.createElement('canvas')
@@ -28,34 +33,40 @@ export function generateFleuronFontDots() {
 
   const CHARS     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const numGlyphs = 1 + Math.floor(Math.random() * 2)  // 1 or 2
+  const glyphs    = []
 
   for (let g = 0; g < numGlyphs; g++) {
     const char     = CHARS[Math.floor(Math.random() * CHARS.length)]
     const fontSize = numGlyphs === 1
       ? 1500 + Math.random() * 400   // 1500–1900 px for single glyph
       : 900  + Math.random() * 300   // 900–1200 px for paired glyphs
-    ctx.font = `${fontSize}px Floralia`
     const cx = numGlyphs === 1
       ? SIZE * (0.4  + (Math.random() - 0.5) * 0.2)
       : SIZE * (0.28 + Math.random() * 0.44)
     const cy = numGlyphs === 1
       ? SIZE * (0.4  + (Math.random() - 0.5) * 0.2)
       : SIZE * (0.28 + Math.random() * 0.44)
+
+    ctx.font = `${fontSize}px Floralia`
     ctx.fillText(char, cx, cy)
+
+    // Store normalised metadata for re-rendering the solid glyph
+    glyphs.push({ char, fontSizeNorm: fontSize / SIZE, cxNorm: cx / SIZE, cyNorm: cy / SIZE })
   }
 
   const { data, width, height } = ctx.getImageData(0, 0, SIZE, SIZE)
-  const dots = []
+  const insideDots  = []
+  const outsideDots = []
   const step = Math.round(SIZE * 0.006)  // 0.006 normalised spacing
 
   for (let y = 0; y < height; y += step) {
     for (let x = 0; x < width; x += step) {
       const idx = (y * width + x) * 4
-      if (data[idx] < 128) {  // dark pixel = inside glyph shape
-        dots.push({ x: x / width, y: y / height })
-      }
+      const dot = { x: x / width, y: y / height }
+      if (data[idx] < 128) insideDots.push(dot)   // dark pixel = inside glyph
+      else outsideDots.push(dot)
     }
   }
 
-  return dots
+  return { insideDots, outsideDots, glyphs }
 }
