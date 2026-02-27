@@ -19,7 +19,7 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRandomize }) {
   const { dims } = settings
   const fileInputRef = useRef(null)
 
@@ -174,6 +174,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <div className="tthumb" />
             </label>
           </div>
+          <button className="btn-all" onClick={onRandomize}>↻ Randomize Fleuron</button>
 
           <div className="div" />
         </>}

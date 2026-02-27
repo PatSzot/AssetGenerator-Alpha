@@ -4,6 +4,7 @@ import CanvasPreview from './components/CanvasPreview'
 import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
+import { generateAllFleuronCanvases } from './utils/drawFleurons'
 import './App.css'
 
 const DEFAULT_SETTINGS = {
@@ -100,6 +101,12 @@ export default function App() {
     })
   }, [])
 
+  const handleRandomize = useCallback(() => {
+    fleuronImagesRef.current = generateAllFleuronCanvases()
+    setSettings(prev => ({ ...prev, showFleuron: true }))
+    setFleuronReady(v => v + 1)
+  }, [])
+
   const handleProfileImageChange = useCallback((dataUrl) => {
     if (!dataUrl) {
       profileImageRef.current = null
@@ -159,6 +166,7 @@ export default function App() {
         uiMode={uiMode}
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
         onProfileImageChange={handleProfileImageChange}
+        onRandomize={handleRandomize}
       />
       <CanvasPreview
         settings={settings}
