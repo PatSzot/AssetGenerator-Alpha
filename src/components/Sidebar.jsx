@@ -9,7 +9,7 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, tweetUrl, onTweetUrlChange, onFetchTweet, tweetFetching, tweetError }) {
   const { dims } = settings
 
   return (
@@ -46,54 +46,97 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         <div className="div" />
 
-        {/* Content */}
-        <div className="sec">Content</div>
+        {/* Content — Quote Block */}
+        {settings.templateType === 'quote' && <>
+          <div className="sec">Content</div>
 
-        <div className="field">
-          <label>Quote</label>
-          <textarea
-            value={settings.quote}
-            onChange={e => update('quote', e.target.value)}
-          />
-        </div>
+          <div className="field">
+            <label>Quote</label>
+            <textarea
+              value={settings.quote}
+              onChange={e => update('quote', e.target.value)}
+            />
+          </div>
 
-        <div className="field">
-          <label>First Name</label>
-          <input
-            type="text"
-            value={settings.firstName}
-            onChange={e => update('firstName', e.target.value)}
-          />
-        </div>
+          <div className="field">
+            <label>First Name</label>
+            <input type="text" value={settings.firstName} onChange={e => update('firstName', e.target.value)} />
+          </div>
 
-        <div className="field">
-          <label>Last Name</label>
-          <input
-            type="text"
-            value={settings.lastName}
-            onChange={e => update('lastName', e.target.value)}
-          />
-        </div>
+          <div className="field">
+            <label>Last Name</label>
+            <input type="text" value={settings.lastName} onChange={e => update('lastName', e.target.value)} />
+          </div>
 
-        <div className="field">
-          <label>Role &amp; Company</label>
-          <input
-            type="text"
-            value={settings.roleCompany}
-            onChange={e => update('roleCompany', e.target.value)}
-          />
-        </div>
+          <div className="field">
+            <label>Role &amp; Company</label>
+            <input type="text" value={settings.roleCompany} onChange={e => update('roleCompany', e.target.value)} />
+          </div>
 
-        <div className="field">
-          <label>CTA Text</label>
-          <input
-            type="text"
-            value={settings.ctaText}
-            onChange={e => update('ctaText', e.target.value)}
-          />
-        </div>
+          <div className="field">
+            <label>CTA Text</label>
+            <input type="text" value={settings.ctaText} onChange={e => update('ctaText', e.target.value)} />
+          </div>
 
-        <div className="div" />
+          <div className="div" />
+
+          <div className="sec">Options</div>
+          <div className="tog-row">
+            <label>Show CTA pill</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showCTA} onChange={e => update('showCTA', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+
+          <div className="div" />
+        </>}
+
+        {/* Content — Twitter Post */}
+        {settings.templateType === 'twitter' && <>
+          <div className="sec">Tweet URL</div>
+
+          <div className="field">
+            <label>Post URL</label>
+            <input
+              type="text"
+              placeholder="https://x.com/user/status/..."
+              value={tweetUrl}
+              onChange={e => onTweetUrlChange(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && onFetchTweet()}
+            />
+          </div>
+
+          <button
+            className="btn-fetch"
+            onClick={onFetchTweet}
+            disabled={tweetFetching || !tweetUrl.trim()}
+          >
+            {tweetFetching ? 'Fetching…' : '↓ Load Tweet'}
+          </button>
+
+          {tweetError && <div className="tweet-error">{tweetError}</div>}
+
+          {settings.tweetData && <>
+            <div className="tweet-preview">
+              <div className="tweet-preview-author">
+                {settings.tweetData.author?.name}
+                <span> @{settings.tweetData.author?.username}</span>
+              </div>
+              <div className="tweet-preview-text">{settings.tweetData.text}</div>
+              <div className="tweet-preview-metrics">
+                ♥ {settings.tweetData.metrics?.like_count?.toLocaleString() ?? 0}
+                &nbsp;·&nbsp;
+                ↺ {settings.tweetData.metrics?.retweet_count?.toLocaleString() ?? 0}
+                &nbsp;·&nbsp;
+                💬 {settings.tweetData.metrics?.reply_count?.toLocaleString() ?? 0}
+              </div>
+            </div>
+          </>}
+
+          <div className="div" />
+        </>}
 
         {/* Color Mode */}
         <div className="sec">Color Mode</div>
@@ -107,23 +150,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               {MODE_LABELS[m].split(' ')[0]}<br />{MODE_LABELS[m].split(' ')[1]}
             </button>
           ))}
-        </div>
-
-        <div className="div" />
-
-        {/* Options */}
-        <div className="sec">Options</div>
-        <div className="tog-row">
-          <label>Show CTA pill</label>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={settings.showCTA}
-              onChange={e => update('showCTA', e.target.checked)}
-            />
-            <div className="ttrack" />
-            <div className="tthumb" />
-          </label>
         </div>
 
         <div className="div" />

@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { drawCanvas, MODES } from '../utils/drawCanvas'
+import { MODES } from '../utils/drawCanvas'
 import './CanvasPreview.css'
 
-const MODE_LABELS = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
+const MODE_LABELS   = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
+const TEMPLATE_LABELS = { quote: 'Quote Block', twitter: 'Twitter Post' }
 
-export default function CanvasPreview({ settings, fontsReady }) {
+export default function CanvasPreview({ settings, fontsReady, draw }) {
   const canvasRef    = useRef(null)
   const containerRef = useRef(null)
   const [scale, setScale] = useState(1)
@@ -27,8 +28,8 @@ export default function CanvasPreview({ settings, fontsReady }) {
 
   // Redraw canvas whenever settings or font-readiness changes
   useEffect(() => {
-    if (canvasRef.current) drawCanvas(canvasRef.current, settings, fontsReady)
-  }, [settings, fontsReady])
+    if (canvasRef.current) draw(canvasRef.current, settings)
+  }, [settings, draw])
 
   const { w, h } = settings.dims
 
@@ -38,7 +39,7 @@ export default function CanvasPreview({ settings, fontsReady }) {
       <div className="canvas-toolbar">
         <span className="tl">Preview</span>
         <span className="dbadge">{w} × {h}</span>
-        <span className="mbadge">{MODE_LABELS[settings.colorMode]}</span>
+        <span className="mbadge">{TEMPLATE_LABELS[settings.templateType]} · {MODE_LABELS[settings.colorMode]}</span>
         <span className={`fpill${fontsReady ? ' ready' : ''}`}>
           {fontsReady ? 'Fonts ready' : 'Loading fonts…'}
         </span>
