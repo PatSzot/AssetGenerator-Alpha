@@ -19,7 +19,7 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRestipple }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRestipple, onRefleuron }) {
   const { dims } = settings
   const fileInputRef = useRef(null)
 
@@ -175,6 +175,16 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </label>
           </div>
           <button className="btn-all" onClick={onRestipple}>↻ Restipple</button>
+
+          <div className="tog-row">
+            <label>Fleuron font fill</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+          <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Re-fleuron</button>
 
           <div className="div" />
         </>}

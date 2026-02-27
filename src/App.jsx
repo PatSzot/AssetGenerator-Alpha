@@ -4,7 +4,7 @@ import CanvasPreview from './components/CanvasPreview'
 import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
-import { generateFleuronDots } from './utils/drawFleurons'
+import { generateFleuronDots, generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 const DEFAULT_SETTINGS = {
@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS = {
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
   showStipple:      false,
+  showFloralia:     false,
 }
 
 export default function App() {
@@ -30,9 +31,11 @@ export default function App() {
   const [fontsReady, setFontsReady] = useState(false)
   const [uiMode, setUiMode]         = useState('light')
 
-  const profileImageRef = useRef(null)
-  const stippleDotsRef  = useRef([])
-  const [stippleReady, setStippleReady] = useState(0)
+  const profileImageRef  = useRef(null)
+  const stippleDotsRef   = useRef([])
+  const floraliaDotsRef  = useRef([])
+  const [stippleReady,  setStippleReady]  = useState(0)
+  const [floraliaReady, setFloraliaReady] = useState(0)
 
   useEffect(() => {
     loadFonts()
@@ -44,6 +47,12 @@ export default function App() {
     stippleDotsRef.current = generateFleuronDots()
     setStippleReady(v => v + 1)
   }, [])
+
+  useEffect(() => {
+    if (!fontsReady) return
+    floraliaDotsRef.current = generateFleuronFontDots()
+    setFloraliaReady(v => v + 1)
+  }, [fontsReady])
 
   const update = useCallback((key, value) => {
     setSettings(prev => {
@@ -62,6 +71,13 @@ export default function App() {
     setStippleReady(v => v + 1)
   }, [])
 
+  const handleRefleuron = useCallback(() => {
+    if (!fontsReady) return
+    floraliaDotsRef.current = generateFleuronFontDots()
+    setSettings(prev => ({ ...prev, showFloralia: true }))
+    setFloraliaReady(v => v + 1)
+  }, [fontsReady])
+
   const handleProfileImageChange = useCallback((dataUrl) => {
     if (!dataUrl) {
       profileImageRef.current = null
@@ -77,9 +93,9 @@ export default function App() {
   }, [update])
 
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, stippleDotsRef.current)
+    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, stippleDotsRef.current, floraliaDotsRef.current)
     else drawCanvas(canvas, s, fontsReady)
-  }, [fontsReady, stippleReady]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fontsReady, stippleReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
     const ew = w ?? settings.dims.w
@@ -122,6 +138,7 @@ export default function App() {
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
         onProfileImageChange={handleProfileImageChange}
         onRestipple={handleRestipple}
+        onRefleuron={handleRefleuron}
       />
       <CanvasPreview
         settings={settings}

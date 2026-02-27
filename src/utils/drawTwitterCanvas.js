@@ -11,7 +11,7 @@ const DARK_MODES = {
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
-export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, stippleDots) {
+export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, stippleDots, floraliaDots) {
   const {
     colorMode,
     dims,
@@ -67,6 +67,27 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, st
     ctx.globalAlpha = 0.3
     ctx.beginPath()
     stippleDots.forEach(({ x, y }) => {
+      const px = offX + x * scale
+      const py = offY + y * scale
+      if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+        ctx.moveTo(px + dotR, py)
+        ctx.arc(px, py, dotR, 0, Math.PI * 2)
+      }
+    })
+    ctx.fill()
+    ctx.globalAlpha = 1
+  }
+
+  // ── Fleuron font fill (rendered at canvas resolution — always crisp)
+  if (settings.showFloralia && floraliaDots?.length > 0) {
+    const scale = Math.max(cw, ch) * 1.5
+    const offX  = (cw - scale) / 2
+    const offY  = (ch - scale) / 2
+    const dotR  = Math.min(cw, ch) * 0.0022
+    ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
+    ctx.globalAlpha = 0.35
+    ctx.beginPath()
+    floraliaDots.forEach(({ x, y }) => {
       const px = offX + x * scale
       const py = offY + y * scale
       if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
