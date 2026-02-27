@@ -139,9 +139,12 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
   ctx.restore()  // release clip
 }
 
-// ── Section border helper: stroke a box around a layout region
-function strokeSection(ctx, x, y, w, h) {
-  ctx.strokeRect(x, y, w, h)
+// ── Guideline helper: drawn last so lines sit on top of all section fills
+function strokeLine(ctx, x1, y1, x2, y2) {
+  ctx.beginPath()
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
+  ctx.stroke()
 }
 
 // ── Main renderer
@@ -187,20 +190,19 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
   }
 
   if (isLand) {
-    // ── Landscape: left content | right photo (top) + logo panel (bottom)
+    // ── Landscape: left content (960) | right photo (top) + logo panel (bottom)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 203
     const photoH     = ch - logoPanelH
-
-    // Figma: content section, photo section, and logo panel each have a border box
-    strokeSection(ctx, 0,      0,      splitX,      ch)
-    strokeSection(ctx, splitX, 0,      cw - splitX, photoH)
-    strokeSection(ctx, splitX, photoH, cw - splitX, logoPanelH)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 53,
       ...contentArgs, nameSz: 120, quoteSzBase: 64, quoteLH: 1.2 })
+
+    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
+    strokeLine(ctx, splitX, 0,      splitX, ch)       // vertical, full height
+    strokeLine(ctx, splitX, photoH, cw,     photoH)   // horizontal, right half
 
   } else if (isStory) {
     // ── Story 9:16: padded content | headshot row | AirOps logo
@@ -209,10 +211,6 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const headshotRowH = 540
     const splitX       = Math.round(cw / 2)
     const rowY         = topPad + contentH
-
-    // Figma: photo and logo sections each have a border box
-    strokeSection(ctx, 0,      rowY, splitX,      headshotRowH)
-    strokeSection(ctx, splitX, rowY, cw - splitX, headshotRowH)
 
     drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
@@ -228,34 +226,39 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     ctx.fillRect(40, logoY, logoW, logoH)
     ctx.drawImage(logoBmp, 40, logoY, logoW, logoH)
 
+    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
+    strokeLine(ctx, 0,      rowY,                   cw, rowY)                    // top horizontal, full width
+    strokeLine(ctx, splitX, rowY,                   splitX, rowY + headshotRowH) // vertical, headshot row only
+    strokeLine(ctx, 0,      rowY + headshotRowH,    cw, rowY + headshotRowH)     // bottom horizontal, full width
+
   } else if (isPortrait) {
     // ── Portrait 4:5: full-width content (top) | headshot row (bottom)
     const headshotRowH = 540
     const contentH     = ch - headshotRowH
     const splitX       = Math.round(cw / 2)
 
-    // Figma: photo and logo sections each have a border box
-    strokeSection(ctx, 0,      contentH, splitX,      headshotRowH)
-    strokeSection(ctx, splitX, contentH, cw - splitX, headshotRowH)
-
     drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
     drawContent(ctx, { x: 0, y: 0, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
+    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
+    strokeLine(ctx, 0,      contentH, cw,     contentH) // horizontal, full width
+    strokeLine(ctx, splitX, contentH, splitX, ch)       // vertical, headshot row only
+
   } else {
-    // ── Square: left content | right photo (top 922) + logo panel (bottom 158)
+    // ── Square: left content (540) | right photo (top 922) + logo panel (bottom 158)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 158
     const photoH     = ch - logoPanelH
-
-    // Figma: photo and logo sections each have a border box (content section has no border)
-    strokeSection(ctx, splitX, 0,      cw - splitX, photoH)
-    strokeSection(ctx, splitX, photoH, cw - splitX, logoPanelH)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
+
+    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
+    strokeLine(ctx, splitX, 0,      splitX, ch)       // vertical, full height
+    strokeLine(ctx, splitX, photoH, cw,     photoH)   // horizontal, right half
   }
 }
