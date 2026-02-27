@@ -57,9 +57,9 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const initials = authorName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'
 
   // ── Sizes
-  const avatarSz  = isLand ? 52  : 68
   const nameSz    = isLand ? 36  : 46
   const handleSz  = isLand ? 24  : 30
+  const avatarSz  = Math.round(nameSz * 1.15 + handleSz)   // matches height of name + handle block
   const dateSz    = isLand ? 18  : 22
   const footerH   = 100
 
@@ -109,10 +109,12 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.textBaseline = 'top'
   ctx.fillText(authorName, nameX, nameY)
 
+  ctx.globalAlpha = 0.55
   ctx.font = `500 ${handleSz}px ${mono}`
   ctx.letterSpacing = '0.02em'
   ctx.fillStyle = M.pillText
   ctx.fillText(authorHandle, nameX, nameY + nameSz * 1.15)
+  ctx.globalAlpha = 1
 
   y += avatarSz + gapAuthorText
 
