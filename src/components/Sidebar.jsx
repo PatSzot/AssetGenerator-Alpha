@@ -163,6 +163,17 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             <input type="text" placeholder="2:47 AM · Feb 24, 2026" value={settings.tweetDate} onChange={e => update('tweetDate', e.target.value)} />
           </div>
 
+          <div className="div" />
+
+          <div className="sec">Options</div>
+          <div className="tog-row">
+            <label>Fleuron background</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showFleuron} onChange={e => update('showFleuron', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
 
           <div className="div" />
         </>}

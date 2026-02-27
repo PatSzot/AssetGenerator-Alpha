@@ -10,7 +10,7 @@ const DARK_MODES = {
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
-export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
+export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fleuronImages) {
   const {
     colorMode,
     dims,
@@ -53,6 +53,20 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   // ── Background
   ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, cw, ch)
+
+  // ── Fleuron background overlay (behind white box)
+  if (settings.showFleuron && fleuronImages) {
+    const img = fleuronImages[colorMode]
+    if (img?.complete && img.naturalWidth > 0) {
+      const fw = 987, fh = 1000
+      const scale = Math.max(cw / fw, ch / fh)
+      const dw = fw * scale
+      const dh = fh * scale
+      ctx.globalAlpha = 0.2
+      ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
+      ctx.globalAlpha = 1
+    }
+  }
 
   // ── Placeholder when nothing entered
   if (!tweetText.trim() && !tweetAuthorName.trim()) {

@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
+  showFleuron:      false,
 }
 
 export default function App() {
@@ -28,11 +29,47 @@ export default function App() {
   const [fontsReady, setFontsReady] = useState(false)
   const [uiMode, setUiMode]         = useState('light')
 
-  const profileImageRef = useRef(null)
+  const profileImageRef  = useRef(null)
+  const fleuronImagesRef = useRef({})
+  const [fleuronReady, setFleuronReady] = useState(0)
 
   useEffect(() => {
     loadFonts()
       .then(() => setFontsReady(true))
+      .catch(() => {})
+  }, [])
+
+  // Preload the fleuron SVG in one tinted variant per colour mode.
+  // Blob URLs are same-origin so canvas exports stay untainted.
+  useEffect(() => {
+    const TINTS = {
+      'green':       '#80CC9F',
+      'pink':        '#CC86C0',
+      'yellow':      '#BCBF35',
+      'blue':        '#8080CC',
+      'dark-green':  '#70D494',
+      'dark-pink':   '#D470C4',
+      'dark-yellow': '#C4C240',
+      'dark-blue':   '#9090D8',
+    }
+    fetch('/GTMGen-Fleuron.svg')
+      .then(r => r.text())
+      .then(svgText => {
+        const entries = Object.entries(TINTS)
+        let loaded = 0
+        entries.forEach(([mode, color]) => {
+          const colored = svgText.replaceAll('fill="#80CC9F"', `fill="${color}"`)
+          const blob = new Blob([colored], { type: 'image/svg+xml' })
+          const url  = URL.createObjectURL(blob)
+          const img  = new Image()
+          img.onload = () => {
+            URL.revokeObjectURL(url)
+            if (++loaded === entries.length) setFleuronReady(v => v + 1)
+          }
+          img.src = url
+          fleuronImagesRef.current[mode] = img
+        })
+      })
       .catch(() => {})
   }, [])
 
@@ -62,9 +99,9 @@ export default function App() {
   }, [update])
 
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current)
+    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, fleuronImagesRef.current)
     else drawCanvas(canvas, s, fontsReady)
-  }, [fontsReady])
+  }, [fontsReady, fleuronReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
     const ew = w ?? settings.dims.w
