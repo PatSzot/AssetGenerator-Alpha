@@ -24,19 +24,17 @@
 }
 
 .sidebar-logo {
-  height: 15px;
+  height: 18px;
   width: auto;
   display: block;
   color: var(--logo);
 }
 
-.sidebar-subtitle {
-  font-family: 'Saans Mono', 'DM Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--label);
+.sidebar-gtmgen {
+  height: 13px;
+  width: auto;
+  display: block;
+  color: var(--logo);
 }
 
 /* ── Body */
