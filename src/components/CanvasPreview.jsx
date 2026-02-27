@@ -27,14 +27,15 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
   }, [updateScale])
 
   // Redraw at 2× buffer so physical pixels are 1:1 on retina screens.
-  // After drawing, pin the CSS size to the original dims — this stops the
-  // 2× buffer from blowing out the layout before the CSS transform applies.
+  // dpr is passed via settings so draw functions scale the buffer and apply
+  // ctx.scale() — all layout coords stay in 1× px, only the buffer grows.
+  // Pin CSS size to original dims to keep layout correct.
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     const { w, h } = settings.dims
-    draw(canvas, { ...settings, dims: { w: w * dpr, h: h * dpr } })
+    draw(canvas, { ...settings, dpr })
     canvas.style.width  = `${w}px`
     canvas.style.height = `${h}px`
   }, [settings, draw])

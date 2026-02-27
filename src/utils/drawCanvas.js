@@ -51,11 +51,13 @@ export function wrapText(ctx, text, maxW) {
 export function drawCanvas(canvas, settings, fontsReady) {
   const { quote, firstName, lastName, roleCompany, ctaText, showCTA, colorMode, dims } = settings;
   const { w: cw, h: ch } = dims;
+  const dpr = settings.dpr ?? 1;
 
-  canvas.width = cw;
-  canvas.height = ch;
+  canvas.width  = cw * dpr;
+  canvas.height = ch * dpr;
 
   const ctx = canvas.getContext('2d');
+  if (dpr !== 1) ctx.scale(dpr, dpr);
 
   const isLand  = cw > ch;
   const isStory = ch > cw * 1.5;

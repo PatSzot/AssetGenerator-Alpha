@@ -21,11 +21,13 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
     tweetDate         = '',
   } = settings
   const { w: cw, h: ch } = dims
+  const dpr = settings.dpr ?? 1
 
-  canvas.width  = cw
-  canvas.height = ch
+  canvas.width  = cw * dpr
+  canvas.height = ch * dpr
 
   const ctx  = canvas.getContext('2d')
+  if (dpr !== 1) ctx.scale(dpr, dpr)
   const isDark = DARK_MODE_KEYS.has(colorMode)
   // Content inside the white box always uses the light base colours
   const baseMode  = isDark ? colorMode.replace('dark-', '') : colorMode
