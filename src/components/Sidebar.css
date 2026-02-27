@@ -148,9 +148,12 @@
 }
 .mode-btn:hover { border-color: var(--hover-bd); }
 .mode-btn.active { border-color: var(--accent) !important; }
-.mode-green  { background: #f8fffb; color: #000d05; }
-.mode-pink   { background: #fff7ff; color: #3a092c; }
-.mode-yellow { background: #fdfff3; color: #0c0d01; }
+.mode-green        { background: #f8fffb; color: #000d05; }
+.mode-pink         { background: #fff7ff; color: #3a092c; }
+.mode-yellow       { background: #fdfff3; color: #0c0d01; }
+.mode-dark-green   { background: #0f2412; color: #e8f5ee; }
+.mode-dark-pink    { background: #230a1e; color: #f5e8f2; }
+.mode-dark-yellow  { background: #1c1d03; color: #f5f5e0; }
 
 /* ── Dimensions grid */
 .dim-grid {

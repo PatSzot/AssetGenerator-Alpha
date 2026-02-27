@@ -20,7 +20,6 @@ const DEFAULT_SETTINGS = {
   tweetAuthorName:  'Sushil Krishna',
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
-  tweetDarkMode:    false,
   tweetProfileImage: null,
 }
 
@@ -38,7 +37,14 @@ export default function App() {
   }, [])
 
   const update = useCallback((key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }))
+    setSettings(prev => {
+      const next = { ...prev, [key]: value }
+      // If switching back to quote, reset any dark colour mode to its light base
+      if (key === 'templateType' && value === 'quote' && next.colorMode.startsWith('dark-')) {
+        next.colorMode = next.colorMode.replace('dark-', '')
+      }
+      return next
+    })
   }, [])
 
   const handleProfileImageChange = useCallback((dataUrl) => {

@@ -1,7 +1,14 @@
 import { useRef } from 'react'
 import './Sidebar.css'
 
-const MODE_LABELS = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
+const MODE_LABELS = {
+  green:        'Green Paper',
+  pink:         'Pink Paper',
+  yellow:       'Yellow Paper',
+  'dark-green': 'Dark Green',
+  'dark-pink':  'Dark Pink',
+  'dark-yellow':'Dark Yellow',
+}
 
 const DIMS = [
   { w: 1080, h: 1080, label: '1080×1080', sub: 'Square' },
@@ -152,17 +159,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             <input type="text" placeholder="2:47 AM · Feb 24, 2026" value={settings.tweetDate} onChange={e => update('tweetDate', e.target.value)} />
           </div>
 
-          <div className="div" />
-
-          <div className="sec">Asset Style</div>
-          <div className="tog-row">
-            <label>Dark background</label>
-            <label className="toggle">
-              <input type="checkbox" checked={settings.tweetDarkMode} onChange={e => update('tweetDarkMode', e.target.checked)} />
-              <div className="ttrack" />
-              <div className="tthumb" />
-            </label>
-          </div>
 
           <div className="div" />
         </>}
@@ -170,7 +166,10 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {/* Color Mode */}
         <div className="sec">Color Mode</div>
         <div className="mode-grid">
-          {['green', 'pink', 'yellow'].map(m => (
+          {(settings.templateType === 'twitter'
+            ? ['green', 'pink', 'yellow', 'dark-green', 'dark-pink', 'dark-yellow']
+            : ['green', 'pink', 'yellow']
+          ).map(m => (
             <button
               key={m}
               className={`mode-btn mode-${m}${settings.colorMode === m ? ' active' : ''}`}

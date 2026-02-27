@@ -1,10 +1,13 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 
-const DARK_BG = {
-  green:  { bg: '#060e07', lineColor: 'rgba(0,210,80,0.22)',  logoColor: '#e8f5ee' },
-  pink:   { bg: '#0d020a', lineColor: 'rgba(210,0,160,0.22)', logoColor: '#f5e8f2' },
-  yellow: { bg: '#0c0d01', lineColor: 'rgba(190,190,0,0.22)', logoColor: '#f5f5e0' },
+// Dark variants — bg is one visible step up from near-black, logo uses a light tint
+const DARK_MODES = {
+  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,0.28)',   logoColor: '#e8f5ee' },
+  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,0.28)',  logoColor: '#f5e8f2' },
+  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,0.28)',  logoColor: '#f5f5e0' },
 }
+
+const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
 export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const {
@@ -14,7 +17,6 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     tweetAuthorName   = '',
     tweetAuthorHandle = '',
     tweetDate         = '',
-    tweetDarkMode     = false,
   } = settings
   const { w: cw, h: ch } = dims
 
@@ -22,12 +24,15 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   canvas.height = ch
 
   const ctx  = canvas.getContext('2d')
-  const M    = MODES[colorMode]
-  const dark = tweetDarkMode ? DARK_BG[colorMode] : null
-
-  const bgColor   = dark ? dark.bg        : M.bg
-  const lineColor = dark ? dark.lineColor  : M.lineColor
-  const logoColor = dark ? dark.logoColor  : M.text
+  const isDark = DARK_MODE_KEYS.has(colorMode)
+  // Content inside the white box always uses the light base colours
+  const baseMode  = isDark ? colorMode.replace('dark-', '') : colorMode
+  const M         = MODES[baseMode] || MODES['green']
+  // Background, guides and logo use the dark variant when active
+  const TM        = isDark ? DARK_MODES[colorMode] : M
+  const bgColor   = TM.bg
+  const lineColor = TM.lineColor
+  const logoColor = isDark ? TM.logoColor : M.text
 
   const isLand  = cw > ch
   const isStory = ch > cw * 1.5
