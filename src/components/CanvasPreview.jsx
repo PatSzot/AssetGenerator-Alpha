@@ -5,10 +5,6 @@ import './CanvasPreview.css'
 const MODE_LABELS   = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
 const TEMPLATE_LABELS = { quote: 'Quote Block', twitter: 'Twitter Post' }
 
-// Cap at 2× — avoids oversized canvases on 3× displays while still
-// giving crisp output on standard retina screens.
-const DPR = Math.min(window.devicePixelRatio || 1, 2)
-
 export default function CanvasPreview({ settings, fontsReady, draw }) {
   const canvasRef    = useRef(null)
   const containerRef = useRef(null)
@@ -30,11 +26,9 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
     return () => window.removeEventListener('resize', updateScale)
   }, [updateScale])
 
-  // Redraw canvas at DPR × dims so physical pixels are 1:1 on retina screens
+  // Redraw canvas whenever settings or font-readiness changes
   useEffect(() => {
-    if (!canvasRef.current) return
-    const { w, h } = settings.dims
-    draw(canvasRef.current, { ...settings, dims: { w: w * DPR, h: h * DPR } })
+    if (canvasRef.current) draw(canvasRef.current, settings)
   }, [settings, draw])
 
   const { w, h } = settings.dims
@@ -51,8 +45,7 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
         </span>
       </div>
 
-      {/* Canvas display — scale(scale/DPR) maps the DPR-scaled canvas back
-          to the correct CSS pixel size in the container */}
+      {/* Canvas display */}
       <div className="canvas-wrap" ref={containerRef}>
         <div
           className="canvas-scaler"
@@ -60,7 +53,7 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
         >
           <canvas
             ref={canvasRef}
-            style={{ transform: `scale(${scale / DPR})`, transformOrigin: 'top left' }}
+            style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}
           />
         </div>
       </div>
