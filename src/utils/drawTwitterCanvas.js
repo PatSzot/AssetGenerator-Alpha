@@ -111,10 +111,13 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const tLH  = tFont * 1.2
   const textH = tLines.length * tLH
 
-  // ── Compute box dimensions — centred on canvas
-  const boxH     = boxPadY + authorH + gapAuthorText + textH + dateGap + dateH + boxPadY
-  const boxY     = Math.round((ch - boxH) / 2)
-  const boxXC    = Math.round((cw - boxW) / 2)   // symmetric with guideX, but explicit
+  // ── Compute box dimensions
+  const boxH = boxPadY + authorH + gapAuthorText + textH + dateGap + dateH + boxPadY
+  // Story: shift box above centre to account for Instagram bottom UI chrome
+  // All other formats: perfect vertical centre
+  const vCenter  = isStory ? ch * 0.42 : ch * 0.5
+  const boxY     = Math.round(vCenter - boxH / 2)
+  const boxXC    = Math.round((cw - boxW) / 2)
   const contentX = boxXC + boxPadX
 
   // ── Draw white content box (centred)
