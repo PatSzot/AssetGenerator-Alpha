@@ -31,6 +31,21 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
       {/* ── Body */}
       <div className="sidebar-body">
 
+        {/* Template Type */}
+        <div className="sec">Asset Type</div>
+        <div className="field">
+          <select
+            className="template-select"
+            value={settings.templateType}
+            onChange={e => update('templateType', e.target.value)}
+          >
+            <option value="quote">Quote Block</option>
+            <option value="twitter">Twitter Post</option>
+          </select>
+        </div>
+
+        <div className="div" />
+
         {/* Content */}
         <div className="sec">Content</div>
 

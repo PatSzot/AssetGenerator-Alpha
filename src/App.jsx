@@ -6,6 +6,7 @@ import { drawCanvas } from './utils/drawCanvas'
 import './App.css'
 
 const DEFAULT_SETTINGS = {
+  templateType: 'quote',
   quote:       '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
   firstName:   'Nicole',
   lastName:    'Baer',
