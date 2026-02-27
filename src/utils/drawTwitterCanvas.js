@@ -63,13 +63,18 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
     const dotR   = Math.max(cw, ch) * 0.0022
     const accent = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
 
+    // Phase-shift the dot grid so a dot lands exactly on the 40px guide lines
+    const stepNorm = 0.006
+    const shiftX = ((guideX - offX) / scale) % stepNorm
+    const shiftY = ((guideX - offY) / scale) % stepNorm
+
     const drawDots = (dots, alpha) => {
       ctx.fillStyle   = accent
       ctx.globalAlpha = alpha
       ctx.beginPath()
       dots.forEach(({ x, y }) => {
-        const px = offX + x * scale
-        const py = offY + y * scale
+        const px = offX + (x + shiftX) * scale
+        const py = offY + (y + shiftY) * scale
         if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
           ctx.moveTo(px + dotR, py)
           ctx.arc(px, py, dotR, 0, Math.PI * 2)
@@ -175,9 +180,11 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.strokeStyle = lineColor
   ctx.lineWidth = 1.5
 
-  // Vertical guides (full canvas height — same x as quote template)
-  ctx.beginPath(); ctx.moveTo(guideX, 0);        ctx.lineTo(guideX, ch);        ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(cw - guideX, 0);   ctx.lineTo(cw - guideX, ch);   ctx.stroke()
+  // Vertical guides — stroke shifted outward by half lineWidth so the inner
+  // edge of the stroke sits exactly at x=40 and nothing inside bleeds over it
+  const hw = ctx.lineWidth / 2
+  ctx.beginPath(); ctx.moveTo(guideX - hw, 0);        ctx.lineTo(guideX - hw, ch);        ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(cw - guideX + hw, 0);   ctx.lineTo(cw - guideX + hw, ch);   ctx.stroke()
 
   // Horizontal guides at top and bottom of box (full canvas width, responsive to centred position)
   ctx.beginPath(); ctx.moveTo(0, boxY);        ctx.lineTo(cw, boxY);        ctx.stroke()
