@@ -83,7 +83,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, st
     const scale = Math.max(cw, ch) * 1.5
     const offX  = (cw - scale) / 2
     const offY  = (ch - scale) / 2
-    const dotR  = Math.min(cw, ch) * 0.0022
+    const dotR  = Math.min(cw, ch) * 0.0034
     ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
     ctx.globalAlpha = 0.35
     ctx.beginPath()

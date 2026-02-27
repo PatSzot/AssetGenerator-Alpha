@@ -196,11 +196,15 @@ export function generateFleuronFontDots() {
   for (let g = 0; g < numGlyphs; g++) {
     const char     = CHARS[Math.floor(Math.random() * CHARS.length)]
     const fontSize = numGlyphs === 1
-      ? 900  + Math.random() * 300   // 900–1200 px for single glyph
-      : 600  + Math.random() * 300   // 600–900 px for paired glyphs
+      ? 1500 + Math.random() * 400   // 1500–1900 px for single glyph
+      : 900  + Math.random() * 300   // 900–1200 px for paired glyphs
     ctx.font = `${fontSize}px Floralia`
-    const cx = SIZE * (0.28 + Math.random() * 0.44)
-    const cy = SIZE * (0.28 + Math.random() * 0.44)
+    const cx = numGlyphs === 1
+      ? SIZE * (0.4  + (Math.random() - 0.5) * 0.2)
+      : SIZE * (0.28 + Math.random() * 0.44)
+    const cy = numGlyphs === 1
+      ? SIZE * (0.4  + (Math.random() - 0.5) * 0.2)
+      : SIZE * (0.28 + Math.random() * 0.44)
     ctx.fillText(char, cx, cy)
   }
 
