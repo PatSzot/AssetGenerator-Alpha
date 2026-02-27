@@ -82,9 +82,9 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
     if (settings.decorationStyle === 'inverted') {
       // Dot grid covers entire canvas, solid glyph shapes cut through
       drawDots(floralia.outsideDots, 0.28)
-      // Solid glyph shapes on top of the dot grid
-      ctx.fillStyle    = accent
-      ctx.globalAlpha  = 0.7
+      // Solid glyph shapes on top of the dot grid — exact background colour
+      ctx.fillStyle    = bgColor
+      ctx.globalAlpha  = 1
       ctx.textBaseline = 'middle'
       ctx.textAlign    = 'center'
       floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
