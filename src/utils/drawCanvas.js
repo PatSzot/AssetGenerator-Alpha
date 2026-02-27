@@ -145,7 +145,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
   ctx.letterSpacing = '0px';
   ctx.fillText(lastName, nx, y);
 
-  y += nameSz * 1.3 + 8;
+  y += nameSz * 1.3 + 4;
 
   // ── Position pill — Saans Mono 500
   const pillFontSz = 32;
@@ -153,7 +153,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
   ctx.font = `500 ${pillFontSz}px ${mono}`;
   ctx.letterSpacing = '1.92px';
   const pillTW   = ctx.measureText(pillText).width;
-  const pillPadX = 16, pillPadY = 8;
+  const pillPadX = 16, pillPadY = 2;
   const pillW    = pillTW + pillPadX * 2;
   const pillH    = pillFontSz * 1.3 + pillPadY * 2;
   const pillX    = pad + dashW;
