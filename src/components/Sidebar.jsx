@@ -175,11 +175,13 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </label>
           </div>
           {settings.showFloralia && (
-            <div className="field">
-              <select value={settings.decorationStyle} onChange={e => update('decorationStyle', e.target.value)}>
-                <option value="fill">Glyph fill</option>
-                <option value="inverted">Inverted</option>
-              </select>
+            <div className="tog-row">
+              <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                <div className="ttrack" />
+                <div className="tthumb" />
+              </label>
             </div>
           )}
           <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
