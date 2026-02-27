@@ -16,12 +16,10 @@ const DEFAULT_SETTINGS = {
   colorMode:        'green',
   showCTA:          false,
   dims:             { w: 1080, h: 1080 },
-  tweetText:        'Giving AI to sales and marketing teams is easy.\n\nGiving AI to the operating layer of revenue is hard, that\'s why AirOps will quietly create more enterprise value than most flashy AI tools.',
+  tweetText:        'Giving AI to sales and marketing teams is easy. Giving AI to the operating layer of revenue is hard, that\'s why AirOps will quietly create more enterprise value than most flashy AI tools.',
   tweetAuthorName:  'Sushil Krishna',
-  tweetAuthorHandle:'',
-  tweetLikes:       '0',
-  tweetRetweets:    '0',
-  tweetReplies:     '0',
+  tweetAuthorHandle:'@ksushil7',
+  tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
 }
 

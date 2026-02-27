@@ -7,9 +7,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     tweetText         = '',
     tweetAuthorName   = '',
     tweetAuthorHandle = '',
-    tweetLikes        = '0',
-    tweetRetweets     = '0',
-    tweetReplies      = '0',
+    tweetDate         = '',
   } = settings
   const { w: cw, h: ch } = dims
 
@@ -58,22 +56,20 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     : tweetAuthorHandle ? `@${tweetAuthorHandle}` : ''
   const initials = authorName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'
 
-  const metricsStr = `${tweetLikes || '0'} Likes  ·  ${tweetRetweets || '0'} Retweets  ·  ${tweetReplies || '0'} Replies`.toUpperCase()
-
   // ── Sizes
   const avatarSz  = isLand ? 52  : 68
   const nameSz    = isLand ? 36  : 46
   const handleSz  = isLand ? 24  : 30
-  const metricsSz = isLand ? 18  : 22
+  const dateSz    = isLand ? 18  : 22
   const footerH   = 100
 
   const authorH       = avatarSz
-  const metricsH      = metricsSz * 1.4
+  const dateH         = dateSz * 1.4
   const gapAuthorText = isStory ? 56 : 40
-  const gapTextMet    = isStory ? 56 : 40
-  const gapMetFooter  = 32
+  const gapTextDate   = isStory ? 56 : 40
+  const gapDateFooter = 32
 
-  const availH = ch - padY * 2 - footerH - authorH - metricsH - gapAuthorText - gapTextMet - gapMetFooter
+  const availH = ch - padY * 2 - footerH - authorH - dateH - gapAuthorText - gapTextDate - gapDateFooter
 
   let y = padY
 
@@ -81,7 +77,6 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const cx = pad + avatarSz / 2
   const cy = y   + avatarSz / 2
 
-  // Background circle
   ctx.beginPath()
   ctx.arc(cx, cy, avatarSz / 2, 0, Math.PI * 2)
   ctx.fillStyle = M.pill
@@ -104,7 +99,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     ctx.textAlign = 'left'
   }
 
-  // Name + handle to the right of avatar
+  // Name + handle
   const nameX = pad + avatarSz + 20
   const nameY = y + avatarSz / 2 - (nameSz * 1.15 + handleSz * 0.6) / 2
 
@@ -142,16 +137,18 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.fillStyle = M.text
   ctx.textBaseline = 'top'
   tLines.forEach((line, i) => ctx.fillText(line, pad, y + i * tLH))
-  y += tLines.length * tLH + gapTextMet
+  y += tLines.length * tLH + gapTextDate
 
-  // ── Metrics (smaller, reduced opacity)
-  ctx.globalAlpha = 0.4
-  ctx.font = `500 ${metricsSz}px ${mono}`
-  ctx.letterSpacing = '0.05em'
-  ctx.fillStyle = M.text
-  ctx.textBaseline = 'top'
-  ctx.fillText(metricsStr, pad, y)
-  ctx.globalAlpha = 1
+  // ── Date / time (muted)
+  if (tweetDate) {
+    ctx.globalAlpha = 0.4
+    ctx.font = `500 ${dateSz}px ${mono}`
+    ctx.letterSpacing = '0.04em'
+    ctx.fillStyle = M.text
+    ctx.textBaseline = 'top'
+    ctx.fillText(tweetDate, pad, y)
+    ctx.globalAlpha = 1
+  }
 
   // ── Footer: AirOps logo
   const logoH   = 56

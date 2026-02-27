@@ -147,22 +147,9 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             )}
           </div>
 
-          <div className="div" />
-
-          <div className="sec">Engagement</div>
-          <div className="metrics-grid">
-            <div className="field">
-              <label>Likes</label>
-              <input type="text" value={settings.tweetLikes} onChange={e => update('tweetLikes', e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Retweets</label>
-              <input type="text" value={settings.tweetRetweets} onChange={e => update('tweetRetweets', e.target.value)} />
-            </div>
-            <div className="field">
-              <label>Replies</label>
-              <input type="text" value={settings.tweetReplies} onChange={e => update('tweetReplies', e.target.value)} />
-            </div>
+          <div className="field">
+            <label>Date &amp; Time</label>
+            <input type="text" placeholder="2:47 AM · Feb 24, 2026" value={settings.tweetDate} onChange={e => update('tweetDate', e.target.value)} />
           </div>
 
           <div className="div" />
