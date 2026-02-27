@@ -142,8 +142,8 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
 // ── Structural border helper: stroke a line, coords in CSS px
 function strokeLine(ctx, x1, y1, x2, y2) {
   ctx.beginPath()
-  ctx.moveTo(Math.round(x1), Math.round(y1))
-  ctx.lineTo(Math.round(x2), Math.round(y2))
+  ctx.moveTo(x1, y1)
+  ctx.lineTo(x2, y2)
   ctx.stroke()
 }
 
@@ -175,14 +175,14 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace"  : 'monospace'
 
   const M  = MODES[colorMode] ?? MODES['green']
-  const BW = 1.5  // structural border width (matches Figma)
 
   // ── Background
   ctx.fillStyle = M.bg
   ctx.fillRect(0, 0, cw, ch)
 
   ctx.strokeStyle = M.lineColor
-  ctx.lineWidth   = BW
+  ctx.lineWidth   = 2
+  const hw = ctx.lineWidth / 2
 
   const contentArgs = {
     firstName: richFirstName, lastName: richLastName,
@@ -196,8 +196,8 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const logoPanelH = 203
     const photoH     = ch - logoPanelH
 
-    strokeLine(ctx, splitX, 0, splitX, ch)
-    strokeLine(ctx, splitX, photoH, cw, photoH)
+    strokeLine(ctx, splitX + hw, 0,      splitX + hw, ch)
+    strokeLine(ctx, splitX,     photoH + hw, cw, photoH + hw)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
@@ -212,9 +212,9 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const splitX       = Math.round(cw / 2)
     const rowY         = topPad + contentH
 
-    strokeLine(ctx, 0, rowY, cw, rowY)
-    strokeLine(ctx, splitX, rowY, splitX, rowY + headshotRowH)
-    strokeLine(ctx, 0, rowY + headshotRowH, cw, rowY + headshotRowH)
+    strokeLine(ctx, 0, rowY - hw,                   cw, rowY - hw)
+    strokeLine(ctx, splitX + hw, rowY,               splitX + hw, rowY + headshotRowH)
+    strokeLine(ctx, 0, rowY + headshotRowH + hw,     cw, rowY + headshotRowH + hw)
 
     drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
@@ -236,8 +236,8 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const contentH     = ch - headshotRowH
     const splitX       = Math.round(cw / 2)
 
-    strokeLine(ctx, 0, contentH, cw, contentH)
-    strokeLine(ctx, splitX, contentH, splitX, ch)
+    strokeLine(ctx, 0,          contentH + hw, cw, contentH + hw)
+    strokeLine(ctx, splitX + hw, contentH,     splitX + hw, ch)
 
     drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
@@ -250,8 +250,8 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const logoPanelH = 158
     const photoH     = ch - logoPanelH
 
-    strokeLine(ctx, splitX, 0, splitX, ch)
-    strokeLine(ctx, splitX, photoH, cw, photoH)
+    strokeLine(ctx, splitX + hw, 0,          splitX + hw, ch)
+    strokeLine(ctx, splitX,      photoH + hw, cw,         photoH + hw)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
