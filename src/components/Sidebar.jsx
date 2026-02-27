@@ -175,16 +175,18 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </label>
           </div>
           {settings.showFloralia && (
-            <div className="tog-row">
-              <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
-              <label className="toggle">
-                <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
-                <div className="ttrack" />
-                <div className="tthumb" />
-              </label>
+            <div style={{ paddingLeft: 12 }}>
+              <div className="tog-row">
+                <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                <label className="toggle">
+                  <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                  <div className="ttrack" />
+                  <div className="tthumb" />
+                </label>
+              </div>
+              <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
             </div>
           )}
-          <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
 
           <div className="div" />
         </>}
