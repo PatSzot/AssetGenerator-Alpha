@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import './Sidebar.css'
 
 const MODE_LABELS = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
@@ -9,8 +10,9 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, tweetUrl, onTweetUrlChange, onFetchTweet, tweetFetching, tweetError }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange }) {
   const { dims } = settings
+  const fileInputRef = useRef(null)
 
   return (
     <div className="sidebar">
@@ -95,45 +97,73 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Content — Twitter Post */}
         {settings.templateType === 'twitter' && <>
-          <div className="sec">Tweet URL</div>
+          <div className="sec">Tweet Content</div>
 
           <div className="field">
-            <label>Post URL</label>
-            <input
-              type="text"
-              placeholder="https://x.com/user/status/..."
-              value={tweetUrl}
-              onChange={e => onTweetUrlChange(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && onFetchTweet()}
+            <label>Tweet Text</label>
+            <textarea
+              value={settings.tweetText}
+              onChange={e => update('tweetText', e.target.value)}
             />
           </div>
 
-          <button
-            className="btn-fetch"
-            onClick={onFetchTweet}
-            disabled={tweetFetching || !tweetUrl.trim()}
-          >
-            {tweetFetching ? 'Fetching…' : '↓ Load Tweet'}
-          </button>
+          <div className="div" />
 
-          {tweetError && <div className="tweet-error">{tweetError}</div>}
+          <div className="sec">Author</div>
 
-          {settings.tweetData && <>
-            <div className="tweet-preview">
-              <div className="tweet-preview-author">
-                {settings.tweetData.author?.name}
-                <span> @{settings.tweetData.author?.username}</span>
-              </div>
-              <div className="tweet-preview-text">{settings.tweetData.text}</div>
-              <div className="tweet-preview-metrics">
-                ♥ {settings.tweetData.metrics?.like_count?.toLocaleString() ?? 0}
-                &nbsp;·&nbsp;
-                ↺ {settings.tweetData.metrics?.retweet_count?.toLocaleString() ?? 0}
-                &nbsp;·&nbsp;
-                💬 {settings.tweetData.metrics?.reply_count?.toLocaleString() ?? 0}
-              </div>
+          <div className="field">
+            <label>Name</label>
+            <input type="text" value={settings.tweetAuthorName} onChange={e => update('tweetAuthorName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Handle</label>
+            <input type="text" placeholder="@username" value={settings.tweetAuthorHandle} onChange={e => update('tweetAuthorHandle', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Profile Photo</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onProfileImageChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => fileInputRef.current?.click()}>
+              {settings.tweetProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            </button>
+            {settings.tweetProfileImage && (
+              <button className="btn-clear-photo" onClick={() => onProfileImageChange(null)}>
+                ✕ Remove photo
+              </button>
+            )}
+          </div>
+
+          <div className="div" />
+
+          <div className="sec">Engagement</div>
+          <div className="metrics-grid">
+            <div className="field">
+              <label>Likes</label>
+              <input type="text" value={settings.tweetLikes} onChange={e => update('tweetLikes', e.target.value)} />
             </div>
-          </>}
+            <div className="field">
+              <label>Retweets</label>
+              <input type="text" value={settings.tweetRetweets} onChange={e => update('tweetRetweets', e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Replies</label>
+              <input type="text" value={settings.tweetReplies} onChange={e => update('tweetReplies', e.target.value)} />
+            </div>
+          </div>
 
           <div className="div" />
         </>}

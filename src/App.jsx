@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Sidebar from './components/Sidebar'
 import CanvasPreview from './components/CanvasPreview'
 import { loadFonts } from './utils/loadFonts'
@@ -7,25 +7,30 @@ import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import './App.css'
 
 const DEFAULT_SETTINGS = {
-  templateType: 'quote',
-  quote:        '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
-  firstName:    'Nicole',
-  lastName:     'Baer',
-  roleCompany:  'CMO, Carta',
-  ctaText:      'See AirOps in Action',
-  colorMode:    'green',
-  showCTA:      false,
-  dims:         { w: 1080, h: 1080 },
-  tweetData:    null,
+  templateType:     'quote',
+  quote:            '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
+  firstName:        'Nicole',
+  lastName:         'Baer',
+  roleCompany:      'CMO, Carta',
+  ctaText:          'See AirOps in Action',
+  colorMode:        'green',
+  showCTA:          false,
+  dims:             { w: 1080, h: 1080 },
+  tweetText:        '',
+  tweetAuthorName:  '',
+  tweetAuthorHandle:'',
+  tweetLikes:       '0',
+  tweetRetweets:    '0',
+  tweetReplies:     '0',
+  tweetProfileImage: null,
 }
 
 export default function App() {
   const [settings, setSettings]     = useState(DEFAULT_SETTINGS)
   const [fontsReady, setFontsReady] = useState(false)
   const [uiMode, setUiMode]         = useState('light')
-  const [tweetUrl, setTweetUrl]     = useState('')
-  const [tweetFetching, setTweetFetching] = useState(false)
-  const [tweetError, setTweetError] = useState('')
+
+  const profileImageRef = useRef(null)
 
   useEffect(() => {
     loadFonts()
@@ -37,24 +42,22 @@ export default function App() {
     setSettings(prev => ({ ...prev, [key]: value }))
   }, [])
 
-  const fetchTweet = useCallback(async () => {
-    if (!tweetUrl.trim()) return
-    setTweetFetching(true)
-    setTweetError('')
-    try {
-      const res = await fetch(`/api/tweet?url=${encodeURIComponent(tweetUrl.trim())}`)
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to fetch tweet')
-      update('tweetData', data)
-    } catch (err) {
-      setTweetError(err.message)
-    } finally {
-      setTweetFetching(false)
+  const handleProfileImageChange = useCallback((dataUrl) => {
+    if (!dataUrl) {
+      profileImageRef.current = null
+      update('tweetProfileImage', null)
+      return
     }
-  }, [tweetUrl, update])
+    const img = new Image()
+    img.onload = () => {
+      profileImageRef.current = img
+      update('tweetProfileImage', dataUrl)
+    }
+    img.src = dataUrl
+  }, [update])
 
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady)
+    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current)
     else drawCanvas(canvas, s, fontsReady)
   }, [fontsReady])
 
@@ -97,11 +100,7 @@ export default function App() {
         onExportAll={exportAll}
         uiMode={uiMode}
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
-        tweetUrl={tweetUrl}
-        onTweetUrlChange={setTweetUrl}
-        onFetchTweet={fetchTweet}
-        tweetFetching={tweetFetching}
-        tweetError={tweetError}
+        onProfileImageChange={handleProfileImageChange}
       />
       <CanvasPreview
         settings={settings}
