@@ -23,7 +23,7 @@ function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode, dpr) {
   off.height = Math.round(h * dpr)
   const oc = off.getContext('2d')
   oc.scale(dpr, dpr)
-  oc.filter = 'grayscale(1) contrast(1.6) brightness(1.05)'
+  oc.filter = 'grayscale(1) invert(1) contrast(1.6) brightness(1.05)'
 
   // Aspect-fill the photo region
   const s  = Math.max(w / (profileImage.naturalWidth  || 1), h / (profileImage.naturalHeight || 1))

@@ -58,6 +58,23 @@ export default function App() {
     setFloraliaReady(v => v + 1)
   }, [fontsReady])
 
+  // Preload default Rich Quote images from public folder
+  useEffect(() => {
+    const portrait = new Image()
+    portrait.onload = () => {
+      richProfileImageRef.current = portrait
+      setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
+    }
+    portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
+
+    const logo = new Image()
+    logo.onload = () => {
+      richCompanyLogoRef.current = logo
+      setSettings(prev => ({ ...prev, richCompanyLogo: '/GTMGen-carta_logo.svg.svg' }))
+    }
+    logo.src = '/GTMGen-carta_logo.svg.svg'
+  }, [])
+
   const update = useCallback((key, value) => {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
