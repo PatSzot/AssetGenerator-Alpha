@@ -19,7 +19,7 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRandomize }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRestipple }) {
   const { dims } = settings
   const fileInputRef = useRef(null)
 
@@ -167,14 +167,14 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
           <div className="sec">Options</div>
           <div className="tog-row">
-            <label>Fleuron background</label>
+            <label>Stipple texture</label>
             <label className="toggle">
-              <input type="checkbox" checked={settings.showFleuron} onChange={e => update('showFleuron', e.target.checked)} />
+              <input type="checkbox" checked={settings.showStipple} onChange={e => update('showStipple', e.target.checked)} />
               <div className="ttrack" />
               <div className="tthumb" />
             </label>
           </div>
-          <button className="btn-all" onClick={onRandomize}>↻ Randomize Fleuron</button>
+          <button className="btn-all" onClick={onRestipple}>↻ Restipple</button>
 
           <div className="div" />
         </>}

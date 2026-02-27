@@ -1,4 +1,5 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
+import { STIPPLE_COLORS } from './drawFleurons.js'
 
 // Dark variants — bg is one visible step up from near-black, logo uses a light tint
 const DARK_MODES = {
@@ -10,7 +11,7 @@ const DARK_MODES = {
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
-export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fleuronImages) {
+export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, stippleDots) {
   const {
     colorMode,
     dims,
@@ -54,17 +55,27 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, cw, ch)
 
-  // ── Fleuron background overlay (behind white box)
-  if (settings.showFleuron && fleuronImages) {
-    const fc = fleuronImages[colorMode]
-    if (fc?.width > 0) {
-      const scale = Math.max(cw / fc.width, ch / fc.height) * 2.0
-      const dw = fc.width  * scale
-      const dh = fc.height * scale
-      ctx.globalAlpha = 0.2
-      ctx.drawImage(fc, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
-      ctx.globalAlpha = 1
-    }
+  // ── Stipple texture (rendered at canvas resolution — always crisp)
+  if (settings.showStipple && stippleDots?.length > 0) {
+    // Scale normalised [0,1] coords by the larger canvas dimension so the
+    // pattern overflows the shorter edges naturally, like the original asset.
+    const scale = Math.max(cw, ch) * 1.5
+    const offX  = (cw - scale) / 2
+    const offY  = (ch - scale) / 2
+    const dotR  = Math.min(cw, ch) * 0.0022   // ~2.4 px at 1080p — crisp
+    ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
+    ctx.globalAlpha = 0.22
+    ctx.beginPath()
+    stippleDots.forEach(({ x, y }) => {
+      const px = offX + x * scale
+      const py = offY + y * scale
+      if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+        ctx.moveTo(px + dotR, py)
+        ctx.arc(px, py, dotR, 0, Math.PI * 2)
+      }
+    })
+    ctx.fill()
+    ctx.globalAlpha = 1
   }
 
   // ── Placeholder when nothing entered
