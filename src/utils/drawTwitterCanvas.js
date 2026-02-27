@@ -11,7 +11,7 @@ const DARK_MODES = {
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
 
-export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, stippleDots, floraliaDots) {
+export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, floraliaDots) {
   const {
     colorMode,
     dims,
@@ -54,29 +54,6 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, st
   // ── Background
   ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, cw, ch)
-
-  // ── Stipple texture (rendered at canvas resolution — always crisp)
-  if (settings.showStipple && stippleDots?.length > 0) {
-    // Scale normalised [0,1] coords by the larger canvas dimension so the
-    // pattern overflows the shorter edges naturally, like the original asset.
-    const scale = Math.max(cw, ch) * 1.5
-    const offX  = (cw - scale) / 2
-    const offY  = (ch - scale) / 2
-    const dotR  = Math.max(cw, ch) * 0.0022   // ~2.4 px at 1080p — crisp
-    ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
-    ctx.globalAlpha = 0.3
-    ctx.beginPath()
-    stippleDots.forEach(({ x, y }) => {
-      const px = offX + x * scale
-      const py = offY + y * scale
-      if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
-        ctx.moveTo(px + dotR, py)
-        ctx.arc(px, py, dotR, 0, Math.PI * 2)
-      }
-    })
-    ctx.fill()
-    ctx.globalAlpha = 1
-  }
 
   // ── Fleuron font fill (rendered at canvas resolution — always crisp)
   if (settings.showFloralia && floraliaDots?.length > 0) {

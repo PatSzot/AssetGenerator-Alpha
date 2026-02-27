@@ -4,7 +4,7 @@ import CanvasPreview from './components/CanvasPreview'
 import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
-import { generateFleuronDots, generateFleuronFontDots } from './utils/drawFleurons'
+import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 const DEFAULT_SETTINGS = {
@@ -22,7 +22,6 @@ const DEFAULT_SETTINGS = {
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
-  showStipple:      false,
   showFloralia:     false,
 }
 
@@ -32,20 +31,13 @@ export default function App() {
   const [uiMode, setUiMode]         = useState('light')
 
   const profileImageRef  = useRef(null)
-  const stippleDotsRef   = useRef([])
   const floraliaDotsRef  = useRef([])
-  const [stippleReady,  setStippleReady]  = useState(0)
   const [floraliaReady, setFloraliaReady] = useState(0)
 
   useEffect(() => {
     loadFonts()
       .then(() => setFontsReady(true))
       .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    stippleDotsRef.current = generateFleuronDots()
-    setStippleReady(v => v + 1)
   }, [])
 
   useEffect(() => {
@@ -63,12 +55,6 @@ export default function App() {
       }
       return next
     })
-  }, [])
-
-  const handleRestipple = useCallback(() => {
-    stippleDotsRef.current = generateFleuronDots()
-    setSettings(prev => ({ ...prev, showStipple: true }))
-    setStippleReady(v => v + 1)
   }, [])
 
   const handleRefleuron = useCallback(() => {
@@ -93,9 +79,9 @@ export default function App() {
   }, [update])
 
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, stippleDotsRef.current, floraliaDotsRef.current)
+    if (s.templateType === 'twitter') drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else drawCanvas(canvas, s, fontsReady)
-  }, [fontsReady, stippleReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
     const ew = w ?? settings.dims.w
@@ -137,7 +123,6 @@ export default function App() {
         uiMode={uiMode}
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
         onProfileImageChange={handleProfileImageChange}
-        onRestipple={handleRestipple}
         onRefleuron={handleRefleuron}
       />
       <CanvasPreview
