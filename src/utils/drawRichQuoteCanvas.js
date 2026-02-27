@@ -70,6 +70,12 @@ function drawLogoSection(ctx, companyLogoImg, x, y, w, h, M) {
 // ── Draw the content (name + role pill + quote) within a given rect
 // justify-between: customer block at top, quote at bottom
 function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, quote, nameSz, quoteSzBase, quoteLH, M, serif, sans }) {
+  // Hard-clip to this section so nothing can overflow into adjacent photo/logo regions
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x, y, w, h)
+  ctx.clip()
+
   const innerW      = w - pad * 2
   const nameTracking = `${(-0.04 * nameSz).toFixed(2)}px`
   const nameLH      = nameSz * 0.84   // Figma: leading-[0.84]
@@ -122,7 +128,9 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
     ctx.font = `400 ${f}px ${serif}`
     ctx.letterSpacing = '0px'
     qLines = wrapText(ctx, quote, innerW)
-    if (qLines.length * f * quoteLH <= availH) { qFont = f; break }
+    const heightFits = qLines.length * f * quoteLH <= availH
+    const widthFits  = qLines.every(l => ctx.measureText(l).width <= innerW)
+    if (heightFits && widthFits) { qFont = f; break }
   }
 
   ctx.font         = `400 ${qFont}px ${serif}`
@@ -135,6 +143,8 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
   ctx.fillStyle    = M.ctaText   // Figma: color-4 (dark accent) for quote text
   ctx.textBaseline = 'top'
   qLines.forEach((line, i) => ctx.fillText(line, x + pad, quoteY + i * qLineH))
+
+  ctx.restore()  // release clip
 }
 
 // ── Structural border helper: stroke a line, coords in CSS px
