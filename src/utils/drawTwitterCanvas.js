@@ -59,23 +59,57 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   // ── Sizes
   const nameSz    = isLand ? 36  : 46
   const handleSz  = isLand ? 24  : 30
-  const avatarSz  = Math.round(nameSz * 1.15 + handleSz)   // matches height of name + handle block
+  const avatarSz  = Math.round(nameSz * 1.15 + handleSz)
   const dateSz    = isLand ? 18  : 22
-  const footerH   = 100
+  const logoH     = 56
 
-  const authorH       = avatarSz
-  const dateH         = dateSz * 1.4
-  const gapAuthorText = isStory ? 56 : 40
-  const gapTextDate   = isStory ? 56 : 40
-  const gapDateFooter = 32
+  const boxPadX      = isLand ? 52 : 64
+  const boxPadY      = isLand ? 52 : 64
+  const contentX     = pad + boxPadX
+  const contentW     = innerW - boxPadX * 2
+  const gapAuthorText = isStory ? 48 : 36
+  const gapTextDate   = isStory ? 40 : 32
+  const gapBoxFooter  = isLand ? 48 : 56
 
-  const availH = ch - padY * 2 - footerH - authorH - dateH - gapAuthorText - gapTextDate - gapDateFooter
+  const authorH = avatarSz
+  const dateH   = tweetDate ? dateSz * 1.4 : 0
+  const dateGap = tweetDate ? gapTextDate   : 0
 
-  let y = padY
+  // Available height for tweet text
+  const textAvailH = ch - padY * 2 - boxPadY * 2 - authorH - gapAuthorText - dateGap - dateH - gapBoxFooter - logoH
 
-  // ── Author row (top)
-  const cx = pad + avatarSz / 2
-  const cy = y   + avatarSz / 2
+  // ── Measure + wrap tweet text
+  const BASE_T = isLand ? 52 : 68
+  let tFont = BASE_T
+  let tLines
+
+  ctx.textBaseline = 'top'
+  for (let f = BASE_T; f >= 28; f -= 1) {
+    ctx.font = `500 ${f}px ${sans}`
+    ctx.letterSpacing = '0px'
+    tLines = wrapText(ctx, tweetText, contentW)
+    if (tLines.length * f * 1.2 <= textAvailH) { tFont = f; break }
+  }
+  ctx.font = `500 ${tFont}px ${sans}`
+  ctx.letterSpacing = '0px'
+  tLines = wrapText(ctx, tweetText, contentW)
+  const tLH = tFont * 1.2
+
+  // ── Compute box height
+  const textH = tLines.length * tLH
+  const boxH  = boxPadY + authorH + gapAuthorText + textH + dateGap + dateH + boxPadY
+
+  // ── Draw white content box (sharp corners, no border)
+  const boxX = pad
+  const boxY = padY
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(boxX, boxY, innerW, boxH)
+
+  // ── Author row
+  let y = boxY + boxPadY
+
+  const cx = contentX + avatarSz / 2
+  const cy = y        + avatarSz / 2
 
   ctx.beginPath()
   ctx.arc(cx, cy, avatarSz / 2, 0, Math.PI * 2)
@@ -87,7 +121,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     ctx.beginPath()
     ctx.arc(cx, cy, avatarSz / 2, 0, Math.PI * 2)
     ctx.clip()
-    ctx.drawImage(profileImage, pad, y, avatarSz, avatarSz)
+    ctx.drawImage(profileImage, contentX, y, avatarSz, avatarSz)
     ctx.restore()
   } else {
     ctx.font = `500 ${Math.round(avatarSz * 0.38)}px ${sans}`
@@ -100,7 +134,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   }
 
   // Name + handle
-  const nameX = pad + avatarSz + 20
+  const nameX = contentX + avatarSz + 20
   const nameY = y + avatarSz / 2 - (nameSz * 1.15 + handleSz * 0.6) / 2
 
   ctx.font = `700 ${nameSz}px ${sans}`
@@ -116,44 +150,28 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.fillText(authorHandle, nameX, nameY + nameSz * 1.15)
   ctx.globalAlpha = 1
 
-  y += avatarSz + gapAuthorText
+  y += authorH + gapAuthorText
 
-  // ── Tweet text — auto-shrink
-  const BASE_T = isLand ? 52 : 68
-  let tFont = BASE_T
-  let tLines
-
-  ctx.textBaseline = 'top'
-  for (let f = BASE_T; f >= 28; f -= 1) {
-    ctx.font = `500 ${f}px ${sans}`
-    ctx.letterSpacing = '0px'
-    tLines = wrapText(ctx, tweetText, innerW)
-    if (tLines.length * f * 1.2 <= availH) { tFont = f; break }
-  }
-
+  // ── Tweet text
   ctx.font = `500 ${tFont}px ${sans}`
   ctx.letterSpacing = '0px'
-  tLines = wrapText(ctx, tweetText, innerW)
-
-  const tLH = tFont * 1.2
   ctx.fillStyle = M.text
   ctx.textBaseline = 'top'
-  tLines.forEach((line, i) => ctx.fillText(line, pad, y + i * tLH))
-  y += tLines.length * tLH + gapTextDate
+  tLines.forEach((line, i) => ctx.fillText(line, contentX, y + i * tLH))
+  y += textH + dateGap
 
-  // ── Date / time (muted)
+  // ── Date / time
   if (tweetDate) {
     ctx.globalAlpha = 0.4
     ctx.font = `500 ${dateSz}px ${mono}`
     ctx.letterSpacing = '0.04em'
     ctx.fillStyle = M.text
     ctx.textBaseline = 'top'
-    ctx.fillText(tweetDate, pad, y)
+    ctx.fillText(tweetDate, contentX, y)
     ctx.globalAlpha = 1
   }
 
-  // ── Footer: AirOps logo
-  const logoH   = 56
+  // ── Footer: AirOps logo (outside the box)
   const logoBmp = buildLogo(M.text, logoH)
   const footerY = ch - padY - logoH
   ctx.drawImage(logoBmp, pad, footerY)
