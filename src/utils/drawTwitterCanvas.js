@@ -1,5 +1,11 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 
+const DARK_BG = {
+  green:  { bg: '#060e07', lineColor: 'rgba(0,210,80,0.22)',  logoColor: '#e8f5ee' },
+  pink:   { bg: '#0d020a', lineColor: 'rgba(210,0,160,0.22)', logoColor: '#f5e8f2' },
+  yellow: { bg: '#0c0d01', lineColor: 'rgba(190,190,0,0.22)', logoColor: '#f5f5e0' },
+}
+
 export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const {
     colorMode,
@@ -8,14 +14,20 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
     tweetAuthorName   = '',
     tweetAuthorHandle = '',
     tweetDate         = '',
+    tweetDarkMode     = false,
   } = settings
   const { w: cw, h: ch } = dims
 
   canvas.width  = cw
   canvas.height = ch
 
-  const ctx = canvas.getContext('2d')
-  const M   = MODES[colorMode]
+  const ctx  = canvas.getContext('2d')
+  const M    = MODES[colorMode]
+  const dark = tweetDarkMode ? DARK_BG[colorMode] : null
+
+  const bgColor   = dark ? dark.bg        : M.bg
+  const lineColor = dark ? dark.lineColor  : M.lineColor
+  const logoColor = dark ? dark.logoColor  : M.text
 
   const isLand  = cw > ch
   const isStory = ch > cw * 1.5
@@ -33,14 +45,14 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const contentW = boxW - boxPadX * 2
 
   // ── Background
-  ctx.fillStyle = M.bg
+  ctx.fillStyle = bgColor
   ctx.fillRect(0, 0, cw, ch)
 
   // ── Placeholder when nothing entered
   if (!tweetText.trim() && !tweetAuthorName.trim()) {
     ctx.font = `500 ${isLand ? 40 : 52}px ${sans}`
     ctx.letterSpacing = '0px'
-    ctx.fillStyle = M.pillText
+    ctx.fillStyle = dark ? logoColor : M.pillText
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'center'
     ctx.fillText('Enter tweet content to preview', cw / 2, ch / 2)
@@ -102,7 +114,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.fillRect(boxXC, boxY, boxW, boxH)
 
   // ── Guide lines drawn ON TOP of box so they're never interrupted
-  ctx.strokeStyle = M.lineColor
+  ctx.strokeStyle = lineColor
   ctx.lineWidth = 1.5
 
   // Vertical guides (full canvas height — same x as quote template)
@@ -181,7 +193,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   }
 
   // ── Footer: AirOps logo (outside box, on brand background)
-  const logoBmp = buildLogo(M.text, logoH)
+  const logoBmp = buildLogo(logoColor, logoH)
   const footerY = ch - padY - logoH
   ctx.drawImage(logoBmp, guideX, footerY)
 }

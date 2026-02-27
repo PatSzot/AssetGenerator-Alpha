@@ -153,6 +153,18 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           </div>
 
           <div className="div" />
+
+          <div className="sec">Asset Style</div>
+          <div className="tog-row">
+            <label>Dark background</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tweetDarkMode} onChange={e => update('tweetDarkMode', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+
+          <div className="div" />
         </>}
 
         {/* Color Mode */}

@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
   tweetAuthorName:  'Sushil Krishna',
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
+  tweetDarkMode:    false,
   tweetProfileImage: null,
 }
 
