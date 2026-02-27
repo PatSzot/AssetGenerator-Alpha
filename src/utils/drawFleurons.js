@@ -119,10 +119,37 @@ export function generateFleuronDots() {
   const dots  = []
   const nodes = []
 
-  const numElements = 7 + Math.floor(Math.random() * 4)   // 7–10
+  function place(x, y, type) {
+    nodes.push({ x, y })
+    const size = 0.09 + Math.random() * 0.1
+    if      (type === 'flower') flowerHead(dots, x, y, size)
+    else if (type === 'leaf')   leafSpray(dots, x, y, Math.random() * Math.PI, size * 2.2)
+    else                        circleCluster(dots, x, y, size * 0.55)
+  }
 
-  for (let i = 0; i < numElements; i++) {
-    // Bias some elements toward edges / corners for natural overflow
+  // ── Guaranteed: 2–3 flower heads, one per quadrant so they're always spread out
+  const QUADRANTS = [
+    [0.08, 0.46, 0.08, 0.46],   // top-left
+    [0.54, 0.92, 0.08, 0.46],   // top-right
+    [0.08, 0.46, 0.54, 0.92],   // bottom-left
+    [0.54, 0.92, 0.54, 0.92],   // bottom-right
+  ]
+  const numFlowers = 2 + Math.floor(Math.random() * 2)   // 2–3
+  const quads = [...QUADRANTS].sort(() => Math.random() - 0.5)
+  for (let i = 0; i < numFlowers; i++) {
+    const [x0, x1, y0, y1] = quads[i]
+    place(x0 + Math.random() * (x1 - x0), y0 + Math.random() * (y1 - y0), 'flower')
+  }
+
+  // ── Guaranteed: 1–2 leaf sprays anywhere on the canvas
+  const numLeaves = 1 + Math.floor(Math.random() * 2)   // 1–2
+  for (let i = 0; i < numLeaves; i++) {
+    place(0.1 + Math.random() * 0.8, 0.1 + Math.random() * 0.8, 'leaf')
+  }
+
+  // ── Extra random elements (3–5) — edge-biased for natural overflow
+  const numExtra = 3 + Math.floor(Math.random() * 3)
+  for (let i = 0; i < numExtra; i++) {
     const edgeBias = Math.random() < 0.42
     const x = edgeBias
       ? (Math.random() < 0.5 ? 0.04 + Math.random() * 0.2 : 0.76 + Math.random() * 0.2)
@@ -130,21 +157,11 @@ export function generateFleuronDots() {
     const y = edgeBias
       ? (Math.random() < 0.5 ? 0.04 + Math.random() * 0.2 : 0.76 + Math.random() * 0.2)
       : 0.12 + Math.random() * 0.76
-    nodes.push({ x, y })
-
-    const type = Math.random()
-    const size = 0.09 + Math.random() * 0.1
-
-    if (type < 0.4) {
-      flowerHead(dots, x, y, size)
-    } else if (type < 0.82) {
-      leafSpray(dots, x, y, Math.random() * Math.PI, size * 2.2)
-    } else {
-      circleCluster(dots, x, y, size * 0.55)   // berry cluster
-    }
+    const t = Math.random()
+    place(x, y, t < 0.35 ? 'flower' : t < 0.75 ? 'leaf' : 'berry')
   }
 
-  // Connect nearby nodes with vines
+  // ── Vine connections between nearby nodes
   nodes.forEach((n1, i) => {
     nodes.slice(i + 1).forEach(n2 => {
       const dist = Math.hypot(n2.x - n1.x, n2.y - n1.y)
