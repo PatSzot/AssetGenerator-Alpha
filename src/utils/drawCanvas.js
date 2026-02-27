@@ -169,10 +169,14 @@ export function drawCanvas(canvas, settings, fontsReady) {
   ctx.letterSpacing = '0px';
 
   // ── Footer: logo (left) + CTA pill (right)
-  const logoH   = 79;
+  const logoH   = 56;
   const logoBmp = buildLogo(M.text, logoH);
-  const footerY = ch - padY - Math.max(logoH, 104);
-  ctx.drawImage(logoBmp, pad, footerY + (Math.max(logoH, 104) - logoH) / 2);
+  // Non-story: logo bottom aligns with guide x (40px from edge)
+  // Story: keep existing vertical positioning
+  const logoY = isStory
+    ? ch - padY - Math.max(logoH, 104) + (Math.max(logoH, 104) - logoH) / 2
+    : ch - pad - logoH;
+  ctx.drawImage(logoBmp, pad, logoY);
 
   if (showCTA) {
     const ctaH = 104, ctaR = ctaH / 2;

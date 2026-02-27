@@ -88,7 +88,10 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   const dateGap = tweetDate ? gapTextDate   : 0
 
   // ── Available height for tweet text
-  const textAvailH = ch - padY * 2 - boxPadY * 2 - authorH - gapAuthorText - dateGap - dateH - gapBoxFooter - logoH
+  // Non-story: logo bottom is at ch - guideX (40px), so reserve that space symmetrically for centering
+  // Story: use padY-based constraint (unchanged)
+  const footerReserve = isStory ? padY + logoH + gapBoxFooter : guideX + logoH + gapBoxFooter
+  const textAvailH = ch - footerReserve * 2 - boxPadY * 2 - authorH - gapAuthorText - dateGap - dateH
 
   // ── Measure + wrap tweet text
   const BASE_T = isLand ? 52 : 68
@@ -198,7 +201,9 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage) {
   }
 
   // ── Footer: AirOps logo (outside box, on brand background)
+  // Non-story: logo bottom aligns with guide x (40px from edge), matching quote template
+  // Story: keep existing vertical positioning
   const logoBmp = buildLogo(logoColor, logoH)
-  const footerY = ch - padY - logoH
+  const footerY = isStory ? ch - padY - logoH : ch - guideX - logoH
   ctx.drawImage(logoBmp, guideX, footerY)
 }
