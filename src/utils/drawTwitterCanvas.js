@@ -56,14 +56,13 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
 
   // ── Fleuron background overlay (behind white box)
   if (settings.showFleuron && fleuronImages) {
-    const img = fleuronImages[colorMode]
-    if (img?.complete && img.naturalWidth > 0) {
-      const fw = 987, fh = 1000
-      const scale = Math.max(cw / fw, ch / fh)
-      const dw = fw * scale
-      const dh = fh * scale
+    const fc = fleuronImages[colorMode]
+    if (fc?.width > 0) {
+      const scale = Math.max(cw / fc.width, ch / fc.height)
+      const dw = fc.width  * scale
+      const dh = fc.height * scale
       ctx.globalAlpha = 0.2
-      ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
+      ctx.drawImage(fc, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
       ctx.globalAlpha = 1
     }
   }
