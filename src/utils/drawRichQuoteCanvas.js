@@ -139,12 +139,9 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
   ctx.restore()  // release clip
 }
 
-// ── Structural border helper: stroke a line, coords in CSS px
-function strokeLine(ctx, x1, y1, x2, y2) {
-  ctx.beginPath()
-  ctx.moveTo(x1, y1)
-  ctx.lineTo(x2, y2)
-  ctx.stroke()
+// ── Section border helper: stroke a box around a layout region
+function strokeSection(ctx, x, y, w, h) {
+  ctx.strokeRect(x, y, w, h)
 }
 
 // ── Main renderer
@@ -182,7 +179,6 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
 
   ctx.strokeStyle = M.lineColor
   ctx.lineWidth   = 2
-  const hw = ctx.lineWidth / 2
 
   const contentArgs = {
     firstName: richFirstName, lastName: richLastName,
@@ -191,13 +187,15 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
   }
 
   if (isLand) {
-    // ── Landscape: left content (960) | right photo (top) + logo panel (bottom)
+    // ── Landscape: left content | right photo (top) + logo panel (bottom)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 203
     const photoH     = ch - logoPanelH
 
-    strokeLine(ctx, splitX + hw, 0,      splitX + hw, ch)
-    strokeLine(ctx, splitX,     photoH + hw, cw, photoH + hw)
+    // Figma: content section, photo section, and logo panel each have a border box
+    strokeSection(ctx, 0,      0,      splitX,      ch)
+    strokeSection(ctx, splitX, 0,      cw - splitX, photoH)
+    strokeSection(ctx, splitX, photoH, cw - splitX, logoPanelH)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
@@ -212,9 +210,9 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const splitX       = Math.round(cw / 2)
     const rowY         = topPad + contentH
 
-    strokeLine(ctx, 0, rowY - hw,                   cw, rowY - hw)
-    strokeLine(ctx, splitX + hw, rowY,               splitX + hw, rowY + headshotRowH)
-    strokeLine(ctx, 0, rowY + headshotRowH + hw,     cw, rowY + headshotRowH + hw)
+    // Figma: photo and logo sections each have a border box
+    strokeSection(ctx, 0,      rowY, splitX,      headshotRowH)
+    strokeSection(ctx, splitX, rowY, cw - splitX, headshotRowH)
 
     drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
@@ -236,8 +234,9 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const contentH     = ch - headshotRowH
     const splitX       = Math.round(cw / 2)
 
-    strokeLine(ctx, 0,          contentH + hw, cw, contentH + hw)
-    strokeLine(ctx, splitX + hw, contentH,     splitX + hw, ch)
+    // Figma: photo and logo sections each have a border box
+    strokeSection(ctx, 0,      contentH, splitX,      headshotRowH)
+    strokeSection(ctx, splitX, contentH, cw - splitX, headshotRowH)
 
     drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
@@ -245,13 +244,14 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
   } else {
-    // ── Square: left content (540) | right photo (top 922) + logo panel (bottom 158)
+    // ── Square: left content | right photo (top 922) + logo panel (bottom 158)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 158
     const photoH     = ch - logoPanelH
 
-    strokeLine(ctx, splitX + hw, 0,          splitX + hw, ch)
-    strokeLine(ctx, splitX,      photoH + hw, cw,         photoH + hw)
+    // Figma: photo and logo sections each have a border box (content section has no border)
+    strokeSection(ctx, splitX, 0,      cw - splitX, photoH)
+    strokeSection(ctx, splitX, photoH, cw - splitX, logoPanelH)
 
     drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
