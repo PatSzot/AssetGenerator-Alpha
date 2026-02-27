@@ -69,7 +69,7 @@ function drawLogoSection(ctx, companyLogoImg, x, y, w, h, M) {
 
 // ── Draw the content (name + role pill + quote) within a given rect
 // justify-between: customer block at top, quote at bottom
-function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, quote, nameSz, quoteSzBase, quoteLH, M, serif, sans }) {
+function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, quote, nameSz, quoteSzBase, quoteLH, M, serif, sans, mono }) {
   // Hard-clip to this section so nothing can overflow into adjacent photo/logo regions
   ctx.save()
   ctx.beginPath()
@@ -79,9 +79,9 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
   const innerW      = w - pad * 2
   const nameTracking = `${(-0.04 * nameSz).toFixed(2)}px`
   const nameLH      = nameSz * 0.84   // Figma: leading-[0.84]
-  const PILL_SZ     = 40              // fixed 40px across all formats (Figma spec)
-  const PILL_PAD_X  = 20
-  const PILL_PAD_Y  = 6
+  const PILL_SZ     = 32              // matches Quote Block: Saans Mono 500 32px
+  const PILL_PAD_X  = 16
+  const PILL_PAD_Y  = 2
   const pillH       = Math.round(PILL_SZ * 1.3 + PILL_PAD_Y * 2)
 
   // ── Customer block (top)
@@ -100,21 +100,22 @@ function drawContent(ctx, { x, y, w, h, pad, firstName, lastName, roleCompany, q
   ctx.fillText(lastName, x + pad, cy)
   cy += nameLH + 24
 
-  // Role pill — Saans 400, NOT uppercase (Rich Quote differs from Quote Block)
-  ctx.letterSpacing = '0.8px'
-  ctx.font = `400 ${PILL_SZ}px ${sans}`
-  const pillTW = ctx.measureText(roleCompany).width
+  // Role pill — Saans Mono 500 32px uppercase, matches Quote Block exactly
+  const pillText = roleCompany.toUpperCase()
+  ctx.font         = `500 ${PILL_SZ}px ${mono}`
+  ctx.letterSpacing = '1.92px'
+  const pillTW = ctx.measureText(pillText).width
   const pillW  = pillTW + PILL_PAD_X * 2
 
   ctx.letterSpacing = '0px'
   ctx.fillStyle = M.pill
   ctx.fillRect(x + pad, cy, pillW, pillH)
 
-  ctx.font         = `400 ${PILL_SZ}px ${sans}`
-  ctx.letterSpacing = '0.8px'
-  ctx.fillStyle    = M.ctaText
+  ctx.font         = `500 ${PILL_SZ}px ${mono}`
+  ctx.letterSpacing = '1.92px'
+  ctx.fillStyle    = M.pillText
   ctx.textBaseline = 'top'
-  ctx.fillText(roleCompany, x + pad + PILL_PAD_X, cy + PILL_PAD_Y)
+  ctx.fillText(pillText, x + pad + PILL_PAD_X, cy + PILL_PAD_Y)
   ctx.letterSpacing = '0px'
 
   // ── Quote (bottom — justify-between)
@@ -180,6 +181,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
 
   const serif = fontsReady ? "'Serrif VF', Georgia, serif"         : 'Georgia, serif'
   const sans  = fontsReady ? "'Saans', sans-serif"                 : 'sans-serif'
+  const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace"  : 'monospace'
 
   const M  = MODES[colorMode] ?? MODES['green']
   const BW = 1.5  // structural border width (matches Figma)
@@ -194,7 +196,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
   const contentArgs = {
     firstName: richFirstName, lastName: richLastName,
     roleCompany: richRoleCompany, quote: richQuoteText,
-    M, serif, sans,
+    M, serif, sans, mono,
   }
 
   if (isLand) {
