@@ -5,9 +5,11 @@ const MODE_LABELS = {
   green:        'Green Paper',
   pink:         'Pink Paper',
   yellow:       'Yellow Paper',
+  blue:         'Blue Paper',
   'dark-green': 'Dark Green',
   'dark-pink':  'Dark Pink',
   'dark-yellow':'Dark Yellow',
+  'dark-blue':  'Dark Blue',
 }
 
 const DIMS = [
@@ -165,20 +167,24 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Color Mode */}
         <div className="sec">Color Mode</div>
-        <div className="mode-grid">
-          {(settings.templateType === 'twitter'
-            ? ['green', 'pink', 'yellow', 'dark-green', 'dark-pink', 'dark-yellow']
-            : ['green', 'pink', 'yellow']
-          ).map(m => (
-            <button
-              key={m}
-              className={`mode-btn mode-${m}${settings.colorMode === m ? ' active' : ''}`}
-              onClick={() => update('colorMode', m)}
-            >
-              {MODE_LABELS[m].split(' ')[0]}<br />{MODE_LABELS[m].split(' ')[1]}
-            </button>
-          ))}
-        </div>
+        {(() => {
+          const modes = settings.templateType === 'twitter'
+            ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
+            : ['green', 'pink', 'yellow', 'blue']
+          return (
+            <div className="mode-grid mode-grid-wide">
+              {modes.map(m => (
+                <button
+                  key={m}
+                  className={`mode-btn mode-${m}${settings.colorMode === m ? ' active' : ''}`}
+                  onClick={() => update('colorMode', m)}
+                >
+                  {MODE_LABELS[m].split(' ')[0]}<br />{MODE_LABELS[m].split(' ')[1]}
+                </button>
+              ))}
+            </div>
+          )
+        })()}
 
         <div className="div" />
 

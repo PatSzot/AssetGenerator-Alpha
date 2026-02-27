@@ -5,6 +5,7 @@ const DARK_MODES = {
   'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,0.28)',   logoColor: '#e8f5ee' },
   'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,0.28)',  logoColor: '#f5e8f2' },
   'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,0.28)',  logoColor: '#f5f5e0' },
+  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,0.28)', logoColor: '#e5e5ff' },
 }
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))

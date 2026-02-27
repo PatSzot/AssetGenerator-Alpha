@@ -3,6 +3,7 @@ export const MODES = {
   green:  { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', ctaText: '#002910', lineColor: 'rgba(0,100,50,0.15)' },
   pink:   { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', ctaText: '#3a092c', lineColor: 'rgba(100,0,80,0.12)' },
   yellow: { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', ctaText: '#242603', lineColor: 'rgba(80,80,0,0.12)' },
+  blue:   { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', ctaText: '#0e0e57', lineColor: 'rgba(20,20,120,0.12)' },
 };
 
 // ── AirOps logo SVG paths (from Figma, viewBox 784×252)

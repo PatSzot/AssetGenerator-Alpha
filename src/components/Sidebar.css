@@ -131,6 +131,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 5px;
 }
+.mode-grid-wide {
+  grid-template-columns: repeat(4, 1fr);
+}
 
 .mode-btn {
   padding: 7px 4px;
@@ -151,9 +154,11 @@
 .mode-green        { background: #f8fffb; color: #000d05; }
 .mode-pink         { background: #fff7ff; color: #3a092c; }
 .mode-yellow       { background: #fdfff3; color: #0c0d01; }
+.mode-blue         { background: #f5f6ff; color: #02020c; }
 .mode-dark-green   { background: #0f2412; color: #e8f5ee; }
 .mode-dark-pink    { background: #230a1e; color: #f5e8f2; }
 .mode-dark-yellow  { background: #1c1d03; color: #f5f5e0; }
+.mode-dark-blue    { background: #0f0f5a; color: #e5e5ff; }
 
 /* ── Dimensions grid */
 .dim-grid {
