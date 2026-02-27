@@ -19,6 +19,44 @@ const DIMS = [
   { w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape 16:9' },
 ]
 
+function RotationDial({ value, onChange }) {
+  const SIZE = 44, CENTER = 22, RADIUS = 16
+  const angle = (value * Math.PI) / 180
+  const dotX = CENTER + RADIUS * Math.sin(angle)
+  const dotY = CENTER - RADIUS * Math.cos(angle)
+
+  const handlePointerDown = (e) => {
+    e.preventDefault()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const move = (ev) => {
+      const dx = ev.clientX - (rect.left + CENTER)
+      const dy = ev.clientY - (rect.top  + CENTER)
+      let deg = Math.round(Math.atan2(dx, -dy) * 180 / Math.PI)
+      if (deg < 0) deg += 360
+      onChange(deg)
+    }
+    move(e)
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
+  return (
+    <svg
+      width={SIZE} height={SIZE}
+      style={{ display: 'block', cursor: 'crosshair', userSelect: 'none', flexShrink: 0 }}
+      onPointerDown={handlePointerDown}
+    >
+      <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.5} />
+      <line x1={CENTER} y1={CENTER} x2={dotX} y2={dotY} stroke="currentColor" strokeOpacity={0.4} strokeWidth={1.5} strokeLinecap="round" />
+      <circle cx={dotX} cy={dotY} r={3.5} fill="currentColor" />
+    </svg>
+  )
+}
+
 export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRefleuron }) {
   const { dims } = settings
   const fileInputRef = useRef(null)
@@ -167,6 +205,20 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
           <div className="sec">Options</div>
           <div className="tog-row">
+            <label>Show CTA pill</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showCTA} onChange={e => update('showCTA', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+          {settings.showCTA && (
+            <div className="field">
+              <label>CTA Text</label>
+              <input type="text" value={settings.ctaText} onChange={e => update('ctaText', e.target.value)} />
+            </div>
+          )}
+          <div className="tog-row">
             <label>Decoration</label>
             <label className="toggle">
               <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
@@ -183,6 +235,13 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                   <div className="ttrack" />
                   <div className="tthumb" />
                 </label>
+              </div>
+              <div className="tog-row">
+                <label>Rotate — {settings.decorationRotation ?? 0}°</label>
+                <RotationDial
+                  value={settings.decorationRotation ?? 0}
+                  onChange={v => update('decorationRotation', v)}
+                />
               </div>
               <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
             </div>

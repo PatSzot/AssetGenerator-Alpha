@@ -1,9 +1,9 @@
 // ── Brand color modes (Figma spec)
 export const MODES = {
-  green:  { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', ctaText: '#002910', lineColor: 'rgba(0,100,50,0.15)' },
-  pink:   { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', ctaText: '#3a092c', lineColor: 'rgba(100,0,80,0.12)' },
-  yellow: { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', ctaText: '#242603', lineColor: 'rgba(80,80,0,0.12)' },
-  blue:   { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', ctaText: '#0e0e57', lineColor: 'rgba(20,20,120,0.12)' },
+  green:  { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', ctaText: '#002910', lineColor: 'rgba(0,100,50,1)' },
+  pink:   { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', ctaText: '#3a092c', lineColor: 'rgba(100,0,80,1)' },
+  yellow: { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', ctaText: '#242603', lineColor: 'rgba(80,80,0,1)' },
+  blue:   { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', ctaText: '#0e0e57', lineColor: 'rgba(20,20,120,1)' },
 };
 
 // ── AirOps logo SVG paths (from Figma, viewBox 784×252)
@@ -46,6 +46,30 @@ export function wrapText(ctx, text, maxW) {
   return lines;
 }
 
+// ── Shared CTA pill — call after all text/logo is drawn.
+//    rightX:   right edge the pill should align to
+//    bottomY:  bottom edge the pill should align to
+export function drawCtaPill(ctx, rightX, bottomY, text, ctaTextColor, sans) {
+  const ctaH = 104, ctaR = ctaH / 2;
+  ctx.font = `600 40px ${sans}`;
+  ctx.letterSpacing = '0px';
+  const ctaW = ctx.measureText(text).width + 96;
+  const ctaX = rightX - ctaW;
+  const ctaY = bottomY - ctaH;
+
+  ctx.beginPath();
+  ctx.roundRect(ctaX, ctaY, ctaW, ctaH, ctaR);
+  ctx.fillStyle = '#00ff64';
+  ctx.fill();
+
+  ctx.fillStyle = ctaTextColor;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, ctaX + ctaW / 2, ctaY + ctaH / 2);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+}
+
 // ── Main draw function — always renders at full canvas resolution.
 // Call with the preview <canvas> ref, or an offscreen canvas for export.
 export function drawCanvas(canvas, settings, fontsReady) {
@@ -86,7 +110,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
   const BASE_Q   = isLand ? 120 : 96;
   const qTracking = isLand ? -2.4 / 120 : -1.92 / 96;  // em ratio
 
-  const footerH = 120;
+  const footerH = isLand ? 80 : 120;
   const attrH   = 64 * 1.3 + 8 + 32 * 1.3;
   const availH  = ch - padY * 2 - footerH - attrH - 32 - 10;
 
@@ -172,7 +196,7 @@ export function drawCanvas(canvas, settings, fontsReady) {
   ctx.letterSpacing = '0px';
 
   // ── Footer: logo (left) + CTA pill (right)
-  const logoH   = 56;
+  const logoH   = 72;
   const logoW   = Math.round(784 * logoH / 252);
   const logoBmp = buildLogo(M.text, Math.round(logoH * dpr));
   // Non-story: logo bottom aligns with guide x (40px from edge)
@@ -180,27 +204,11 @@ export function drawCanvas(canvas, settings, fontsReady) {
   const logoY = isStory
     ? ch - padY - Math.max(logoH, 104) + (Math.max(logoH, 104) - logoH) / 2
     : ch - pad - logoH;
+  ctx.fillStyle = M.bg;
+  ctx.fillRect(pad, logoY, logoW, logoH);
   ctx.drawImage(logoBmp, pad, logoY, logoW, logoH);
 
   if (showCTA) {
-    const ctaH = 104, ctaR = ctaH / 2;
-    ctx.font = `600 40px ${sans}`;
-    ctx.letterSpacing = '0px';
-    const ctaTW = ctx.measureText(ctaText).width;
-    const ctaW  = ctaTW + 96;
-    const ctaX  = cw - pad - ctaW;
-    const ctaY  = ch - padY - ctaH;
-
-    ctx.beginPath();
-    ctx.roundRect(ctaX, ctaY, ctaW, ctaH, ctaR);
-    ctx.fillStyle = '#00ff64';
-    ctx.fill();
-
-    ctx.fillStyle = M.ctaText;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    ctx.fillText(ctaText, ctaX + ctaW / 2, ctaY + ctaH / 2);
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
+    drawCtaPill(ctx, cw - pad, ch - padY, ctaText, M.ctaText, sans);
   }
 }

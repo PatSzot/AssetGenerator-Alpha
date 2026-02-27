@@ -1,12 +1,12 @@
-import { MODES, buildLogo, wrapText } from './drawCanvas.js'
+import { MODES, buildLogo, wrapText, drawCtaPill } from './drawCanvas.js'
 import { STIPPLE_COLORS } from './drawFleurons.js'
 
 // Dark variants — bg is one visible step up from near-black, logo uses a light tint
 const DARK_MODES = {
-  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,0.28)',   logoColor: '#e8f5ee' },
-  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,0.28)',  logoColor: '#f5e8f2' },
-  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,0.28)',  logoColor: '#f5f5e0' },
-  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,0.28)', logoColor: '#e5e5ff' },
+  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,1)',    logoColor: '#e8f5ee' },
+  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,1)',   logoColor: '#f5e8f2' },
+  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,1)',   logoColor: '#f5f5e0' },
+  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff' },
 }
 
 const DARK_MODE_KEYS = new Set(Object.keys(DARK_MODES))
@@ -19,6 +19,8 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
     tweetAuthorName   = '',
     tweetAuthorHandle = '',
     tweetDate         = '',
+    showCTA           = false,
+    ctaText           = '',
   } = settings
   const { w: cw, h: ch } = dims
   const dpr = settings.dpr ?? 1
@@ -59,10 +61,18 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
 
   // ── Decoration (fleuron font fill)
   if (settings.showFloralia && floralia?.insideDots) {
+    const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
+    if (rotAngle !== 0) {
+      ctx.save()
+      ctx.translate(cw / 2, ch / 2)
+      ctx.rotate(rotAngle)
+      ctx.translate(-cw / 2, -ch / 2)
+    }
+
     const scale  = Math.max(cw, ch) * 1.5
     const offX   = (cw - scale) / 2
     const offY   = (ch - scale) / 2
-    const dotR   = Math.max(cw, ch) * 0.0022
+    const dotR   = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
     const accent = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
 
     // Phase-shift the dot grid so a dot lands exactly on the 40px guide lines
@@ -105,13 +115,15 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
       // Dot fill inside glyph shapes only
       drawDots(floralia.insideDots, 0.35)
     }
+
+    if (rotAngle !== 0) ctx.restore()
   }
 
   // ── Placeholder when nothing entered
   if (!tweetText.trim() && !tweetAuthorName.trim()) {
     ctx.font = `500 ${isLand ? 40 : 52}px ${sans}`
     ctx.letterSpacing = '0px'
-    ctx.fillStyle = dark ? logoColor : M.pillText
+    ctx.fillStyle = isDark ? logoColor : M.pillText
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'center'
     ctx.fillText('Enter tweet content to preview', cw / 2, ch / 2)
@@ -131,11 +143,11 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   const handleSz  = isLand ? 24 : 30
   const avatarSz  = Math.round(nameSz * 1.15 + handleSz)
   const dateSz    = isLand ? 18 : 22
-  const logoH     = 56
+  const logoH     = 72
 
   const gapAuthorText = isStory ? 48 : 36
   const gapTextDate   = isStory ? 40 : 32
-  const gapBoxFooter  = isLand  ? 48 : 56
+  const gapBoxFooter  = isLand  ? 28 : 56
 
   const authorH = avatarSz
   const dateH   = tweetDate ? dateSz * 1.4 : 0
@@ -189,8 +201,9 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.beginPath(); ctx.moveTo(cw - guideX + hw, 0);   ctx.lineTo(cw - guideX + hw, ch);   ctx.stroke()
 
   // Horizontal guides at top and bottom of box (full canvas width, responsive to centred position)
-  ctx.beginPath(); ctx.moveTo(0, boxY);        ctx.lineTo(cw, boxY);        ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, boxY + boxH); ctx.lineTo(cw, boxY + boxH); ctx.stroke()
+  // Stroke shifted outward so the inner edge sits exactly at boxY / boxY+boxH (same treatment as vertical guides)
+  ctx.beginPath(); ctx.moveTo(0, boxY - hw);        ctx.lineTo(cw, boxY - hw);        ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(0, boxY + boxH + hw); ctx.lineTo(cw, boxY + boxH + hw); ctx.stroke()
 
   // ── Content inside box
   let y = boxY + boxPadY
@@ -266,15 +279,22 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   const logoW   = Math.round(784 * logoH / 252)
   const logoBmp = buildLogo(logoColor, Math.round(logoH * dpr))
   const footerY = isStory ? boxY + boxH + 40 : ch - guideX - logoH
-  // In inverted decoration mode, clear dots behind the logo.
-  // Snap the fill rect to the dot grid so no dots are partially clipped at its edges.
-  if (settings.showFloralia && settings.decorationStyle === 'inverted') {
+  // Always clear background behind logo. When decoration is active (either style), snap the
+  // fill rect to the dot grid so no dots are partially clipped at its edges.
+  ctx.fillStyle = bgColor
+  if (settings.showFloralia && floralia?.insideDots) {
     const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
     const fy = Math.floor(footerY / stepCanvas) * stepCanvas
     const fh = Math.ceil((footerY + logoH - fy) / stepCanvas) * stepCanvas
     const fw = Math.ceil(logoW / stepCanvas) * stepCanvas
-    ctx.fillStyle = bgColor
     ctx.fillRect(guideX, fy, fw, fh)
+  } else {
+    ctx.fillRect(guideX, footerY, logoW, logoH)
   }
   ctx.drawImage(logoBmp, guideX, footerY, logoW, logoH)
+
+  // ── CTA pill (right-aligned to guide, bottom-aligned with logo)
+  if (showCTA && ctaText) {
+    drawCtaPill(ctx, cw - guideX, footerY + logoH, ctaText, M.ctaText, sans)
+  }
 }

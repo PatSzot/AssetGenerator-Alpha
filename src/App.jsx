@@ -22,8 +22,9 @@ const DEFAULT_SETTINGS = {
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
-  showFloralia:     false,
-  decorationStyle:  'fill',
+  showFloralia:       false,
+  decorationStyle:    'fill',
+  decorationRotation: 0,
 }
 
 export default function App() {

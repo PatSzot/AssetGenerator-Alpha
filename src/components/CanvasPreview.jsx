@@ -2,7 +2,10 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { MODES } from '../utils/drawCanvas'
 import './CanvasPreview.css'
 
-const MODE_LABELS   = { green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper' }
+const MODE_LABELS = {
+  green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper', blue: 'Blue Paper',
+  'dark-green': 'Dark Green', 'dark-pink': 'Dark Pink', 'dark-yellow': 'Dark Yellow', 'dark-blue': 'Dark Blue',
+}
 const TEMPLATE_LABELS = { quote: 'Quote Block', twitter: 'Twitter Post' }
 
 export default function CanvasPreview({ settings, fontsReady, draw }) {
