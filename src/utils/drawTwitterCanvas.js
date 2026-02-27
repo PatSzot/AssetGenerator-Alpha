@@ -64,7 +64,7 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, st
     const offY  = (ch - scale) / 2
     const dotR  = Math.min(cw, ch) * 0.0022   // ~2.4 px at 1080p — crisp
     ctx.fillStyle  = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
-    ctx.globalAlpha = 0.22
+    ctx.globalAlpha = 0.3
     ctx.beginPath()
     stippleDots.forEach(({ x, y }) => {
       const px = offX + x * scale

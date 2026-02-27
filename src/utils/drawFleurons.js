@@ -11,8 +11,9 @@ export const STIPPLE_COLORS = {
 }
 
 // ── Target dot density: ~1 dot per (spacing)² of normalized [0,1] area.
-// spacing = 0.013 → D ≈ 5900 dots / unit²
-const D = 5900
+// At 1.5× canvas scale (1620px for 1080p), spacing=0.005 → ~8px between dots.
+// D = 1/0.005² = 40000
+const D = 40000
 
 function makeDot(dots, x, y) {
   if (x > 0.005 && x < 0.995 && y > 0.005 && y < 0.995) dots.push({ x, y })
@@ -61,7 +62,7 @@ function flowerHead(dots, cx, cy, size) {
 
 // ── Leaf spray — curved stem with alternating leaves branching off
 function leafSpray(dots, cx, cy, angle, size) {
-  const steps  = Math.floor(size / 0.012)
+  const steps  = Math.floor(size / 0.007)
   let sx = cx - (size / 2) * Math.cos(angle)
   let sy = cy - (size / 2) * Math.sin(angle)
   let sa = angle + (Math.random() - 0.5) * 0.4
@@ -69,10 +70,10 @@ function leafSpray(dots, cx, cy, angle, size) {
 
   for (let i = 0; i < steps; i++) {
     sa += (Math.random() - 0.5) * 0.1
-    sx += Math.cos(sa) * 0.012
-    sy += Math.sin(sa) * 0.012
+    sx += Math.cos(sa) * 0.007
+    sy += Math.sin(sa) * 0.007
     makeDot(dots, sx, sy)
-    if (Math.random() < 0.45) makeDot(dots, sx + (Math.random() - 0.5) * 0.009, sy + (Math.random() - 0.5) * 0.009)
+    if (Math.random() < 0.45) makeDot(dots, sx + (Math.random() - 0.5) * 0.005, sy + (Math.random() - 0.5) * 0.005)
 
     // Alternating leaves every 4–6 steps
     if (i > 2 && i % (4 + Math.floor(Math.random() * 3)) === 0) {
@@ -102,13 +103,13 @@ function vine(dots, x1, y1, x2, y2) {
   const ctrlX = mx + nx * bend
   const ctrlY = my + ny * bend
 
-  const steps = Math.floor(len / 0.012)
+  const steps = Math.floor(len / 0.007)
   for (let i = 0; i <= steps; i++) {
     const t  = i / steps
     const bx = (1-t)*(1-t)*x1 + 2*(1-t)*t*ctrlX + t*t*x2
     const by = (1-t)*(1-t)*y1 + 2*(1-t)*t*ctrlY + t*t*y2
     if (Math.random() < 0.82) makeDot(dots, bx, by)
-    if (Math.random() < 0.32) makeDot(dots, bx + (Math.random()-0.5)*0.009, by + (Math.random()-0.5)*0.009)
+    if (Math.random() < 0.32) makeDot(dots, bx + (Math.random()-0.5)*0.005, by + (Math.random()-0.5)*0.005)
   }
 }
 
@@ -118,7 +119,7 @@ export function generateFleuronDots() {
   const dots  = []
   const nodes = []
 
-  const numElements = 5 + Math.floor(Math.random() * 4)   // 5–8
+  const numElements = 7 + Math.floor(Math.random() * 4)   // 7–10
 
   for (let i = 0; i < numElements; i++) {
     // Bias some elements toward edges / corners for natural overflow
