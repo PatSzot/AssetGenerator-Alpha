@@ -20,9 +20,7 @@ function drawPhotoSection(ctx, profileImage, x, y, w, h, M) {
   ctx.rect(x, y, w, h)
   ctx.clip()
   ctx.globalCompositeOperation = 'hard-light'
-  ctx.globalAlpha = 0.9
   ctx.drawImage(profileImage, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih)
-  ctx.globalAlpha = 1
   ctx.globalCompositeOperation = 'source-over'
   ctx.restore()
 }
