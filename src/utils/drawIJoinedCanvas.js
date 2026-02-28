@@ -262,7 +262,9 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
     ctx.rect(innerX, innerY, innerW, innerH)
     ctx.clip()
     ctx.globalCompositeOperation = 'hard-light'
+    ctx.globalAlpha = 0.9
     ctx.drawImage(profileImage, innerX + (innerW - iw) / 2, innerY + (innerH - ih) / 2, iw, ih)
+    ctx.globalAlpha = 1
     ctx.globalCompositeOperation = 'source-over'
     ctx.restore()
   }
