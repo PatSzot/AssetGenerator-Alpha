@@ -57,18 +57,6 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
   const leftColX  = guideX
   const rightColX = guideX + colW + colGap
 
-  // ── Guide lines
-  ctx.strokeStyle = M.frameBorder
-  ctx.lineWidth   = 2
-  const hw = 1  // stroke-on-outside half-offset
-
-  ctx.beginPath(); ctx.moveTo(guideX - hw, 0);              ctx.lineTo(guideX - hw, ch);              ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(cw - guideX + hw, 0);         ctx.lineTo(cw - guideX + hw, ch);         ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(cw / 2, 0);                   ctx.lineTo(cw / 2, ch);                   ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, contentY - hw);            ctx.lineTo(cw, contentY - hw);            ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, contentY + contentH + hw); ctx.lineTo(cw, contentY + contentH + hw); ctx.stroke()
-  ctx.lineWidth = 1
-
   // ── Left column — "I joined" + logo (top)
   const ijTextSz = Math.round(192 * s)
   const ijLH     = Math.round(192 * 0.94 * s)   // line-height advance
