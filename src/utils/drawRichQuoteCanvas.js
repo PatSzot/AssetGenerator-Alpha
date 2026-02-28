@@ -1,7 +1,7 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 
-// Per-colorway dark photo bg — same depth/weight as I Joined's #002910 green,
-// applied as the equivalent darkest brand tint in each hue family
+// Per-colorway dark photo bg — same depth as I Joined's #002910 green,
+// darkest brand tint in each hue family; lighten blend on top
 const PHOTO_BG = {
   green:  '#002910',
   pink:   '#290014',
