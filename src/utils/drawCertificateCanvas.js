@@ -90,7 +90,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   const s  = cW / 1009.778  // scale vs Figma 1080×1080 reference
 
   // Center vertical guide (full canvas height) — drawn before card image
-  ctx.strokeStyle = 'rgba(0,210,80,1)'
+  ctx.strokeStyle = '#008c44'
   ctx.lineWidth   = 2
   ctx.beginPath(); ctx.moveTo(cw / 2, 0); ctx.lineTo(cw / 2, ch); ctx.stroke()
   ctx.lineWidth   = 1
