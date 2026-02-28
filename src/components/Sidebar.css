@@ -15,7 +15,7 @@
 
 /* ── Header */
 .sidebar-header {
-  padding: 15px 16px 11px;
+  padding: 13px 16px 9px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   display: flex;
@@ -24,7 +24,7 @@
 }
 
 .sidebar-logo {
-  height: 20px;
+  height: 24px;
   width: auto;
   display: block;
   color: var(--logo);
