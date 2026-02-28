@@ -75,7 +75,6 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
   //    Portrait/Square/Story: top-left + top-right corners
   //    Landscape:             left-centre + right-centre sides
   if (settings.showFloralia && floralia?.insideDots) {
-    const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     const scale    = Math.max(cw, ch) * 1.5
     const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
     const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
@@ -129,24 +128,30 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
       ctx.textBaseline = 'top'
     }
 
-    // Outer rotation around canvas centre (same dial as Twitter template)
+    // Instance 1: 45° clockwise — SE, pointing toward canvas centre from top-left corner
     ctx.save()
-    if (rotAngle !== 0) {
-      ctx.translate(cw / 2, ch / 2)
-      ctx.rotate(rotAngle)
-      ctx.translate(-cw / 2, -ch / 2)
-    }
-
+    ctx.translate(anchorX1, anchorY1)
+    ctx.rotate(Math.PI / 4)
+    ctx.translate(-anchorX1, -anchorY1)
     if (settings.decorationStyle === 'inverted') {
       renderDots(floralia.outsideDots, 0.28, offX1, offY1, shiftX1, shiftY1)
       renderGlyphs(offX1, offY1)
+    } else {
+      renderDots(floralia.insideDots, 0.35, offX1, offY1, shiftX1, shiftY1)
+    }
+    ctx.restore()
+
+    // Instance 2: 225° clockwise — NW, pointing toward canvas centre from bottom-right corner
+    ctx.save()
+    ctx.translate(anchorX2, anchorY2)
+    ctx.rotate(Math.PI / 4 + Math.PI)
+    ctx.translate(-anchorX2, -anchorY2)
+    if (settings.decorationStyle === 'inverted') {
       renderDots(floralia.outsideDots, 0.28, offX2, offY2, shiftX2, shiftY2)
       renderGlyphs(offX2, offY2)
     } else {
-      renderDots(floralia.insideDots, 0.35, offX1, offY1, shiftX1, shiftY1)
       renderDots(floralia.insideDots, 0.35, offX2, offY2, shiftX2, shiftY2)
     }
-
     ctx.restore()
   }
 

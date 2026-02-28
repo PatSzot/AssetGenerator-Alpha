@@ -358,13 +358,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                   <div className="tthumb" />
                 </label>
               </div>
-              <div className="tog-row">
-                <label>Rotate — {settings.decorationRotation ?? 0}°</label>
-                <RotationDial
-                  value={settings.decorationRotation ?? 0}
-                  onChange={v => update('decorationRotation', v)}
-                />
-              </div>
               <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
             </div>
           )}
