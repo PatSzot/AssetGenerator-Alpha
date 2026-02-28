@@ -121,6 +121,10 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const logoGap  = Math.round(8 * s)
   const logoBmp  = buildLogo(M.logoColor, Math.round(logoH * dpr))
 
+  // Container fill — clears any floralia beneath "I joined"
+  ctx.fillStyle = M.bg
+  ctx.fillRect(leftColX, contentY, colW, ijLH)
+
   ctx.textBaseline = 'top'
   ctx.textAlign    = 'left'
   ctx.fillStyle    = M.text
@@ -156,6 +160,10 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const bottomGroupH  = nameLH + roleLH + hiringH
   const bottomGroupY  = contentBottom - bottomGroupH
 
+  // Container fill — clears any floralia beneath name, role and hiring
+  ctx.fillStyle = M.bg
+  ctx.fillRect(leftColX, bottomGroupY, colW, bottomGroupH)
+
   // Name — Serrif VF
   ctx.fillStyle    = M.text
   ctx.font         = `400 ${nameSz}px ${serif}`
@@ -187,6 +195,11 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const frameY  = contentY
   const frameW  = colW
   const frameH  = contentH
+
+  // Frame container fill — M.bg fills the whole frame area, clearing floralia and
+  // also acting as the fill for the padding gap between the stroke and the photo
+  ctx.fillStyle = M.bg
+  ctx.fillRect(frameX, frameY, frameW, frameH)
 
   // Border
   ctx.strokeStyle = M.frameBorder
