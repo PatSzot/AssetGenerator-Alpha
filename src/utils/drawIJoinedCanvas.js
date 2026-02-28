@@ -10,7 +10,7 @@ const IJ_MODES = {
 }
 
 // Photo frame bg — near-dark green base so lighter blend lifts highlights through cleanly
-const PHOTO_BG = '#002910'
+const PHOTO_BG = '#008c44'
 
 export const IJ_MODE_LABELS = {
   night:  'Night',
