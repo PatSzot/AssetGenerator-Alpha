@@ -54,8 +54,8 @@ const DEFAULT_SETTINGS = {
   decorationRotation: 0,
   // I Joined template
   ijMode:            'night',
-  ijName:            'Firstname Lastname',
-  ijRole:            'Role',
+  ijName:            'Nicole Baer',
+  ijRole:            'Marketing Strategist',
   ijShowHiring:      true,
   ijProfileImage:    null,
 }
@@ -85,12 +85,13 @@ export default function App() {
     setFloraliaReady(v => v + 1)
   }, [fontsReady])
 
-  // Preload default Rich Quote images from public folder
+  // Preload default Rich Quote + I Joined images from public folder
   useEffect(() => {
     const portrait = new Image()
     portrait.onload = () => {
       richProfileImageRef.current = portrait
-      setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
+      ijProfileImageRef.current   = portrait
+      setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg', ijProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
     }
     portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
 

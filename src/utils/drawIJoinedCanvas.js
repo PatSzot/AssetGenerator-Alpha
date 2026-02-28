@@ -2,12 +2,15 @@ import { buildLogo } from './drawCanvas.js'
 
 // ── Per-mode palette (5 AirOps brand variants)
 const IJ_MODES = {
-  night:  { bg: '#000d05', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', frameBg: '#002910', hiringColor: '#00ff64' },
-  forest: { bg: '#002910', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', frameBg: '#002910', hiringColor: '#00ff64' },
-  green:  { bg: '#008c44', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#dfeae3', frameBg: '#008c44', hiringColor: '#00ff64' },
-  mint:   { bg: '#dfeae3', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', frameBg: '#002910', hiringColor: '#008c44' },
-  paper:  { bg: '#f8fffb', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', frameBg: '#002910', hiringColor: '#008c44' },
+  night:  { bg: '#000d05', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
+  forest: { bg: '#002910', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
+  green:  { bg: '#008c44', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#dfeae3', hiringColor: '#00ff64' },
+  mint:   { bg: '#dfeae3', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
+  paper:  { bg: '#f8fffb', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
 }
+
+// Near-black bg for the photo frame — lighter blend lifts the highlights through (same as Rich Quote)
+const PHOTO_BG = '#001408'
 
 export const IJ_MODE_LABELS = {
   night:  'Night',
@@ -145,20 +148,25 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
   const innerW = frameW - (borderW + pad) * 2
   const innerH = frameH - (borderW + pad) * 2
 
-  ctx.fillStyle = M.frameBg
+  // Inner background — near-black so lighter blend lifts highlights through (Rich Quote treatment)
+  ctx.fillStyle = PHOTO_BG
   ctx.fillRect(innerX, innerY, innerW, innerH)
 
-  // Photo — hard-light blend, clipped to inner area, horizontally centred
+  // Photo — aspect-fill with 4px overscan + lighter (additive) blend, same as Rich Quote
   if (profileImage) {
+    const overscan = 4
+    const ps = Math.max(
+      (innerW + overscan * 2) / (profileImage.naturalWidth  || 1),
+      (innerH + overscan * 2) / (profileImage.naturalHeight || 1),
+    )
+    const iw = profileImage.naturalWidth  * ps
+    const ih = profileImage.naturalHeight * ps
     ctx.save()
     ctx.beginPath()
     ctx.rect(innerX, innerY, innerW, innerH)
     ctx.clip()
-    const photoSize = Math.round(988 * s)
-    const photoX    = innerX + Math.round((innerW - photoSize) / 2)
-    const photoY    = innerY
-    ctx.globalCompositeOperation = 'hard-light'
-    ctx.drawImage(profileImage, photoX, photoY, photoSize, photoSize)
+    ctx.globalCompositeOperation = 'lighter'
+    ctx.drawImage(profileImage, innerX + (innerW - iw) / 2, innerY + (innerH - ih) / 2, iw, ih)
     ctx.globalCompositeOperation = 'source-over'
     ctx.restore()
   }
