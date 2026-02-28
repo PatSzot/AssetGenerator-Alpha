@@ -129,7 +129,7 @@
 }
 .asset-card.active {
   border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+  background: rgba(0,255,100,.04);
 }
 
 .asset-card-img {
