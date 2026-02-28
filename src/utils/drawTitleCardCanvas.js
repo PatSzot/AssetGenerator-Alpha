@@ -81,9 +81,10 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
     const stepNorm = 0.006
 
-    // Anchor = centre of the LEFT floralia instance
-    const anchorX = 0
-    const anchorY = isLand ? ch / 2 : 0
+    // Anchor = centre of the floralia pattern in screen space.
+    // Nudge inward so ~40% of the glyph is visible rather than just the corner sliver.
+    const anchorX = isLand ? cw * 0.06 : cw * 0.06
+    const anchorY = isLand ? ch / 2    : ch * 0.06
     const offX    = anchorX - scale / 2
     const offY    = anchorY - scale / 2
     const shiftX  = ((40 - offX) / scale) % stepNorm
