@@ -131,7 +131,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     // Instance 1: 90° clockwise — glyph top faces SE (toward canvas centre from top-left corner)
     ctx.save()
     ctx.translate(anchorX1, anchorY1)
-    ctx.rotate(Math.PI / 2)
+    ctx.rotate(3 * Math.PI / 4)
     ctx.translate(-anchorX1, -anchorY1)
     if (settings.decorationStyle === 'inverted') {
       renderDots(floralia.outsideDots, 0.28, offX1, offY1, shiftX1, shiftY1)
@@ -144,7 +144,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     // Instance 2: 270° clockwise — glyph top faces NW (toward canvas centre from bottom-right corner)
     ctx.save()
     ctx.translate(anchorX2, anchorY2)
-    ctx.rotate(Math.PI / 2 + Math.PI)
+    ctx.rotate(3 * Math.PI / 4 + Math.PI)
     ctx.translate(-anchorX2, -anchorY2)
     if (settings.decorationStyle === 'inverted') {
       renderDots(floralia.outsideDots, 0.28, offX2, offY2, shiftX2, shiftY2)
