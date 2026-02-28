@@ -48,6 +48,15 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.fillStyle = M.bg
   ctx.fillRect(0, 0, cw, ch)
 
+  // ── Layout constants (Figma reference 1920×1080)
+  const guideX    = Math.round(40   * s)
+  const contentY  = Math.round(40   * s)
+  const contentH  = Math.round(1006 * s)
+  const colGap    = Math.round(32   * s)
+  const colW      = Math.round(904  * s)   // (1840 − 32) / 2
+  const leftColX  = guideX
+  const rightColX = guideX + colW + colGap
+
   // ── Decoration (floralia — identical logic to Twitter template)
   if (settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
@@ -103,15 +112,6 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
 
     if (rotAngle !== 0) ctx.restore()
   }
-
-  // ── Layout constants (Figma reference 1920×1080)
-  const guideX    = Math.round(40   * s)
-  const contentY  = Math.round(40   * s)
-  const contentH  = Math.round(1006 * s)
-  const colGap    = Math.round(32   * s)
-  const colW      = Math.round(904  * s)   // (1840 − 32) / 2
-  const leftColX  = guideX
-  const rightColX = guideX + colW + colGap
 
   // ── Left column — "I joined" + logo (top)
   const ijTextSz = Math.round(192 * s)
