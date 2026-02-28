@@ -108,12 +108,13 @@
   overflow-x: auto;
   scrollbar-width: none;
   padding-bottom: 2px;
+  scroll-snap-type: x mandatory;
 }
 .asset-picker::-webkit-scrollbar { display: none; }
 
 .asset-card {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 72px;
+  scroll-snap-align: start;
   background: transparent;
   border: 1px solid var(--border);
   cursor: pointer;
