@@ -59,7 +59,10 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
       <div className="sidebar-body">
 
         {/* Template Type */}
-        <div className="sec">Asset Type</div>
+        <div className="sec" style={{ display: 'flex', justifyContent: 'space-between' }}>
+          Asset Type
+          <span style={{ fontFamily: "'Saans Mono', 'DM Mono', monospace" }}>{TEMPLATES.length}</span>
+        </div>
         <div className="asset-picker">
           {TEMPLATES.map(t => (
             <button
