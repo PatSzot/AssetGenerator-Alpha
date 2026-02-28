@@ -140,7 +140,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
   ctx.fillStyle = PHOTO_BG
   ctx.fillRect(innerX, innerY, innerW, innerH)
 
-  // Photo — aspect-fill with 4px overscan + hard-light blend (matches Figma)
+  // Photo — aspect-fill with 4px overscan + lighten blend
   if (profileImage) {
     const overscan = 4
     const ps = Math.max(
@@ -153,7 +153,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
     ctx.beginPath()
     ctx.rect(innerX, innerY, innerW, innerH)
     ctx.clip()
-    ctx.globalCompositeOperation = 'hard-light'
+    ctx.globalCompositeOperation = 'lighten'
     ctx.drawImage(profileImage, innerX + (innerW - iw) / 2, innerY + (innerH - ih) / 2, iw, ih)
     ctx.globalCompositeOperation = 'source-over'
     ctx.restore()
