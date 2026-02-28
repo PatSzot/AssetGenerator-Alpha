@@ -116,7 +116,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   // ── Left column — "I joined" + logo (top)
   const ijTextSz = Math.round(192 * s)
   const ijLH     = Math.round(192 * 0.94 * s)   // line-height advance
-  const logoH    = Math.round(150 * s)
+  const logoH    = Math.round(170 * s)
   const logoW    = Math.round(logoH * 784 / 252)
   const logoGap  = Math.round(8 * s)
   const logoBmp  = buildLogo(M.logoColor, Math.round(logoH * dpr))
