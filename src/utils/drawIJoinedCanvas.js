@@ -121,17 +121,9 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const logoGap  = Math.round(8 * s)
   const logoBmp  = buildLogo(M.logoColor, Math.round(logoH * dpr))
 
-  ctx.textBaseline = 'top'
-  ctx.textAlign    = 'left'
-  ctx.font         = `400 ${ijTextSz}px ${sans}`
-  ctx.letterSpacing = `${(-ijTextSz * 0.04).toFixed(2)}px`   // tracking −4%
-  ctx.fillStyle    = M.bg
-  ctx.fillRect(leftColX, contentY - Math.round(4 * s), Math.ceil(ctx.measureText('I joined').width), ijLH + Math.round(4 * s))
-  ctx.fillStyle    = M.text
-  ctx.fillText('I joined', leftColX, contentY)
-  ctx.letterSpacing = '0px'
-
   const logoY = contentY + ijLH + logoGap
+
+  // Draw logo bg rect FIRST so the "I joined" text (incl. J descender) renders on top of it
   ctx.fillStyle = M.bg
   if (settings.showFloralia && floralia?.insideDots) {
     const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
@@ -142,6 +134,19 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   } else {
     ctx.fillRect(leftColX, logoY, logoW + Math.round(4 * s), logoH)
   }
+
+  // "I joined" text — drawn after logo bg so descender isn't clipped by it
+  ctx.textBaseline = 'top'
+  ctx.textAlign    = 'left'
+  ctx.font         = `400 ${ijTextSz}px ${sans}`
+  ctx.letterSpacing = `${(-ijTextSz * 0.04).toFixed(2)}px`   // tracking −4%
+  ctx.fillStyle    = M.bg
+  ctx.fillRect(leftColX, contentY - Math.round(4 * s), Math.ceil(ctx.measureText('I joined').width), ijLH + Math.round(4 * s))
+  ctx.fillStyle    = M.text
+  ctx.fillText('I joined', leftColX, contentY)
+  ctx.letterSpacing = '0px'
+
+  // Logo image drawn last — transparent bitmap so descender shows through any gap
   ctx.drawImage(logoBmp, leftColX, logoY, logoW, logoH)
 
   // ── Left column — name / role / hiring (bottom-aligned)
