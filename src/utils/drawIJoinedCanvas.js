@@ -9,8 +9,15 @@ const IJ_MODES = {
   paper:  { bg: '#f8fffb', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
 }
 
-// Near-black bg for the photo frame — lighter blend lifts the highlights through (same as Rich Quote)
-const PHOTO_BG = '#001408'
+// Per-mode photo frame bg — darker modes get a darker base so the lighter blend produces a
+// more dramatic (darker, higher-contrast) headshot; lighter modes lift toward their canvas bg.
+const IJ_PHOTO_BG = {
+  night:  '#000d05',   // canvas bg — darkest, most dramatic
+  forest: '#001408',   // near-black, slightly lifted vs night
+  green:  '#003d1e',   // dark green tint behind the lighter blend
+  mint:   '#002910',   // forest green — keeps the headshot warm but visible
+  paper:  '#002910',   // same as mint
+}
 
 export const IJ_MODE_LABELS = {
   night:  'Night',
@@ -136,8 +143,8 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
   const innerW = frameW - (borderW + pad) * 2
   const innerH = frameH - (borderW + pad) * 2
 
-  // Inner background — near-black so lighter blend lifts highlights through (Rich Quote treatment)
-  ctx.fillStyle = PHOTO_BG
+  // Inner background — per-mode near-dark base so lighter blend produces the right headshot depth
+  ctx.fillStyle = IJ_PHOTO_BG[ijMode] ?? '#001408'
   ctx.fillRect(innerX, innerY, innerW, innerH)
 
   // Photo — aspect-fill with 4px overscan + lighter (additive) blend, same as Rich Quote
