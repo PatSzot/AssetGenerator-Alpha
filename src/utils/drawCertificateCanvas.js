@@ -59,21 +59,8 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
       ctx.globalAlpha = 1
     }
 
-    if (settings.decorationStyle === 'inverted') {
-      drawFloraliaDots(floralia.outsideDots, 0.28)
-      ctx.fillStyle    = CANVAS_BG
-      ctx.globalAlpha  = 1
-      ctx.textBaseline = 'middle'
-      ctx.textAlign    = 'center'
-      floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
-        ctx.font = `${fontSizeNorm * fScale}px Floralia`
-        ctx.fillText(char, offX + cxNorm * fScale, offY + cyNorm * fScale)
-      })
-      ctx.textAlign    = 'left'
-      ctx.textBaseline = 'top'
-    } else {
-      drawFloraliaDots(floralia.insideDots, 0.35)
-    }
+    // Draw all dots — no glyph mask, full grid coverage
+    drawFloraliaDots([...floralia.insideDots, ...floralia.outsideDots], 0.35)
 
     if (rotAngle !== 0) ctx.restore()
   }
@@ -93,23 +80,11 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     ctx.fillRect(cX, cY, cW, cH)
   }
 
-  // Guide lines — drawn on top of card so they're always visible
+  // Center vertical guide (full canvas height)
   ctx.strokeStyle = 'rgba(0,210,80,1)'
   ctx.lineWidth   = 2
-  const hw = 1  // half lineWidth — shifts stroke outward so inner edge sits on the card boundary
-
-  // Vertical guides at card left/right edges (full canvas height)
-  ctx.beginPath(); ctx.moveTo(cX - hw,      0); ctx.lineTo(cX - hw,      ch); ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(cX + cW + hw, 0); ctx.lineTo(cX + cW + hw, ch); ctx.stroke()
-
-  // Center vertical guide (full canvas height)
   ctx.beginPath(); ctx.moveTo(cw / 2, 0); ctx.lineTo(cw / 2, ch); ctx.stroke()
-
-  // Horizontal guides at card top/bottom (full canvas width)
-  ctx.beginPath(); ctx.moveTo(0, cY - hw);       ctx.lineTo(cw, cY - hw);       ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, cY + cH + hw);  ctx.lineTo(cw, cY + cH + hw);  ctx.stroke()
-
-  ctx.lineWidth = 1
+  ctx.lineWidth   = 1
 
   // Name overlay at Figma-matched position (210px from card top at 1× scale)
   const nameSz = Math.round(50.49 * s)
