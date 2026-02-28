@@ -69,7 +69,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
 
     const isLand   = cw > ch
     const fscale   = Math.max(cw, ch) * 1.5
-    const offX     = (cw - fscale) / 2
+    const offX     = (cw - fscale) / 2 + Math.round(80 * s)  // nudge pattern right
     const offY     = (ch - fscale) / 2
     const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
     const accent   = M.hiringColor
