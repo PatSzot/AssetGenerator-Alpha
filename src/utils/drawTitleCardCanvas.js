@@ -277,17 +277,23 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     if (sec.type === 'title') {
       ctx.textAlign = 'center'
       if (tcShowSerifTitle) {
-        ctx.fillStyle    = headlineColor
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
+        const sTW = ctx.measureText(tcSerifTitle).width
+        ctx.fillStyle = bg
+        ctx.fillRect(Math.round(cw / 2 - sTW / 2), ty, Math.ceil(sTW), Math.ceil(serifLH))
+        ctx.fillStyle    = headlineColor
         ctx.fillText(tcSerifTitle, cw / 2, ty)
         // When paired with sans, advance by font-size only (no leading) for a tight title block
         ty += tcShowSansTitle ? serifSz : serifLH
       }
       if (tcShowSansTitle) {
-        ctx.fillStyle    = headlineColor
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
+        const sTW = ctx.measureText(tcSansTitle).width
+        ctx.fillStyle = bg
+        ctx.fillRect(Math.round(cw / 2 - sTW / 2), ty, Math.ceil(sTW), Math.ceil(sansLH))
+        ctx.fillStyle    = headlineColor
         ctx.fillText(tcSansTitle, cw / 2, ty)
         ty += sansLH
       }
@@ -298,9 +304,12 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     if (sec.type === 'sub') {
       ctx.textAlign = 'center'
       if (tcShowSubheadline) {
-        ctx.fillStyle    = textColor
         ctx.font         = `600 ${subSz}px ${sans}`
         ctx.letterSpacing = '0px'
+        const sTW = ctx.measureText(tcSubheadline).width
+        ctx.fillStyle = bg
+        ctx.fillRect(Math.round(cw / 2 - sTW / 2), ty, Math.ceil(sTW), Math.ceil(subLH))
+        ctx.fillStyle    = textColor
         ctx.fillText(tcSubheadline, cw / 2, ty)
         ty += subLH
         if (tcShowBody) ty += GAP_SUB
