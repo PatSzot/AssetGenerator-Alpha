@@ -1,8 +1,8 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 
-// ── Draw photo region: M.ctaText bg (darkest brand color per colorway) + lighten blend
+// ── Draw photo region: fixed #002910 bg + hard-light blend
 function drawPhotoSection(ctx, profileImage, x, y, w, h, M) {
-  ctx.fillStyle = M.ctaText
+  ctx.fillStyle = '#002910'
   ctx.fillRect(x, y, w, h)
 
   if (!profileImage) return
@@ -19,7 +19,7 @@ function drawPhotoSection(ctx, profileImage, x, y, w, h, M) {
   ctx.beginPath()
   ctx.rect(x, y, w, h)
   ctx.clip()
-  ctx.globalCompositeOperation = 'lighten'
+  ctx.globalCompositeOperation = 'hard-light'
   ctx.drawImage(profileImage, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih)
   ctx.globalCompositeOperation = 'source-over'
   ctx.restore()

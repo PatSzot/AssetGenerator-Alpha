@@ -261,7 +261,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
     ctx.beginPath()
     ctx.rect(innerX, innerY, innerW, innerH)
     ctx.clip()
-    ctx.globalCompositeOperation = 'lighten'
+    ctx.globalCompositeOperation = 'hard-light'
     ctx.drawImage(profileImage, innerX + (innerW - iw) / 2, innerY + (innerH - ih) / 2, iw, ih)
     ctx.globalCompositeOperation = 'source-over'
     ctx.restore()
