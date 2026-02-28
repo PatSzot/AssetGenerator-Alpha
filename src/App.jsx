@@ -93,7 +93,7 @@ export default function App() {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
       // Rich Quote and Quote Block don't support dark modes — reset if switching to them
-      if (key === 'templateType' && ['quote', 'richquote', 'titlecard'].includes(value) && next.colorMode.startsWith('dark-')) {
+      if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
       return next

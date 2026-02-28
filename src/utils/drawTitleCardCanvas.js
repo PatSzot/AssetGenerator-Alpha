@@ -8,6 +8,14 @@ const EYEBROW_ACCENT = {
   blue:   '#0014a8',
 }
 
+// Dark variants — same values as drawTwitterCanvas for consistency
+const DARK_MODES = {
+  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,1)',    logoColor: '#e8f5ee' },
+  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,1)',   logoColor: '#f5e8f2' },
+  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,1)',   logoColor: '#f5f5e0' },
+  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff' },
+}
+
 // ── Main renderer
 export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const {
@@ -42,16 +50,26 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const sans  = fontsReady ? "'Saans', sans-serif"                : 'sans-serif'
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
-  const M             = MODES[colorMode] ?? MODES['green']
-  const eyebrowAccent = EYEBROW_ACCENT[colorMode] ?? EYEBROW_ACCENT['green']
+  const isDark = colorMode in DARK_MODES
+  const M      = MODES[isDark ? colorMode.replace('dark-', '') : colorMode] ?? MODES['green']
+  const TM     = isDark ? DARK_MODES[colorMode] : M
+
+  // Resolved per-element colours
+  const bg          = TM.bg
+  const lineColor   = isDark ? TM.lineColor   : M.lineColor
+  const logoColor   = isDark ? TM.logoColor   : M.text
+  const textColor   = isDark ? TM.logoColor   : M.text
+  const eyebrowBg   = isDark ? TM.bg          : '#ffffff'
+  const eyebrowBd   = isDark ? TM.lineColor   : (EYEBROW_ACCENT[colorMode.replace('dark-', '')] ?? EYEBROW_ACCENT['green'])
+  const eyebrowTxt  = eyebrowBd
 
   // ── Background
-  ctx.fillStyle = M.bg
+  ctx.fillStyle = bg
   ctx.fillRect(0, 0, cw, ch)
 
   // ── Guidelines — two vertical lines at x=40 and x=cw-40
   const guideX = 40
-  ctx.strokeStyle = M.lineColor
+  ctx.strokeStyle = lineColor
   ctx.lineWidth   = 2
   ctx.beginPath(); ctx.moveTo(guideX,      0); ctx.lineTo(guideX,      ch); ctx.stroke()
   ctx.beginPath(); ctx.moveTo(cw - guideX, 0); ctx.lineTo(cw - guideX, ch); ctx.stroke()
@@ -59,11 +77,11 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   // ── Logo (top center)
   const logoH    = isStory ? 80 : 56
   const logoW    = Math.round(784 * logoH / 252)
-  const logoBmp  = buildLogo(M.text, Math.round(logoH * dpr))
+  const logoBmp  = buildLogo(logoColor, Math.round(logoH * dpr))
   const logoPadT = isStory ? 360 : guideX
   const logoX    = Math.round((cw - logoW) / 2)
   const logoY    = logoPadT
-  ctx.fillStyle = M.bg
+  ctx.fillStyle = bg
   ctx.fillRect(logoX, logoY, logoW, logoH)
   ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
 
@@ -148,19 +166,19 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
       const ewPillW = ewTW + eyebrowPadX * 2
       const ewPillX = Math.round((cw - ewPillW) / 2)
 
-      // Pill: white bg + eyebrowAccent border
-      ctx.fillStyle   = '#ffffff'
-      ctx.strokeStyle = eyebrowAccent
+      // Pill: bg + border
+      ctx.fillStyle   = eyebrowBg
+      ctx.strokeStyle = eyebrowBd
       ctx.lineWidth   = 1.5
       ctx.beginPath()
       ctx.roundRect(ewPillX, ty, ewPillW, eyebrowH, 8)
       ctx.fill()
       ctx.stroke()
       // Restore guide stroke
-      ctx.strokeStyle = M.lineColor
+      ctx.strokeStyle = lineColor
       ctx.lineWidth   = 2
 
-      ctx.fillStyle    = eyebrowAccent
+      ctx.fillStyle    = eyebrowTxt
       ctx.textBaseline = 'middle'
       ctx.textAlign    = 'center'
       ctx.fillText(pillText, cw / 2, ty + eyebrowH / 2)
@@ -174,7 +192,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     if (sec.type === 'title') {
       ctx.textAlign = 'center'
       if (tcShowSerifTitle) {
-        ctx.fillStyle    = M.text
+        ctx.fillStyle    = textColor
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
         ctx.fillText(tcSerifTitle, cw / 2, ty)
@@ -182,7 +200,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
         ty += tcShowSansTitle ? serifSz : serifLH
       }
       if (tcShowSansTitle) {
-        ctx.fillStyle    = M.text
+        ctx.fillStyle    = textColor
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
         ctx.fillText(tcSansTitle, cw / 2, ty)
@@ -195,7 +213,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     if (sec.type === 'sub') {
       ctx.textAlign = 'center'
       if (tcShowSubheadline) {
-        ctx.fillStyle    = M.text
+        ctx.fillStyle    = textColor
         ctx.font         = `600 ${subSz}px ${sans}`
         ctx.letterSpacing = '0px'
         ctx.fillText(tcSubheadline, cw / 2, ty)
@@ -203,7 +221,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
         if (tcShowBody) ty += GAP_SUB
       }
       if (tcShowBody) {
-        ctx.fillStyle    = M.text
+        ctx.fillStyle    = textColor
         ctx.font         = `400 ${subSz}px ${sans}`
         ctx.letterSpacing = '0px'
         bodyLines.forEach((line, idx) => ctx.fillText(line, cw / 2, ty + idx * subLH))
@@ -226,7 +244,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     ctx.roundRect(ctaPillX, ctaTopY, ctaPillW, ctaH, ctaR)
     ctx.fill()
 
-    ctx.fillStyle    = M.ctaText
+    ctx.fillStyle    = M.ctaText  // always the dark base-mode tone — readable on #00ff64
     ctx.textBaseline = 'middle'
     ctx.textAlign    = 'center'
     ctx.fillText(tcCTAText, cw / 2, ctaTopY + ctaH / 2)

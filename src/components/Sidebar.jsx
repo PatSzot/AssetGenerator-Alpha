@@ -441,9 +441,9 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {/* Color Mode */}
         <div className="sec">Color Mode</div>
         {(() => {
-          const modes = settings.templateType === 'twitter'
+          const modes = ['twitter', 'titlecard'].includes(settings.templateType)
             ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
-            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote + titlecard: light modes only
+            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote: light modes only
           return (
             <div className="mode-grid mode-grid-wide">
               {modes.map(m => (
