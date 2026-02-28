@@ -119,7 +119,18 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     }
 
     // Bottom-right: glyph top faces NW (toward canvas centre from bottom-right corner)
+    // For portrait/square/story: clip to a quarter-circle from the bottom-right corner so the
+    // artificial flat edge where the offscreen sampling canvas clipped the glyph top is hidden.
+    // The arc gives a clean, intentional boundary instead of a harsh horizontal cut mid-pattern.
     ctx.save()
+    if (!isLand) {
+      const clipR = Math.min(cw, ch) * 0.72
+      ctx.beginPath()
+      ctx.arc(cw, ch, clipR, Math.PI, 3 * Math.PI / 2, true)
+      ctx.lineTo(cw, ch)
+      ctx.closePath()
+      ctx.clip()
+    }
     ctx.translate(anchorX2, anchorY2)
     ctx.rotate(2 * Math.PI)
     ctx.translate(-anchorX2, -anchorY2)
