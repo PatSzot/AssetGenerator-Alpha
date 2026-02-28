@@ -126,7 +126,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.font         = `400 ${ijTextSz}px ${sans}`
   ctx.letterSpacing = `${(-ijTextSz * 0.04).toFixed(2)}px`   // tracking −4%
   ctx.fillStyle    = M.bg
-  ctx.fillRect(leftColX, contentY, Math.ceil(ctx.measureText('I joined').width), ijLH)
+  ctx.fillRect(leftColX, contentY - Math.round(4 * s), Math.ceil(ctx.measureText('I joined').width), ijLH + Math.round(4 * s))
   ctx.fillStyle    = M.text
   ctx.fillText('I joined', leftColX, contentY)
   ctx.letterSpacing = '0px'
@@ -137,10 +137,10 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
     const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
     const fy = Math.floor(logoY / stepCanvas) * stepCanvas
     const fh = Math.ceil((logoY + logoH - fy) / stepCanvas) * stepCanvas
-    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas
+    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas + Math.round(4 * s)
     ctx.fillRect(leftColX, fy, fw, fh)
   } else {
-    ctx.fillRect(leftColX, logoY, logoW, logoH)
+    ctx.fillRect(leftColX, logoY, logoW + Math.round(4 * s), logoH)
   }
   ctx.drawImage(logoBmp, leftColX, logoY, logoW, logoH)
 
