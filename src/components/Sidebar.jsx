@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { IJ_MODE_LABELS } from '../utils/drawIJoinedCanvas'
 import './Sidebar.css'
 
 const MODE_LABELS = {
@@ -18,6 +19,7 @@ const TEMPLATES = [
   { value: 'titlecard',   label: 'Title Card',   icon: '/Icon-TitleCard.jpg'    },
   { value: 'twitter',     label: 'Twitter Post', icon: '/Icon-Twitter.jpg'      },
   { value: 'certificate', label: 'Certificate',  icon: '/Icon-Certificate.jpg'  },
+  { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
 ]
 
 const DIMS = [
@@ -28,11 +30,12 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onRefleuron }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
   const richLogoInputRef    = useRef(null)
+  const ijPhotoInputRef     = useRef(null)
 
   return (
     <div className="sidebar">
@@ -465,8 +468,76 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Color Mode — hidden for Certificate (fixed dark-green palette) */}
-        {settings.templateType !== 'certificate' && <>
+        {/* Content — I Joined */}
+        {settings.templateType === 'ijoined' && <>
+          <div className="sec">Content</div>
+
+          <div className="field">
+            <label>Full Name</label>
+            <input type="text" value={settings.ijName} onChange={e => update('ijName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Role</label>
+            <input type="text" value={settings.ijRole} onChange={e => update('ijRole', e.target.value)} />
+          </div>
+
+          <div className="tog-row">
+            <label>(We're Hiring)</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.ijShowHiring} onChange={e => update('ijShowHiring', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+
+          <div className="div" />
+          <div className="sec">Photo</div>
+
+          <div className="field">
+            <input
+              ref={ijPhotoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onIJProfileImageChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => ijPhotoInputRef.current?.click()}>
+              {settings.ijProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            </button>
+            {settings.ijProfileImage && (
+              <button className="btn-clear-photo" onClick={() => onIJProfileImageChange(null)}>
+                ✕ Remove photo
+              </button>
+            )}
+          </div>
+
+          <div className="div" />
+          <div className="sec">Color Variant</div>
+
+          <div className="mode-grid mode-grid-wide">
+            {Object.entries(IJ_MODE_LABELS).map(([key, label]) => (
+              <button
+                key={key}
+                className={`mode-btn mode-ij-${key}${settings.ijMode === key ? ' active' : ''}`}
+                onClick={() => update('ijMode', key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="div" />
+        </>}
+
+        {/* Color Mode — hidden for Certificate and I Joined (have their own palettes) */}
+        {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined' && <>
           <div className="sec">Color Mode</div>
           {(() => {
             const modes = ['twitter', 'titlecard'].includes(settings.templateType)
@@ -489,11 +560,15 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Export Size — Certificate restricted to 1080×1080 and 1080×1920 */}
+        {/* Export Size — Certificate: 1080×1080 / 1080×1920 only · I Joined: 1920×1080 only */}
         <div className="sec">Export Size</div>
         <div className="dim-grid">
           {DIMS
-            .filter(({ w, h }) => settings.templateType !== 'certificate' || (w === 1080 && (h === 1080 || h === 1920)))
+            .filter(({ w, h }) => {
+              if (settings.templateType === 'certificate') return w === 1080 && (h === 1080 || h === 1920)
+              if (settings.templateType === 'ijoined')    return w === 1920 && h === 1080
+              return true
+            })
             .map(({ w, h, label, sub }) => (
               <button
                 key={label}
@@ -510,6 +585,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
         {settings.templateType === 'certificate'
           ? <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1080, 1920), 350) }}>↓ Export Both Sizes</button>
+          : settings.templateType === 'ijoined'
+          ? null
           : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
         }
 

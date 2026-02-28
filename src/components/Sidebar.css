@@ -207,6 +207,12 @@
 .mode-dark-pink    { background: #230a1e; color: #f5e8f2; }
 .mode-dark-yellow  { background: #1c1d03; color: #f5f5e0; }
 .mode-dark-blue    { background: #0f0f5a; color: #e5e5ff; }
+/* I Joined colour variants */
+.mode-ij-night     { background: #000d05; color: #ffffff; }
+.mode-ij-forest    { background: #002910; color: #ffffff; }
+.mode-ij-green     { background: #008c44; color: #ffffff; }
+.mode-ij-mint      { background: #dfeae3; color: #002910; }
+.mode-ij-paper     { background: #f8fffb; color: #002910; }
 
 /* ── Dimensions grid */
 .dim-grid {

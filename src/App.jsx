@@ -7,6 +7,7 @@ import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
 import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
+import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -51,6 +52,12 @@ const DEFAULT_SETTINGS = {
   tcShowCTA:         true,
   decorationStyle:    'fill',
   decorationRotation: 0,
+  // I Joined template
+  ijMode:            'night',
+  ijName:            'Firstname Lastname',
+  ijRole:            'Role',
+  ijShowHiring:      true,
+  ijProfileImage:    null,
 }
 
 export default function App() {
@@ -62,6 +69,7 @@ export default function App() {
   const richProfileImageRef  = useRef(null)
   const richCompanyLogoRef   = useRef(null)
   const certImageRef         = useRef(null)
+  const ijProfileImageRef    = useRef(null)
   const floraliaDotsRef      = useRef([])
   const [floraliaReady, setFloraliaReady] = useState(0)
 
@@ -117,6 +125,10 @@ export default function App() {
         const valid = (w === 1080 && (h === 1080 || h === 1920))
         if (!valid) next.dims = { w: 1080, h: 1080 }
       }
+      // I Joined is fixed to 1920×1080
+      if (key === 'templateType' && value === 'ijoined') {
+        next.dims = { w: 1920, h: 1080 }
+      }
       return next
     })
   }, [])
@@ -156,12 +168,20 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
+  const handleIJProfileImageChange = useCallback((dataUrl) => {
+    if (!dataUrl) { ijProfileImageRef.current = null; update('ijProfileImage', null); return }
+    const img = new Image()
+    img.onload = () => { ijProfileImageRef.current = img; update('ijProfileImage', dataUrl) }
+    img.src = dataUrl
+  }, [update])
+
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter')         drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
-    else if (s.templateType === 'richquote')  drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
-    else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    if (s.templateType === 'twitter')          drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'richquote')   drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
+    else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
-    else                                      drawCanvas(canvas, s, fontsReady)
+    else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current)
+    else                                       drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
@@ -171,12 +191,14 @@ export default function App() {
     const ec = document.createElement('canvas')
     draw(ec, s)
     const prefix = settings.templateType === 'twitter'      ? 'airops-tweet'
-      : settings.templateType === 'richquote'              ? 'airops-richquote'
-      : settings.templateType === 'titlecard'              ? 'airops-titlecard'
-      : settings.templateType === 'certificate'            ? 'airops-certificate'
+      : settings.templateType === 'richquote'               ? 'airops-richquote'
+      : settings.templateType === 'titlecard'               ? 'airops-titlecard'
+      : settings.templateType === 'certificate'             ? 'airops-certificate'
+      : settings.templateType === 'ijoined'                 ? 'airops-ijoined'
       : 'airops-quote'
+    const modeTag = settings.templateType === 'ijoined' ? settings.ijMode : settings.colorMode
     const a = document.createElement('a')
-    a.download = filename ?? `${prefix}-${settings.colorMode}-${ew}x${eh}.jpg`
+    a.download = filename ?? `${prefix}-${modeTag}-${ew}x${eh}.jpg`
     a.href = ec.toDataURL('image/jpeg', 0.95)
     a.click()
   }, [settings, draw])
@@ -214,6 +236,7 @@ export default function App() {
         onProfileImageChange={handleProfileImageChange}
         onRichProfileImageChange={handleRichProfileImageChange}
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
+        onIJProfileImageChange={handleIJProfileImageChange}
         onRefleuron={handleRefleuron}
       />
       <CanvasPreview

@@ -1,12 +1,13 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { MODES } from '../utils/drawCanvas'
+import { IJ_MODE_LABELS } from '../utils/drawIJoinedCanvas'
 import './CanvasPreview.css'
 
 const MODE_LABELS = {
   green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper', blue: 'Blue Paper',
   'dark-green': 'Dark Green', 'dark-pink': 'Dark Pink', 'dark-yellow': 'Dark Yellow', 'dark-blue': 'Dark Blue',
 }
-const TEMPLATE_LABELS = { quote: 'Quote Block', richquote: 'Rich Quote', titlecard: 'Title Card', twitter: 'Twitter Post', certificate: 'Certificate' }
+const TEMPLATE_LABELS = { quote: 'Quote Block', richquote: 'Rich Quote', titlecard: 'Title Card', twitter: 'Twitter Post', certificate: 'Certificate', ijoined: 'I Joined' }
 
 export default function CanvasPreview({ settings, fontsReady, draw }) {
   const canvasRef    = useRef(null)
@@ -51,7 +52,7 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
       <div className="canvas-toolbar">
         <span className="tl">Preview</span>
         <span className="dbadge">{w} × {h}</span>
-        <span className="mbadge">{TEMPLATE_LABELS[settings.templateType]} · {MODE_LABELS[settings.colorMode]}</span>
+        <span className="mbadge">{TEMPLATE_LABELS[settings.templateType]} · {settings.templateType === 'ijoined' ? IJ_MODE_LABELS[settings.ijMode] : MODE_LABELS[settings.colorMode]}</span>
         <span className={`fpill${fontsReady ? ' ready' : ''}`}>
           {fontsReady ? 'Fonts ready' : 'Loading fonts…'}
         </span>
