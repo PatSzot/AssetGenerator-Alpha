@@ -60,7 +60,8 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const bg          = TM.bg
   const lineColor   = isDark ? TM.lineColor   : M.lineColor
   const logoColor   = isDark ? TM.logoColor   : M.text
-  const textColor   = isDark ? TM.logoColor   : M.text
+  const textColor     = isDark ? TM.logoColor : M.text
+  const headlineColor = isDark ? M.bg         : M.text  // one step lighter in dark modes
   const eyebrowBg   = isDark ? TM.eyebrowBg   : '#ffffff'
   const eyebrowBd   = isDark ? TM.lineColor   : (EYEBROW_ACCENT[colorMode.replace('dark-', '')] ?? EYEBROW_ACCENT['green'])
   const eyebrowTxt  = eyebrowBd
@@ -196,7 +197,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     if (sec.type === 'title') {
       ctx.textAlign = 'center'
       if (tcShowSerifTitle) {
-        ctx.fillStyle    = textColor
+        ctx.fillStyle    = headlineColor
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
         ctx.fillText(tcSerifTitle, cw / 2, ty)
@@ -204,7 +205,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
         ty += tcShowSansTitle ? serifSz : serifLH
       }
       if (tcShowSansTitle) {
-        ctx.fillStyle    = textColor
+        ctx.fillStyle    = headlineColor
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
         ctx.fillText(tcSansTitle, cw / 2, ty)
