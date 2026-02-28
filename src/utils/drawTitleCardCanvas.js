@@ -80,17 +80,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
     const stepNorm = 0.006
 
-    // Instance anchors — centre of each floralia pattern in screen space.
-    // Nudge inward so ~40% of the glyph is visible rather than just the corner sliver.
-    // Instance 1: top-left corner (portrait/square/story) or left-centre (landscape)
-    // Instance 2: bottom-right corner (portrait/square/story) or right-centre (landscape)
-    const anchorX1 = cw * 0.15
-    const anchorY1 = isLand ? ch / 2 : ch * 0.15
-    const offX1    = anchorX1 - scale / 2
-    const offY1    = anchorY1 - scale / 2
-    const shiftX1  = ((40 - offX1) / scale) % stepNorm
-    const shiftY1  = ((40 - offY1) / scale) % stepNorm
-
+    // Anchor — bottom-right corner (portrait/square/story) or right-centre (landscape)
     const anchorX2 = cw * 0.97
     const anchorY2 = isLand ? ch / 2 : ch * 0.97
     const offX2    = anchorX2 - scale / 2
@@ -128,20 +118,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
       ctx.textBaseline = 'top'
     }
 
-    // Instance 1: 90° clockwise — glyph top faces SE (toward canvas centre from top-left corner)
-    ctx.save()
-    ctx.translate(anchorX1, anchorY1)
-    ctx.rotate(Math.PI)
-    ctx.translate(-anchorX1, -anchorY1)
-    if (settings.decorationStyle === 'inverted') {
-      renderDots(floralia.outsideDots, 0.28, offX1, offY1, shiftX1, shiftY1)
-      renderGlyphs(offX1, offY1)
-    } else {
-      renderDots(floralia.insideDots, 0.35, offX1, offY1, shiftX1, shiftY1)
-    }
-    ctx.restore()
-
-    // Instance 2: 270° clockwise — glyph top faces NW (toward canvas centre from bottom-right corner)
+    // Bottom-right: glyph top faces NW (toward canvas centre from bottom-right corner)
     ctx.save()
     ctx.translate(anchorX2, anchorY2)
     ctx.rotate(2 * Math.PI)
