@@ -2,22 +2,22 @@ import { buildLogo, wrapText } from './drawCanvas.js'
 
 // ── Per-mode palette (5 AirOps brand variants)
 const IJ_MODES = {
-  night:  { bg: '#000d05', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
-  forest: { bg: '#002910', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
-  green:  { bg: '#008c44', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#dfeae3', hiringColor: '#00ff64' },
-  mint:   { bg: '#dfeae3', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
   paper:  { bg: '#f8fffb', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
+  mint:   { bg: '#dfeae3', text: '#002910', logoColor: '#002910', frameBorder: '#008c44', hiringColor: '#008c44' },
+  green:  { bg: '#008c44', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#dfeae3', hiringColor: '#00ff64' },
+  forest: { bg: '#002910', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
+  night:  { bg: '#000d05', text: '#ffffff', logoColor: '#ffffff', frameBorder: '#008c44', hiringColor: '#00ff64' },
 }
 
 // Photo frame bg — near-dark green base so lighter blend lifts highlights through cleanly
 const PHOTO_BG = '#002910'
 
 export const IJ_MODE_LABELS = {
-  night:  'Night',
-  forest: 'Forest',
-  green:  'Green',
-  mint:   'Mint',
   paper:  'Paper',
+  mint:   'Mint',
+  green:  'Green',
+  forest: 'Forest',
+  night:  'Night',
 }
 
 export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, floralia) {
