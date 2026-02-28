@@ -20,7 +20,7 @@ export const IJ_MODE_LABELS = {
   paper:  'Paper',
 }
 
-export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
+export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, floralia) {
   const {
     dims,
     ijMode       = 'night',
@@ -47,6 +47,62 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
   // ── Background
   ctx.fillStyle = M.bg
   ctx.fillRect(0, 0, cw, ch)
+
+  // ── Decoration (floralia — identical logic to Twitter template)
+  if (settings.showFloralia && floralia?.insideDots) {
+    const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
+    if (rotAngle !== 0) {
+      ctx.save()
+      ctx.translate(cw / 2, ch / 2)
+      ctx.rotate(rotAngle)
+      ctx.translate(-cw / 2, -ch / 2)
+    }
+
+    const isLand   = cw > ch
+    const fscale   = Math.max(cw, ch) * 1.5
+    const offX     = (cw - fscale) / 2
+    const offY     = (ch - fscale) / 2
+    const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
+    const accent   = M.hiringColor
+    const stepNorm = 0.006
+    const shiftX   = ((guideX - offX) / fscale) % stepNorm
+    const shiftY   = ((guideX - offY) / fscale) % stepNorm
+
+    const drawDots = (dots, alpha) => {
+      ctx.fillStyle   = accent
+      ctx.globalAlpha = alpha
+      ctx.beginPath()
+      dots.forEach(({ x, y }) => {
+        const px = offX + (x + shiftX) * fscale
+        const py = offY + (y + shiftY) * fscale
+        if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+          ctx.moveTo(px + dotR, py)
+          ctx.arc(px, py, dotR, 0, Math.PI * 2)
+        }
+      })
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    if (settings.decorationStyle === 'inverted') {
+      drawDots(floralia.outsideDots, 0.28)
+      ctx.fillStyle    = M.bg
+      ctx.globalAlpha  = 1
+      ctx.textBaseline = 'middle'
+      ctx.textAlign    = 'center'
+      floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
+        ctx.font = `${fontSizeNorm * fscale}px Floralia`
+        ctx.fillText(char, offX + cxNorm * fscale, offY + cyNorm * fscale)
+      })
+      ctx.textAlign    = 'left'
+      ctx.textBaseline = 'top'
+      ctx.globalAlpha  = 1
+    } else {
+      drawDots(floralia.insideDots, 0.35)
+    }
+
+    if (rotAngle !== 0) ctx.restore()
+  }
 
   // ── Layout constants (Figma reference 1920×1080)
   const guideX    = Math.round(40   * s)
@@ -75,7 +131,15 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage) {
 
   const logoY = contentY + ijLH + logoGap
   ctx.fillStyle = M.bg
-  ctx.fillRect(leftColX, logoY, logoW, logoH)
+  if (settings.showFloralia && floralia?.insideDots) {
+    const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
+    const fy = Math.floor(logoY / stepCanvas) * stepCanvas
+    const fh = Math.ceil((logoY + logoH - fy) / stepCanvas) * stepCanvas
+    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas
+    ctx.fillRect(leftColX, fy, fw, fh)
+  } else {
+    ctx.fillRect(leftColX, logoY, logoW, logoH)
+  }
   ctx.drawImage(logoBmp, leftColX, logoY, logoW, logoH)
 
   // ── Left column — name / role / hiring (bottom-aligned)
