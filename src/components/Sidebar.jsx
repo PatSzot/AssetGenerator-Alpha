@@ -12,6 +12,12 @@ const MODE_LABELS = {
   'dark-blue':  'Dark Blue',
 }
 
+const TEMPLATES = [
+  { value: 'quote',     label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg' },
+  { value: 'richquote', label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'  },
+  { value: 'twitter',   label: 'Twitter Post', icon: '/Icon-Twitter.jpg'    },
+]
+
 const DIMS = [
   { w: 1080, h: 1080, label: '1080×1080', sub: 'Square' },
   { w: 1080, h: 1350, label: '1080×1350', sub: 'Portrait 4:5' },
@@ -86,16 +92,19 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Template Type */}
         <div className="sec">Asset Type</div>
-        <div className="field">
-          <select
-            className="template-select"
-            value={settings.templateType}
-            onChange={e => update('templateType', e.target.value)}
-          >
-            <option value="quote">Quote Block</option>
-            <option value="richquote">Rich Quote Block</option>
-            <option value="twitter">Twitter Post</option>
-          </select>
+        <div className="asset-picker">
+          {TEMPLATES.map(t => (
+            <button
+              key={t.value}
+              className={`asset-card${settings.templateType === t.value ? ' active' : ''}`}
+              onClick={() => update('templateType', t.value)}
+            >
+              <div className="asset-card-img">
+                <img src={t.icon} alt={t.label} draggable={false} />
+              </div>
+              <span className="asset-card-name">{t.label}</span>
+            </button>
+          ))}
         </div>
 
         <div className="div" />
