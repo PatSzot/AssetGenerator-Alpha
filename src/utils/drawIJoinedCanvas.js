@@ -1,4 +1,4 @@
-import { buildLogo } from './drawCanvas.js'
+import { buildLogo, wrapText } from './drawCanvas.js'
 
 // ── Per-mode palette (5 AirOps brand variants)
 const IJ_MODES = {
@@ -158,40 +158,62 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const hireLH  = Math.round(40 * 0.94 * s)
   const hireGap = Math.round(25 * s)            // Figma: gap-[24.773px]
 
-  const contentBottom = contentY + contentH
-  const hiringH       = ijShowHiring ? hireGap + hireLH : 0
-  const bottomGroupH  = nameLH + roleLH + hiringH
-  const bottomGroupY  = contentBottom - bottomGroupH
+  // Max text width — left col width minus 24px margin before the photo frame
+  const maxTextW = rightColX - leftColX - Math.round(24 * s)
 
-  // Name — Serrif VF (measure first, draw tight bg rect, then text)
+  // Pre-wrap name and role so we know actual line counts before computing bottomGroupY
   ctx.font         = `400 ${nameSz}px ${serif}`
   ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`
-  ctx.textBaseline = 'top'
-  ctx.textAlign    = 'left'
-  ctx.fillStyle    = M.bg
-  ctx.fillRect(leftColX, bottomGroupY, Math.ceil(ctx.measureText(ijName).width), nameLH)
-  ctx.fillStyle    = M.text
-  ctx.fillText(ijName, leftColX, bottomGroupY)
-  ctx.letterSpacing = '0px'
-
-  // Role — Saans
+  const nameLines  = wrapText(ctx, ijName, maxTextW)
   ctx.font         = `400 ${roleSz}px ${sans}`
   ctx.letterSpacing = `${(-roleSz * 0.02).toFixed(2)}px`
-  ctx.fillStyle    = M.bg
-  ctx.fillRect(leftColX, bottomGroupY + nameLH, Math.ceil(ctx.measureText(ijRole).width), roleLH)
-  ctx.fillStyle    = M.text
-  ctx.fillText(ijRole, leftColX, bottomGroupY + nameLH)
+  const roleLines  = wrapText(ctx, ijRole, maxTextW)
+  ctx.letterSpacing = '0px'
+
+  const contentBottom = contentY + contentH
+  const hiringH       = ijShowHiring ? hireGap + hireLH : 0
+  const nameH         = nameLines.length * nameLH
+  const roleH         = roleLines.length * roleLH
+  const bottomGroupH  = nameH + roleH + hiringH
+  const bottomGroupY  = contentBottom - bottomGroupH
+
+  ctx.textBaseline = 'top'
+  ctx.textAlign    = 'left'
+
+  // Name — Serrif VF, one bg rect per line (tight hug)
+  ctx.font         = `400 ${nameSz}px ${serif}`
+  ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`
+  nameLines.forEach((line, i) => {
+    const y = bottomGroupY + i * nameLH
+    ctx.fillStyle = M.bg
+    ctx.fillRect(leftColX, y, Math.ceil(ctx.measureText(line).width), nameLH)
+    ctx.fillStyle = M.text
+    ctx.fillText(line, leftColX, y)
+  })
+  ctx.letterSpacing = '0px'
+
+  // Role — Saans, one bg rect per line
+  ctx.font         = `400 ${roleSz}px ${sans}`
+  ctx.letterSpacing = `${(-roleSz * 0.02).toFixed(2)}px`
+  roleLines.forEach((line, i) => {
+    const y = bottomGroupY + nameH + i * roleLH
+    ctx.fillStyle = M.bg
+    ctx.fillRect(leftColX, y, Math.ceil(ctx.measureText(line).width), roleLH)
+    ctx.fillStyle = M.text
+    ctx.fillText(line, leftColX, y)
+  })
   ctx.letterSpacing = '0px'
 
   // (WE'RE HIRING) — Saans Mono Medium
   if (ijShowHiring) {
     const hireText = "(WE'RE HIRING)"
+    const hireY    = bottomGroupY + nameH + roleH + hireGap
     ctx.font         = `500 ${hireSz}px ${mono}`
     ctx.letterSpacing = `${(-hireSz * 0.04).toFixed(2)}px`  // tracking −4%
     ctx.fillStyle    = M.bg
-    ctx.fillRect(leftColX, bottomGroupY + nameLH + roleLH + hireGap, Math.ceil(ctx.measureText(hireText).width), hireLH)
+    ctx.fillRect(leftColX, hireY, Math.ceil(ctx.measureText(hireText).width), hireLH)
     ctx.fillStyle    = M.hiringColor
-    ctx.fillText(hireText, leftColX, bottomGroupY + nameLH + roleLH + hireGap)
+    ctx.fillText(hireText, leftColX, hireY)
     ctx.letterSpacing = '0px'
   }
 
