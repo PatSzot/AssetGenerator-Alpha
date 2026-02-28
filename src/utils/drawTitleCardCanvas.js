@@ -358,12 +358,12 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     const ctaPillW = ctaTW + 96   // px-48 each side
     const ctaPillX = Math.round((cw - ctaPillW) / 2)
 
-    ctx.fillStyle = '#00ff64'
+    ctx.fillStyle = M.text  // nearly-black per colorway
     ctx.beginPath()
     ctx.roundRect(ctaPillX, ctaTopY, ctaPillW, ctaH, ctaR)
     ctx.fill()
 
-    ctx.fillStyle    = M.ctaText  // always the dark base-mode tone — readable on #00ff64
+    ctx.fillStyle    = M.bg  // nearly-white paper per colorway
     ctx.textBaseline = 'middle'
     ctx.textAlign    = 'center'
     ctx.fillText(tcCTAText, cw / 2, ctaTopY + ctaH / 2)
