@@ -1,4 +1,4 @@
-import { MODES, buildLogo, wrapText } from './drawCanvas.js'
+import { MODES, buildLogo, wrapText, smartQuotes } from './drawCanvas.js'
 import { STIPPLE_COLORS } from './drawFleurons.js'
 
 // Per-mode accent for eyebrow pill border + text (var(--color-3) equivalent)
@@ -43,12 +43,13 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     tcEmphasizeSans   = false,
     tcSubheadline     = 'Subheadline/Details',
     tcShowSubheadline = true,
-    tcBody            = '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
+    tcBody: tcBodyRaw = '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
     tcShowBody        = true,
     tcCTAText         = 'See AirOps in Action',
     tcShowCTA         = true,
     tcShowLogo        = true,
   } = settings
+  const tcBody = smartQuotes(tcBodyRaw)
 
   const { w: cw, h: ch } = dims
   const dpr = settings.dpr ?? 1

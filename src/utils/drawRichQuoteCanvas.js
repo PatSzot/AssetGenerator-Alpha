@@ -1,4 +1,4 @@
-import { MODES, buildLogo, wrapText } from './drawCanvas.js'
+import { MODES, buildLogo, wrapText, smartQuotes } from './drawCanvas.js'
 
 // ── Draw photo region: darkest brand color per colorway (M.ctaText) + hard-light blend
 function drawPhotoSection(ctx, profileImage, x, y, w, h, M) {
@@ -150,10 +150,10 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     richFirstName    = 'Alex',
     richLastName     = 'Rodmell',
     richRoleCompany  = 'Growth, Venn',
-    richQuoteText    = '"Enter a quote here."',
     richFlip         = false,
     colorMode, dims,
   } = settings
+  const richQuoteText = smartQuotes(settings.richQuoteText ?? '"Enter a quote here."')
 
   const { w: cw, h: ch } = dims
   const dpr = settings.dpr ?? 1

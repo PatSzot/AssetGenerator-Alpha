@@ -13,7 +13,7 @@ import './App.css'
 
 const DEFAULT_SETTINGS = {
   templateType:     'quote',
-  quote:            '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
+  quote:            '\u201CThe most successful marketing teams in the AI era will be those who build content for how the internet actually works.\u201D',
   firstName:        'Nicole',
   lastName:         'Baer',
   roleCompany:      'CMO, Carta',
@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS = {
   tweetProfileImage: null,
   showFloralia:       false,
   // Rich Quote template
-  richQuoteText:    '"The most successful marketing teams in the AI era will be those who build content for how the internet actually works."',
+  richQuoteText:    '\u201CThe most successful marketing teams in the AI era will be those who build content for how the internet actually works.\u201D',
   richFirstName:    'Nicole',
   richLastName:     'Baer',
   richRoleCompany:  'CMO, Carta',
@@ -47,7 +47,7 @@ const DEFAULT_SETTINGS = {
   tcEmphasizeSans:   false,
   tcSubheadline:     'Friday @7pm EST',
   tcShowSubheadline: true,
-  tcBody:            '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
+  tcBody:            '\u201CLLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google.\u201D',
   tcShowBody:        false,
   tcShowLogo:        false,
   tcCTAText:         'See AirOps in Action',

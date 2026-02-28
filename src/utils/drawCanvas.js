@@ -29,6 +29,13 @@ export function buildLogo(color, h) {
   return oc;
 }
 
+// Convert straight quotes to typographic curly quotes matching Serrif VF glyphs
+export function smartQuotes(str) {
+  return str
+    .replace(/(^|[\s\u2014([\u201C])"/g, '$1\u201C')  // opening " after space/start
+    .replace(/"/g, '\u201D');                           // remaining " → closing
+}
+
 export function wrapText(ctx, text, maxW) {
   const words = text.split(' ');
   const lines = [];
@@ -73,7 +80,8 @@ export function drawCtaPill(ctx, rightX, bottomY, text, ctaTextColor, sans) {
 // ── Main draw function — always renders at full canvas resolution.
 // Call with the preview <canvas> ref, or an offscreen canvas for export.
 export function drawCanvas(canvas, settings, fontsReady) {
-  const { quote, firstName, lastName, roleCompany, ctaText, showCTA, colorMode, dims } = settings;
+  const { firstName, lastName, roleCompany, ctaText, showCTA, colorMode, dims } = settings;
+  const quote = smartQuotes(settings.quote ?? '');
   const { w: cw, h: ch } = dims;
   const dpr = settings.dpr ?? 1;
 
