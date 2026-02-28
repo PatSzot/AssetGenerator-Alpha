@@ -17,8 +17,11 @@ function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode) {
 
   if (!profileImage) return
 
-  // Aspect-fill the photo region
-  const s  = Math.max(w / (profileImage.naturalWidth  || 1), h / (profileImage.naturalHeight || 1))
+  // Aspect-fill with a small overscan so JPEG edge artifacts land outside the
+  // clip region and are never visible at the section boundaries.
+  const overscan = 4
+  const s  = Math.max((w + overscan * 2) / (profileImage.naturalWidth  || 1),
+                      (h + overscan * 2) / (profileImage.naturalHeight || 1))
   const iw = profileImage.naturalWidth  * s
   const ih = profileImage.naturalHeight * s
 
