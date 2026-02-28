@@ -34,8 +34,7 @@ const DEFAULT_SETTINGS = {
   richProfileImage:  null,
   richCompanyLogo:   null,
   // Certificate
-  certFirstName:     'Firstname',
-  certLastName:      'Lastname',
+  certFullName:      'Firstname Lastname',
   // Title Card
   tcEyebrow:         'Offer ends today',
   tcShowEyebrow:     true,
@@ -62,6 +61,7 @@ export default function App() {
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
   const richCompanyLogoRef   = useRef(null)
+  const certImageRef         = useRef(null)
   const floraliaDotsRef      = useRef([])
   const [floraliaReady, setFloraliaReady] = useState(0)
 
@@ -92,6 +92,16 @@ export default function App() {
       setSettings(prev => ({ ...prev, richCompanyLogo: '/GTMGen-carta_logo.svg.svg' }))
     }
     logo.src = '/GTMGen-carta_logo.svg.svg'
+  }, [])
+
+  // Preload certificate background image
+  useEffect(() => {
+    const img = new Image()
+    img.onload = () => {
+      certImageRef.current = img
+      setSettings(prev => ({ ...prev }))
+    }
+    img.src = '/GTMGen-Certificate.jpg'
   }, [])
 
   const update = useCallback((key, value) => {
@@ -150,7 +160,7 @@ export default function App() {
     if (s.templateType === 'twitter')         drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')  drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
     else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
-    else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else                                      drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 

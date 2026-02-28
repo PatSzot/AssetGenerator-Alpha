@@ -371,13 +371,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="sec">Recipient</div>
 
           <div className="field">
-            <label>First Name</label>
-            <input type="text" value={settings.certFirstName} onChange={e => update('certFirstName', e.target.value)} />
-          </div>
-
-          <div className="field">
-            <label>Last Name</label>
-            <input type="text" value={settings.certLastName} onChange={e => update('certLastName', e.target.value)} />
+            <label>Full Name</label>
+            <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
           </div>
 
           <div className="div" />
