@@ -84,15 +84,15 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     // Nudge inward so ~40% of the glyph is visible rather than just the corner sliver.
     // Instance 1: top-left corner (portrait/square/story) or left-centre (landscape)
     // Instance 2: bottom-right corner (portrait/square/story) or right-centre (landscape)
-    const anchorX1 = cw * 0.06
-    const anchorY1 = isLand ? ch / 2 : ch * 0.06
+    const anchorX1 = cw * 0.15
+    const anchorY1 = isLand ? ch / 2 : ch * 0.15
     const offX1    = anchorX1 - scale / 2
     const offY1    = anchorY1 - scale / 2
     const shiftX1  = ((40 - offX1) / scale) % stepNorm
     const shiftY1  = ((40 - offY1) / scale) % stepNorm
 
-    const anchorX2 = cw * 0.94
-    const anchorY2 = isLand ? ch / 2 : ch * 0.94
+    const anchorX2 = cw * 0.97
+    const anchorY2 = isLand ? ch / 2 : ch * 0.97
     const offX2    = anchorX2 - scale / 2
     const offY2    = anchorY2 - scale / 2
     const shiftX2  = ((cw - 40 - offX2) / scale) % stepNorm
