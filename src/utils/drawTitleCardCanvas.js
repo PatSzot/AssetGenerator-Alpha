@@ -96,8 +96,8 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const ctaTopY = ctaBotY - ctaH
 
   // ── Typography scale (varies by format)
-  const serifSz = isLand ? 132 : 100
-  const sansSz  = isLand ? 128 : 96
+  const serifSz = isLand ? 148 : 112
+  const sansSz  = isLand ? 144 : 108
   const serifLH = serifSz * 1.08
   const sansLH  = sansSz  * 1.08
   const subSz   = 40
