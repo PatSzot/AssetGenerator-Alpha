@@ -72,6 +72,12 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   const cY = Math.round((ch - cH) / 2)
   const s  = cW / 1009.778  // scale vs Figma 1080×1080 reference
 
+  // Center vertical guide (full canvas height) — drawn before card image
+  ctx.strokeStyle = 'rgba(0,210,80,1)'
+  ctx.lineWidth   = 2
+  ctx.beginPath(); ctx.moveTo(cw / 2, 0); ctx.lineTo(cw / 2, ch); ctx.stroke()
+  ctx.lineWidth   = 1
+
   // Draw certificate image (all design elements)
   if (certImage) {
     ctx.drawImage(certImage, cX, cY, cW, cH)
@@ -79,12 +85,6 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     ctx.fillStyle = '#f8fffb'
     ctx.fillRect(cX, cY, cW, cH)
   }
-
-  // Center vertical guide (full canvas height)
-  ctx.strokeStyle = 'rgba(0,210,80,1)'
-  ctx.lineWidth   = 2
-  ctx.beginPath(); ctx.moveTo(cw / 2, 0); ctx.lineTo(cw / 2, ch); ctx.stroke()
-  ctx.lineWidth   = 1
 
   // Name overlay at Figma-matched position (210px from card top at 1× scale)
   const nameSz = Math.round(50.49 * s)
