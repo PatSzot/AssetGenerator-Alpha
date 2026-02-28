@@ -268,31 +268,46 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
 
     if (sec.type === 'title') {
       ctx.textAlign = 'center'
+      const lineAdv  = tcShowSansTitle ? serifSz : serifLH
+      const serifTy  = ty
+      const sansTy   = serifTy + (tcShowSerifTitle ? serifLines.length * lineAdv : 0)
+
+      // Pass 1: all bg rects — drawn before any text so descenders render on top
       if (tcShowSerifTitle) {
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
-        const lineAdv = tcShowSansTitle ? serifSz : serifLH
+        ctx.fillStyle = bg
         serifLines.forEach((line, i) => {
           const lTW = ctx.measureText(line).width
-          ctx.fillStyle = bg
-          ctx.fillRect(Math.round(cw / 2 - lTW / 2), ty + i * lineAdv, Math.ceil(lTW), Math.ceil(lineAdv))
-          ctx.fillStyle = headlineColor
-          ctx.fillText(line, cw / 2, ty + i * lineAdv)
+          ctx.fillRect(Math.round(cw / 2 - lTW / 2), serifTy + i * lineAdv, Math.ceil(lTW), Math.ceil(serifLH))
         })
+      }
+      if (tcShowSansTitle) {
+        ctx.font         = `400 ${sansSz}px ${sans}`
+        ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
+        ctx.fillStyle = bg
+        sansLines.forEach((line, i) => {
+          const lTW = ctx.measureText(line).width
+          ctx.fillRect(Math.round(cw / 2 - lTW / 2), sansTy + i * sansLH, Math.ceil(lTW), Math.ceil(sansLH))
+        })
+      }
+
+      // Pass 2: all text on top
+      if (tcShowSerifTitle) {
+        ctx.font         = `400 ${serifSz}px ${serif}`
+        ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
+        ctx.fillStyle = headlineColor
+        serifLines.forEach((line, i) => ctx.fillText(line, cw / 2, serifTy + i * lineAdv))
         ty += serifLines.length * lineAdv
       }
       if (tcShowSansTitle) {
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
-        sansLines.forEach((line, i) => {
-          const lTW = ctx.measureText(line).width
-          ctx.fillStyle = bg
-          ctx.fillRect(Math.round(cw / 2 - lTW / 2), ty + i * sansLH, Math.ceil(lTW), Math.ceil(sansLH))
-          ctx.fillStyle = headlineColor
-          ctx.fillText(line, cw / 2, ty + i * sansLH)
-        })
+        ctx.fillStyle = headlineColor
+        sansLines.forEach((line, i) => ctx.fillText(line, cw / 2, sansTy + i * sansLH))
         ty += sansLines.length * sansLH
       }
+
       ctx.textAlign    = 'left'
       ctx.letterSpacing = '0px'
     }
