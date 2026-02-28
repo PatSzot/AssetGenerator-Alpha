@@ -215,6 +215,16 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           </div>
 
           <div className="div" />
+
+          <div className="tog-row">
+            <label>Flip Layout</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.richFlip ?? false} onChange={e => update('richFlip', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+
+          <div className="div" />
         </>}
 
         {/* Content — Title Card */}

@@ -151,6 +151,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     richLastName     = 'Rodmell',
     richRoleCompany  = 'Growth, Venn',
     richQuoteText    = '"Enter a quote here."',
+    richFlip         = false,
     colorMode, dims,
   } = settings
 
@@ -187,31 +188,33 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
   }
 
   if (isLand) {
-    // ── Landscape: left content (960) | right photo (top) + logo panel (bottom)
+    // ── Landscape: content | photo+logo  (flip swaps left/right)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 203
     const photoH     = ch - logoPanelH
+    const mediaX     = richFlip ? 0      : splitX
+    const contentX   = richFlip ? splitX : 0
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, M)
-    drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
-    drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 53,
+    drawPhotoSection(ctx, profileImage,    mediaX, 0,      splitX, photoH,     M)
+    drawLogoSection(ctx, companyLogoImage, mediaX, photoH, splitX, logoPanelH, M)
+    drawContent(ctx, { x: contentX, y: 0, w: splitX, h: ch, pad: 53,
       ...contentArgs, nameSz: 120, quoteSzBase: 64, quoteLH: 1.2 })
 
-    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
-    strokeLine(ctx, splitX, 0,      splitX, ch)       // vertical, full height
-    strokeLine(ctx, splitX, photoH, cw,     photoH)   // horizontal, right half
+    strokeLine(ctx, splitX,           0,      splitX,           ch)
+    strokeLine(ctx, mediaX === 0 ? 0 : splitX, photoH, mediaX === 0 ? splitX : cw, photoH)
 
   } else if (isStory) {
-    // ── Story 9:16: padded content | headshot row | AirOps logo
+    // ── Story 9:16: content | headshot row  (flip swaps top/bottom)
     const topPad       = 240
     const contentH     = 618
     const headshotRowH = 540
     const splitX       = Math.round(cw / 2)
-    const rowY         = topPad + contentH
+    const rowY         = richFlip ? topPad                 : topPad + contentH
+    const contentY     = richFlip ? topPad + headshotRowH  : topPad
 
-    drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, M)
+    drawPhotoSection(ctx, profileImage,    0,      rowY, splitX, headshotRowH, M)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
-    drawContent(ctx, { x: 0, y: topPad, w: cw, h: contentH, pad: 40,
+    drawContent(ctx, { x: 0, y: contentY, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
     // AirOps logo — story-only (matches Figma)
@@ -223,39 +226,41 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     ctx.fillRect(40, logoY, logoW, logoH)
     ctx.drawImage(logoBmp, 40, logoY, logoW, logoH)
 
-    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
-    strokeLine(ctx, 0,      rowY,                   cw, rowY)                    // top horizontal, full width
-    strokeLine(ctx, splitX, rowY,                   splitX, rowY + headshotRowH) // vertical, headshot row only
-    strokeLine(ctx, 0,      rowY + headshotRowH,    cw, rowY + headshotRowH)     // bottom horizontal, full width
+    strokeLine(ctx, 0,      rowY,                   cw, rowY)
+    strokeLine(ctx, splitX, rowY,                   splitX, rowY + headshotRowH)
+    strokeLine(ctx, 0,      rowY + headshotRowH,    cw, rowY + headshotRowH)
 
   } else if (isPortrait) {
-    // ── Portrait 4:5: full-width content (top) | headshot row (bottom)
+    // ── Portrait 4:5: content | headshot row  (flip swaps top/bottom)
     const headshotRowH = 540
     const contentH     = ch - headshotRowH
     const splitX       = Math.round(cw / 2)
+    const rowY         = richFlip ? 0          : contentH
+    const contentY     = richFlip ? headshotRowH : 0
 
-    drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, M)
-    drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
-    drawContent(ctx, { x: 0, y: 0, w: cw, h: contentH, pad: 40,
+    drawPhotoSection(ctx, profileImage,    0,      rowY, splitX, headshotRowH, M)
+    drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
+    drawContent(ctx, { x: 0, y: contentY, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
-    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
-    strokeLine(ctx, 0,      contentH, cw,     contentH) // horizontal, full width
-    strokeLine(ctx, splitX, contentH, splitX, ch)       // vertical, headshot row only
+    strokeLine(ctx, 0,      rowY,         cw,     rowY)
+    strokeLine(ctx, splitX, rowY,         splitX, rowY + headshotRowH)
+    strokeLine(ctx, 0,      rowY + headshotRowH, cw, rowY + headshotRowH)
 
   } else {
-    // ── Square: left content (540) | right photo (top 922) + logo panel (bottom 158)
+    // ── Square: content | photo+logo  (flip swaps left/right)
     const splitX     = Math.round(cw / 2)
     const logoPanelH = 158
     const photoH     = ch - logoPanelH
+    const mediaX     = richFlip ? 0      : splitX
+    const contentX   = richFlip ? splitX : 0
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, M)
-    drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
-    drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 40,
+    drawPhotoSection(ctx, profileImage,    mediaX, 0,      splitX, photoH,     M)
+    drawLogoSection(ctx, companyLogoImage, mediaX, photoH, splitX, logoPanelH, M)
+    drawContent(ctx, { x: contentX, y: 0, w: splitX, h: ch, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
-    // Guidelines drawn last — on top of all section fills (matches Figma layer order)
-    strokeLine(ctx, splitX, 0,      splitX, ch)       // vertical, full height
-    strokeLine(ctx, splitX, photoH, cw,     photoH)   // horizontal, right half
+    strokeLine(ctx, splitX,                          0,      splitX,                          ch)
+    strokeLine(ctx, mediaX === 0 ? 0 : splitX, photoH, mediaX === 0 ? splitX : cw, photoH)
   }
 }

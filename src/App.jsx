@@ -34,6 +34,7 @@ const DEFAULT_SETTINGS = {
   richRoleCompany:  'CMO, Carta',
   richProfileImage:  null,
   richCompanyLogo:   null,
+  richFlip:          false,
   // Certificate
   certFullName:      'Firstname Lastname',
   // Title Card
