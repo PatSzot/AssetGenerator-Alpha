@@ -128,20 +128,10 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     }
 
     if (settings.decorationStyle === 'inverted') {
-      // All dots first, then glyph cutouts on top — keeps order correct for both instances
       renderDots(floralia.outsideDots, 0.28)
-      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
-      renderDots(floralia.outsideDots, 0.28)
-      ctx.restore()
       renderGlyphs()
-      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
-      renderGlyphs()
-      ctx.restore()
     } else {
       renderDots(floralia.insideDots, 0.35)
-      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
-      renderDots(floralia.insideDots, 0.35)
-      ctx.restore()
     }
 
     ctx.restore()
