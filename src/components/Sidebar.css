@@ -273,7 +273,7 @@
 .ttrack {
   position: absolute;
   inset: 0;
-  background: var(--input-bg);
+  background: var(--toggle-inactive, var(--input-bg));
   border: 1px solid var(--border);
   border-radius: 9px;
   cursor: pointer;

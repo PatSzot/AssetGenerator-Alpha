@@ -16,7 +16,8 @@
   --logo:      #00ff64;
   --accent:        #00ff64;   /* neon: used for bg fills & active borders      */
   --accent-hv:     #00dc55;
-  --toggle-active: #000d05;
+  --toggle-active:   #000d05;
+  --toggle-inactive: #002910;
   --dot:       rgba(255,255,255,0.07);
 
   background: var(--bg);
