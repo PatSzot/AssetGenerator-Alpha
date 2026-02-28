@@ -13,9 +13,10 @@ const MODE_LABELS = {
 }
 
 const TEMPLATES = [
-  { value: 'quote',     label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg' },
-  { value: 'richquote', label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'  },
-  { value: 'twitter',   label: 'Twitter Post', icon: '/Icon-Twitter.jpg'    },
+  { value: 'quote',     label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg'  },
+  { value: 'richquote', label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'   },
+  { value: 'titlecard', label: 'Title Card',   icon: '/Icon-TitleCard.jpg'   },
+  { value: 'twitter',   label: 'Twitter Post', icon: '/Icon-Twitter.jpg'     },
 ]
 
 const DIMS = [
@@ -246,6 +247,91 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
+        {/* Content — Title Card */}
+        {settings.templateType === 'titlecard' && <>
+          <div className="sec">Content</div>
+
+          <div className="tog-row">
+            <label>Eyebrow</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowEyebrow} onChange={e => update('tcShowEyebrow', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowEyebrow && (
+            <div className="field">
+              <input type="text" value={settings.tcEyebrow} onChange={e => update('tcEyebrow', e.target.value)} />
+            </div>
+          )}
+
+          <div className="tog-row">
+            <label>Serif Title</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowSerifTitle} onChange={e => update('tcShowSerifTitle', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowSerifTitle && (
+            <div className="field">
+              <input type="text" value={settings.tcSerifTitle} onChange={e => update('tcSerifTitle', e.target.value)} />
+            </div>
+          )}
+
+          <div className="tog-row">
+            <label>Sans Title</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowSansTitle} onChange={e => update('tcShowSansTitle', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowSansTitle && (
+            <div className="field">
+              <input type="text" value={settings.tcSansTitle} onChange={e => update('tcSansTitle', e.target.value)} />
+            </div>
+          )}
+
+          <div className="tog-row">
+            <label>Subheadline</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowSubheadline} onChange={e => update('tcShowSubheadline', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowSubheadline && (
+            <div className="field">
+              <input type="text" value={settings.tcSubheadline} onChange={e => update('tcSubheadline', e.target.value)} />
+            </div>
+          )}
+
+          <div className="tog-row">
+            <label>Body</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowBody} onChange={e => update('tcShowBody', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowBody && (
+            <div className="field">
+              <textarea value={settings.tcBody} onChange={e => update('tcBody', e.target.value)} />
+            </div>
+          )}
+
+          <div className="tog-row">
+            <label>CTA</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowCTA} onChange={e => update('tcShowCTA', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+          {settings.tcShowCTA && (
+            <div className="field">
+              <input type="text" value={settings.tcCTAText} onChange={e => update('tcCTAText', e.target.value)} />
+            </div>
+          )}
+
+          <div className="div" />
+        </>}
+
         {/* Content — Twitter Post */}
         {settings.templateType === 'twitter' && <>
           <div className="sec">Tweet Content</div>
@@ -357,7 +443,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {(() => {
           const modes = settings.templateType === 'twitter'
             ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
-            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote: light modes only
+            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote + titlecard: light modes only
           return (
             <div className="mode-grid mode-grid-wide">
               {modes.map(m => (

@@ -5,6 +5,7 @@ import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
+import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -31,6 +32,19 @@ const DEFAULT_SETTINGS = {
   richRoleCompany:  'CMO, Carta',
   richProfileImage:  null,
   richCompanyLogo:   null,
+  // Title Card
+  tcEyebrow:         'Offer ends today',
+  tcShowEyebrow:     true,
+  tcSerifTitle:      'Serif Title',
+  tcShowSerifTitle:  true,
+  tcSansTitle:       'Sans Title',
+  tcShowSansTitle:   true,
+  tcSubheadline:     'Subheadline/Details',
+  tcShowSubheadline: true,
+  tcBody:            '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
+  tcShowBody:        true,
+  tcCTAText:         'See AirOps in Action',
+  tcShowCTA:         true,
   decorationStyle:    'fill',
   decorationRotation: 0,
 }
@@ -79,7 +93,7 @@ export default function App() {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
       // Rich Quote and Quote Block don't support dark modes — reset if switching to them
-      if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
+      if (key === 'templateType' && ['quote', 'richquote', 'titlecard'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
       return next
@@ -122,9 +136,10 @@ export default function App() {
   }, [update])
 
   const draw = useCallback((canvas, s) => {
-    if (s.templateType === 'twitter')    drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
-    else if (s.templateType === 'richquote') drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
-    else                                     drawCanvas(canvas, s, fontsReady)
+    if (s.templateType === 'twitter')         drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'richquote')  drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
+    else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady)
+    else                                      drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
@@ -133,8 +148,9 @@ export default function App() {
     const s  = { ...settings, dims: { w: ew, h: eh } }
     const ec = document.createElement('canvas')
     draw(ec, s)
-    const prefix = settings.templateType === 'twitter' ? 'airops-tweet'
-      : settings.templateType === 'richquote'          ? 'airops-richquote'
+    const prefix = settings.templateType === 'twitter'   ? 'airops-tweet'
+      : settings.templateType === 'richquote'            ? 'airops-richquote'
+      : settings.templateType === 'titlecard'            ? 'airops-titlecard'
       : 'airops-quote'
     const a = document.createElement('a')
     a.download = filename ?? `${prefix}-${settings.colorMode}-${ew}x${eh}.jpg`
@@ -151,6 +167,7 @@ export default function App() {
     ]
     const prefix = settings.templateType === 'twitter'    ? 'airops-tweet'
       : settings.templateType === 'richquote' ? 'airops-richquote'
+      : settings.templateType === 'titlecard' ? 'airops-titlecard'
       : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(

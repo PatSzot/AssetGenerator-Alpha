@@ -281,17 +281,18 @@ export function drawTwitterCanvas(canvas, settings, fontsReady, profileImage, fl
   const footerY = isStory ? boxY + boxH + 40 : ch - guideX - logoH
   // Always clear background behind logo. When decoration is active (either style), snap the
   // fill rect to the dot grid so no dots are partially clipped at its edges.
+  const logoX = guideX + 2
   ctx.fillStyle = bgColor
   if (settings.showFloralia && floralia?.insideDots) {
     const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
     const fy = Math.floor(footerY / stepCanvas) * stepCanvas
     const fh = Math.ceil((footerY + logoH - fy) / stepCanvas) * stepCanvas
     const fw = Math.ceil(logoW / stepCanvas) * stepCanvas
-    ctx.fillRect(guideX, fy, fw, fh)
+    ctx.fillRect(logoX, fy, fw, fh)
   } else {
-    ctx.fillRect(guideX, footerY, logoW, logoH)
+    ctx.fillRect(logoX, footerY, logoW, logoH)
   }
-  ctx.drawImage(logoBmp, guideX, footerY, logoW, logoH)
+  ctx.drawImage(logoBmp, logoX, footerY, logoW, logoH)
 
   // ── CTA pill (right-aligned to guide, bottom-aligned with logo)
   if (showCTA && ctaText) {

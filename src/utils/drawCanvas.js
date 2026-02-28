@@ -205,8 +205,8 @@ export function drawCanvas(canvas, settings, fontsReady) {
     ? ch - padY - Math.max(logoH, 104) + (Math.max(logoH, 104) - logoH) / 2
     : ch - pad - logoH;
   ctx.fillStyle = M.bg;
-  ctx.fillRect(pad, logoY, logoW, logoH);
-  ctx.drawImage(logoBmp, pad, logoY, logoW, logoH);
+  ctx.fillRect(pad + 2, logoY, logoW, logoH);
+  ctx.drawImage(logoBmp, pad + 2, logoY, logoW, logoH);
 
   if (showCTA) {
     drawCtaPill(ctx, cw - pad, ch - padY, ctaText, M.ctaText, sans);
