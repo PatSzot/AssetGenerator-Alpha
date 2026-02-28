@@ -204,9 +204,8 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
       ...contentArgs, nameSz: 120, quoteSzBase: 64, quoteLH: 1.2 })
 
     // Guidelines drawn last — on top of all section fills (matches Figma layer order)
-    const hw = ctx.lineWidth / 2
-    strokeLine(ctx, splitX, 0,          splitX,    ch)       // vertical, full height
-    strokeLine(ctx, splitX, photoH, cw - hw,     photoH)   // horizontal, right half (outer edge at canvas edge)
+    strokeLine(ctx, splitX, 0,      splitX, ch)       // vertical, full height
+    strokeLine(ctx, splitX, photoH, cw,     photoH)   // horizontal, right half
 
   } else if (isStory) {
     // ── Story 9:16: padded content | headshot row | AirOps logo
