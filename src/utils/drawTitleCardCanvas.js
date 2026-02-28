@@ -106,8 +106,14 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   }
   if (tcShowSerifTitle || tcShowSansTitle) {
     let h = 0
-    if (tcShowSerifTitle) h += serifLH
-    if (tcShowSansTitle)  h += sansLH
+    if (tcShowSerifTitle && tcShowSansTitle) {
+      // Paired: serif advances by font-size only (no leading) so the two sit as one title block
+      h = serifSz + sansLH
+    } else if (tcShowSerifTitle) {
+      h = serifLH
+    } else {
+      h = sansLH
+    }
     sections.push({ type: 'title', h })
   }
   if (tcShowSubheadline || tcShowBody) {
@@ -172,7 +178,8 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
         ctx.fillText(tcSerifTitle, cw / 2, ty)
-        ty += serifLH
+        // When paired with sans, advance by font-size only (no leading) for a tight title block
+        ty += tcShowSansTitle ? serifSz : serifLH
       }
       if (tcShowSansTitle) {
         ctx.fillStyle    = M.text
