@@ -1,4 +1,5 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
+import { STIPPLE_COLORS } from './drawFleurons.js'
 
 // Per-mode accent for eyebrow pill border + text (var(--color-3) equivalent)
 const EYEBROW_ACCENT = {
@@ -18,7 +19,7 @@ const DARK_MODES = {
 }
 
 // ── Main renderer
-export function drawTitleCardCanvas(canvas, settings, fontsReady) {
+export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
   const {
     colorMode, dims,
     tcEyebrow         = 'Offer ends today',
@@ -69,6 +70,82 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   // ── Background
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, cw, ch)
+
+  // ── Decoration — floralia placed symmetrically on edges
+  //    Portrait/Square/Story: top-left + top-right corners
+  //    Landscape:             left-centre + right-centre sides
+  if (settings.showFloralia && floralia?.insideDots) {
+    const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
+    const scale    = Math.max(cw, ch) * 1.5
+    const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
+    const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
+    const stepNorm = 0.006
+
+    // Anchor = centre of the LEFT floralia instance
+    const anchorX = 0
+    const anchorY = isLand ? ch / 2 : 0
+    const offX    = anchorX - scale / 2
+    const offY    = anchorY - scale / 2
+    const shiftX  = ((40 - offX) / scale) % stepNorm
+    const shiftY  = ((40 - offY) / scale) % stepNorm
+
+    // Draw dots in current transform (called once per instance)
+    const renderDots = (dots, alpha) => {
+      ctx.fillStyle   = accent
+      ctx.globalAlpha = alpha
+      ctx.beginPath()
+      dots.forEach(({ x, y }) => {
+        const px = offX + (x + shiftX) * scale
+        const py = offY + (y + shiftY) * scale
+        if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+          ctx.moveTo(px + dotR, py)
+          ctx.arc(px, py, dotR, 0, Math.PI * 2)
+        }
+      })
+      ctx.fill()
+      ctx.globalAlpha = 1
+    }
+
+    // Glyph cutouts (inverted style only)
+    const renderGlyphs = () => {
+      ctx.fillStyle    = bg
+      ctx.textBaseline = 'middle'
+      ctx.textAlign    = 'center'
+      floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
+        ctx.font = `${fontSizeNorm * scale}px Floralia`
+        ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
+      })
+      ctx.textAlign    = 'left'
+      ctx.textBaseline = 'top'
+    }
+
+    // Outer rotation around canvas centre (same dial as Twitter template)
+    ctx.save()
+    if (rotAngle !== 0) {
+      ctx.translate(cw / 2, ch / 2)
+      ctx.rotate(rotAngle)
+      ctx.translate(-cw / 2, -ch / 2)
+    }
+
+    if (settings.decorationStyle === 'inverted') {
+      // All dots first, then glyph cutouts on top — keeps order correct for both instances
+      renderDots(floralia.outsideDots, 0.28)
+      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
+      renderDots(floralia.outsideDots, 0.28)
+      ctx.restore()
+      renderGlyphs()
+      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
+      renderGlyphs()
+      ctx.restore()
+    } else {
+      renderDots(floralia.insideDots, 0.35)
+      ctx.save(); ctx.translate(cw, 0); ctx.scale(-1, 1)
+      renderDots(floralia.insideDots, 0.35)
+      ctx.restore()
+    }
+
+    ctx.restore()
+  }
 
   // ── Guidelines — two vertical lines at x=40 and x=cw-40
   const guideX = 40

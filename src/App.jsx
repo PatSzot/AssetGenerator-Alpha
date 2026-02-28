@@ -139,7 +139,7 @@ export default function App() {
   const draw = useCallback((canvas, s) => {
     if (s.templateType === 'twitter')         drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')  drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
-    else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady)
+    else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else                                      drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
