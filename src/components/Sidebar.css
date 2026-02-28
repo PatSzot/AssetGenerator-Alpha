@@ -280,8 +280,8 @@
   transition: background .2s;
 }
 .toggle input:checked + .ttrack {
-  background: #dfeae3;
-  border-color: #dfeae3;
+  background: var(--toggle-active);
+  border-color: var(--toggle-active);
 }
 
 .tthumb {

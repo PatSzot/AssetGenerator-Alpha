@@ -14,8 +14,9 @@
   --hover-bd:  #356045;   /* hover border highlight                        */
   --input-bg:  rgba(0,0,0,0.28);
   --logo:      #00ff64;
-  --accent:    #00ff64;   /* neon: used for bg fills & active borders      */
-  --accent-hv: #00dc55;
+  --accent:        #00ff64;   /* neon: used for bg fills & active borders      */
+  --accent-hv:     #00dc55;
+  --toggle-active: #00ff64;
   --dot:       rgba(255,255,255,0.07);
 
   background: var(--bg);
@@ -34,7 +35,8 @@
   --hover-bd:  #999999;
   --input-bg:  #ffffff;
   --logo:      #141414;
-  --accent:    #006b28;   /* dark green — ~8:1 on white (safe for text)    */
-  --accent-hv: #005220;
+  --accent:        #006b28;   /* dark green — ~8:1 on white (safe for text)    */
+  --accent-hv:     #005220;
+  --toggle-active: #008c44;
   --dot:       rgba(0,0,0,0.07);
 }
