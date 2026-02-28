@@ -38,7 +38,7 @@ const DEFAULT_SETTINGS = {
   // Certificate
   certFullName:      'Firstname Lastname',
   // Title Card
-  tcEyebrow:         'Update',
+  tcEyebrow:         'Deadline extended',
   tcShowEyebrow:     true,
   tcSerifTitle:      'Submit your',
   tcShowSerifTitle:  true,
