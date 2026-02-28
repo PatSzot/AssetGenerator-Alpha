@@ -9,11 +9,12 @@ const EYEBROW_ACCENT = {
 }
 
 // Dark variants — same values as drawTwitterCanvas for consistency
+// eyebrowBg: darkest brand colour in each colorway (matches PHOTO_BG in richquote)
 const DARK_MODES = {
-  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,1)',    logoColor: '#e8f5ee' },
-  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,1)',   logoColor: '#f5e8f2' },
-  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,1)',   logoColor: '#f5f5e0' },
-  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff' },
+  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,1)',    logoColor: '#e8f5ee', eyebrowBg: '#001408' },
+  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,1)',   logoColor: '#f5e8f2', eyebrowBg: '#140006' },
+  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,1)',   logoColor: '#f5f5e0', eyebrowBg: '#0e0e00' },
+  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff', eyebrowBg: '#00000e' },
 }
 
 // ── Main renderer
@@ -60,7 +61,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const lineColor   = isDark ? TM.lineColor   : M.lineColor
   const logoColor   = isDark ? TM.logoColor   : M.text
   const textColor   = isDark ? TM.logoColor   : M.text
-  const eyebrowBg   = isDark ? TM.bg          : '#ffffff'
+  const eyebrowBg   = isDark ? TM.eyebrowBg   : '#ffffff'
   const eyebrowBd   = isDark ? TM.lineColor   : (EYEBROW_ACCENT[colorMode.replace('dark-', '')] ?? EYEBROW_ACCENT['green'])
   const eyebrowTxt  = eyebrowBd
 
