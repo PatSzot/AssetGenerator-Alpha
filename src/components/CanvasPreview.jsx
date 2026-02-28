@@ -6,7 +6,7 @@ const MODE_LABELS = {
   green: 'Green Paper', pink: 'Pink Paper', yellow: 'Yellow Paper', blue: 'Blue Paper',
   'dark-green': 'Dark Green', 'dark-pink': 'Dark Pink', 'dark-yellow': 'Dark Yellow', 'dark-blue': 'Dark Blue',
 }
-const TEMPLATE_LABELS = { quote: 'Quote Block', richquote: 'Rich Quote', titlecard: 'Title Card', twitter: 'Twitter Post' }
+const TEMPLATE_LABELS = { quote: 'Quote Block', richquote: 'Rich Quote', titlecard: 'Title Card', twitter: 'Twitter Post', certificate: 'Certificate' }
 
 export default function CanvasPreview({ settings, fontsReady, draw }) {
   const canvasRef    = useRef(null)

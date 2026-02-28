@@ -13,10 +13,11 @@ const MODE_LABELS = {
 }
 
 const TEMPLATES = [
-  { value: 'quote',     label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg'  },
-  { value: 'richquote', label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'   },
-  { value: 'titlecard', label: 'Title Card',   icon: '/Icon-TitleCard.jpg'   },
-  { value: 'twitter',   label: 'Twitter Post', icon: '/Icon-Twitter.jpg'     },
+  { value: 'quote',       label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg'   },
+  { value: 'richquote',   label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'    },
+  { value: 'titlecard',   label: 'Title Card',   icon: '/Icon-TitleCard.jpg'    },
+  { value: 'twitter',     label: 'Twitter Post', icon: '/Icon-Twitter.jpg'      },
+  { value: 'certificate', label: 'Certificate',  icon: '/Icon-Certificate.jpg'  },
 ]
 
 const DIMS = [
@@ -365,6 +366,55 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
+        {/* Content — Certificate */}
+        {settings.templateType === 'certificate' && <>
+          <div className="sec">Recipient</div>
+
+          <div className="field">
+            <label>First Name</label>
+            <input type="text" value={settings.certFirstName} onChange={e => update('certFirstName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Last Name</label>
+            <input type="text" value={settings.certLastName} onChange={e => update('certLastName', e.target.value)} />
+          </div>
+
+          <div className="div" />
+          <div className="sec">Decoration</div>
+
+          <div className="tog-row">
+            <label>Decoration</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+          {settings.showFloralia && (
+            <div style={{ paddingLeft: 12 }}>
+              <div className="tog-row">
+                <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                <label className="toggle">
+                  <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                  <div className="ttrack" />
+                  <div className="tthumb" />
+                </label>
+              </div>
+              <div className="tog-row">
+                <label>Rotate — {settings.decorationRotation ?? 0}°</label>
+                <RotationDial
+                  value={settings.decorationRotation ?? 0}
+                  onChange={v => update('decorationRotation', v)}
+                />
+              </div>
+              <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+            </div>
+          )}
+
+          <div className="div" />
+        </>}
+
         {/* Content — Twitter Post */}
         {settings.templateType === 'twitter' && <>
           <div className="sec">Tweet Content</div>
@@ -471,47 +521,53 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Color Mode */}
-        <div className="sec">Color Mode</div>
-        {(() => {
-          const modes = ['twitter', 'titlecard'].includes(settings.templateType)
-            ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
-            : ['green', 'pink', 'yellow', 'blue']  // quote + richquote: light modes only
-          return (
-            <div className="mode-grid mode-grid-wide">
-              {modes.map(m => (
-                <button
-                  key={m}
-                  className={`mode-btn mode-${m}${settings.colorMode === m ? ' active' : ''}`}
-                  onClick={() => update('colorMode', m)}
-                >
-                  {MODE_LABELS[m].split(' ')[0]}<br />{MODE_LABELS[m].split(' ')[1]}
-                </button>
-              ))}
-            </div>
-          )
-        })()}
+        {/* Color Mode — hidden for Certificate (fixed dark-green palette) */}
+        {settings.templateType !== 'certificate' && <>
+          <div className="sec">Color Mode</div>
+          {(() => {
+            const modes = ['twitter', 'titlecard'].includes(settings.templateType)
+              ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
+              : ['green', 'pink', 'yellow', 'blue']
+            return (
+              <div className="mode-grid mode-grid-wide">
+                {modes.map(m => (
+                  <button
+                    key={m}
+                    className={`mode-btn mode-${m}${settings.colorMode === m ? ' active' : ''}`}
+                    onClick={() => update('colorMode', m)}
+                  >
+                    {MODE_LABELS[m].split(' ')[0]}<br />{MODE_LABELS[m].split(' ')[1]}
+                  </button>
+                ))}
+              </div>
+            )
+          })()}
+          <div className="div" />
+        </>}
 
-        <div className="div" />
-
-        {/* Export Size */}
+        {/* Export Size — Certificate restricted to 1080×1080 and 1080×1920 */}
         <div className="sec">Export Size</div>
         <div className="dim-grid">
-          {DIMS.map(({ w, h, label, sub }) => (
-            <button
-              key={label}
-              className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
-              onClick={() => update('dims', { w, h })}
-            >
-              {label}<span className="dim-sub">{sub}</span>
-            </button>
-          ))}
+          {DIMS
+            .filter(({ w, h }) => settings.templateType !== 'certificate' || (w === 1080 && (h === 1080 || h === 1920)))
+            .map(({ w, h, label, sub }) => (
+              <button
+                key={label}
+                className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
+                onClick={() => update('dims', { w, h })}
+              >
+                {label}<span className="dim-sub">{sub}</span>
+              </button>
+            ))}
         </div>
 
         <div className="div" />
 
         <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
-        <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
+        {settings.templateType === 'certificate'
+          ? <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1080, 1920), 350) }}>↓ Export Both Sizes</button>
+          : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
+        }
 
       </div>
 

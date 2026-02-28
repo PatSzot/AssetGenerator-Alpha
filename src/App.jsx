@@ -6,6 +6,7 @@ import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
+import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -32,6 +33,9 @@ const DEFAULT_SETTINGS = {
   richRoleCompany:  'CMO, Carta',
   richProfileImage:  null,
   richCompanyLogo:   null,
+  // Certificate
+  certFirstName:     'Firstname',
+  certLastName:      'Lastname',
   // Title Card
   tcEyebrow:         'Offer ends today',
   tcShowEyebrow:     true,
@@ -97,6 +101,12 @@ export default function App() {
       if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
+      // Certificate only supports 1080×1080 and 1080×1920 — reset to square if switching to it
+      if (key === 'templateType' && value === 'certificate') {
+        const { w, h } = next.dims
+        const valid = (w === 1080 && (h === 1080 || h === 1920))
+        if (!valid) next.dims = { w: 1080, h: 1080 }
+      }
       return next
     })
   }, [])
@@ -140,6 +150,7 @@ export default function App() {
     if (s.templateType === 'twitter')         drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')  drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
     else if (s.templateType === 'titlecard')  drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else                                      drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -149,9 +160,10 @@ export default function App() {
     const s  = { ...settings, dims: { w: ew, h: eh } }
     const ec = document.createElement('canvas')
     draw(ec, s)
-    const prefix = settings.templateType === 'twitter'   ? 'airops-tweet'
-      : settings.templateType === 'richquote'            ? 'airops-richquote'
-      : settings.templateType === 'titlecard'            ? 'airops-titlecard'
+    const prefix = settings.templateType === 'twitter'      ? 'airops-tweet'
+      : settings.templateType === 'richquote'              ? 'airops-richquote'
+      : settings.templateType === 'titlecard'              ? 'airops-titlecard'
+      : settings.templateType === 'certificate'            ? 'airops-certificate'
       : 'airops-quote'
     const a = document.createElement('a')
     a.download = filename ?? `${prefix}-${settings.colorMode}-${ew}x${eh}.jpg`
@@ -166,9 +178,10 @@ export default function App() {
       [1080, 1920, 's916'],
       [1920, 1080, 'l169'],
     ]
-    const prefix = settings.templateType === 'twitter'    ? 'airops-tweet'
-      : settings.templateType === 'richquote' ? 'airops-richquote'
-      : settings.templateType === 'titlecard' ? 'airops-titlecard'
+    const prefix = settings.templateType === 'twitter'      ? 'airops-tweet'
+      : settings.templateType === 'richquote'               ? 'airops-richquote'
+      : settings.templateType === 'titlecard'               ? 'airops-titlecard'
+      : settings.templateType === 'certificate'             ? 'airops-certificate'
       : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(

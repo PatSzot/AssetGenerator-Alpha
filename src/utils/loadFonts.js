@@ -9,4 +9,13 @@ export async function loadFonts() {
     new FontFace('Floralia', 'url(/Floralia.ttf)'),
   ];
   await Promise.all(faces.map(async f => { await f.load(); document.fonts.add(f); }));
+
+  // Certificate script fonts (Google Fonts — optional, fail gracefully)
+  const certFaces = [
+    new FontFace('Monsieur La Doulaise', 'url(https://fonts.gstatic.com/s/monsieurladoulaise/v20/_Xmz-GY4rjmCbQfc-aPRaa4pqV340p7EZm5ZyEA242Tz.woff2)'),
+    new FontFace('Mrs Saint Delafield',  'url(https://fonts.gstatic.com/s/mrssaintdelafield/v14/v6-IGZDIOVXH9xtmTZfRagunqBw5WC62QKknL-mYF20.woff2)'),
+  ];
+  await Promise.allSettled(certFaces.map(async f => {
+    try { await f.load(); document.fonts.add(f); } catch (_) {}
+  }));
 }
