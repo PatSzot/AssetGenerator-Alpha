@@ -129,10 +129,10 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
     const stepCanvas = 0.006 * Math.max(cw, ch) * 1.5
     const fy = Math.floor(logoY / stepCanvas) * stepCanvas
     const fh = Math.ceil((logoY + logoH - fy) / stepCanvas) * stepCanvas
-    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas + Math.round(4 * s)
+    const fw = Math.ceil(logoW / stepCanvas) * stepCanvas + Math.round(1 * s)
     ctx.fillRect(leftColX, fy, fw, fh)
   } else {
-    ctx.fillRect(leftColX, logoY, logoW + Math.round(4 * s), logoH)
+    ctx.fillRect(leftColX, logoY, logoW + Math.round(1 * s), logoH)
   }
 
   // "I joined" text — drawn after logo bg so descender isn't clipped by it
@@ -141,7 +141,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.font         = `400 ${ijTextSz}px ${sans}`
   ctx.letterSpacing = `${(-ijTextSz * 0.04).toFixed(2)}px`   // tracking −4%
   ctx.fillStyle    = M.bg
-  ctx.fillRect(leftColX, contentY - Math.round(4 * s), Math.ceil(ctx.measureText('I joined').width), ijLH + Math.round(4 * s))
+  ctx.fillRect(leftColX, contentY - Math.round(1 * s), Math.ceil(ctx.measureText('I joined').width), ijLH + Math.round(1 * s))
   ctx.fillStyle    = M.text
   ctx.fillText('I joined', leftColX, contentY)
   ctx.letterSpacing = '0px'
@@ -150,13 +150,14 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.drawImage(logoBmp, leftColX, logoY, logoW, logoH)
 
   // ── Left column — name / role / hiring (bottom-aligned)
-  const nameSz  = Math.round(76 * s)
-  const nameLH  = Math.round(72 * 0.94 * s)
-  const roleSz  = Math.round(72 * s)
-  const roleLH  = Math.round(72 * 0.94 * s)
-  const hireSz  = Math.round(40 * s)
-  const hireLH  = Math.round(40 * 0.94 * s)
-  const hireGap = Math.round(25 * s)            // Figma: gap-[24.773px]
+  const nameSz      = Math.round(84 * s)
+  const nameLH      = Math.round(80 * 0.94 * s)
+  const roleSz      = Math.round(80 * s)
+  const roleLH      = Math.round(80 * 0.94 * s)
+  const nameRoleGap = Math.round(36 * s)        // gap between name block and role block
+  const hireSz      = Math.round(40 * s)
+  const hireLH      = Math.round(40 * 0.94 * s)
+  const hireGap     = Math.round(25 * s)        // Figma: gap-[24.773px]
 
   // Max text width — left col width minus 24px margin before the photo frame
   const maxTextW = rightColX - leftColX - Math.round(24 * s)
@@ -174,7 +175,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const hiringH       = ijShowHiring ? hireGap + hireLH : 0
   const nameH         = nameLines.length * nameLH
   const roleH         = roleLines.length * roleLH
-  const bottomGroupH  = nameH + roleH + hiringH
+  const bottomGroupH  = nameH + nameRoleGap + roleH + hiringH
   const bottomGroupY  = contentBottom - bottomGroupH
 
   ctx.textBaseline = 'top'
@@ -198,18 +199,18 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.letterSpacing = `${(-roleSz * 0.02).toFixed(2)}px`
   ctx.fillStyle    = M.bg
   roleLines.forEach((line, i) => {
-    ctx.fillRect(leftColX, bottomGroupY + nameH + i * roleLH, Math.ceil(ctx.measureText(line).width), roleLH)
+    ctx.fillRect(leftColX, bottomGroupY + nameH + nameRoleGap + i * roleLH, Math.ceil(ctx.measureText(line).width), roleLH)
   })
   ctx.fillStyle    = M.text
   roleLines.forEach((line, i) => {
-    ctx.fillText(line, leftColX, bottomGroupY + nameH + i * roleLH)
+    ctx.fillText(line, leftColX, bottomGroupY + nameH + nameRoleGap + i * roleLH)
   })
   ctx.letterSpacing = '0px'
 
   // (WE'RE HIRING) — Saans Mono Medium
   if (ijShowHiring) {
     const hireText = "(WE'RE HIRING)"
-    const hireY    = bottomGroupY + nameH + roleH + hireGap
+    const hireY    = bottomGroupY + nameH + nameRoleGap + roleH + hireGap
     ctx.font         = `500 ${hireSz}px ${mono}`
     ctx.letterSpacing = `${(-hireSz * 0.04).toFixed(2)}px`  // tracking −4%
     ctx.fillStyle    = M.bg

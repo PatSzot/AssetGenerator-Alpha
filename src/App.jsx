@@ -38,13 +38,13 @@ const DEFAULT_SETTINGS = {
   // Certificate
   certFullName:      'Firstname Lastname',
   // Title Card
-  tcEyebrow:         'Reminder',
+  tcEyebrow:         'Update',
   tcShowEyebrow:     true,
-  tcSerifTitle:      'Submit your workflow',
+  tcSerifTitle:      'Submit your',
   tcShowSerifTitle:  true,
-  tcSansTitle:       'Deadline extended',
+  tcSansTitle:       'workflow',
   tcShowSansTitle:   true,
-  tcEmphasizeSans:   false,
+  tcEmphasizeSans:   true,
   tcSubheadline:     'Friday @7pm EST',
   tcShowSubheadline: true,
   tcBody:            '\u201CLLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google.\u201D',
