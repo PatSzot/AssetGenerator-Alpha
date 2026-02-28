@@ -1,11 +1,17 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 
-// Photo bg — same treatment as I Joined: #002910 base + lighten blend across all colorways
-const PHOTO_BG = '#002910'
+// Per-colorway dark photo bg — same depth/weight as I Joined's #002910 green,
+// applied as the equivalent darkest brand tint in each hue family
+const PHOTO_BG = {
+  green:  '#002910',
+  pink:   '#290014',
+  yellow: '#191900',
+  blue:   '#000429',
+}
 
 // ── Draw photo region: dark bg + stipple image via lighten blend (matches I Joined)
-function drawPhotoSection(ctx, profileImage, x, y, w, h) {
-  ctx.fillStyle = PHOTO_BG
+function drawPhotoSection(ctx, profileImage, x, y, w, h, colorMode) {
+  ctx.fillStyle = PHOTO_BG[colorMode] ?? '#002910'
   ctx.fillRect(x, y, w, h)
 
   if (!profileImage) return
@@ -195,7 +201,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const logoPanelH = 203
     const photoH     = ch - logoPanelH
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH)
+    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 53,
       ...contentArgs, nameSz: 120, quoteSzBase: 64, quoteLH: 1.2 })
@@ -212,7 +218,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const splitX       = Math.round(cw / 2)
     const rowY         = topPad + contentH
 
-    drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH)
+    drawPhotoSection(ctx, profileImage, 0, rowY, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, rowY, splitX, headshotRowH, M)
     drawContent(ctx, { x: 0, y: topPad, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
@@ -237,7 +243,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const contentH     = ch - headshotRowH
     const splitX       = Math.round(cw / 2)
 
-    drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH)
+    drawPhotoSection(ctx, profileImage, 0, contentH, splitX, headshotRowH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, contentH, splitX, headshotRowH, M)
     drawContent(ctx, { x: 0, y: 0, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
@@ -252,7 +258,7 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     const logoPanelH = 158
     const photoH     = ch - logoPanelH
 
-    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH)
+    drawPhotoSection(ctx, profileImage, splitX, 0, splitX, photoH, colorMode)
     drawLogoSection(ctx, companyLogoImage, splitX, photoH, splitX, logoPanelH, M)
     drawContent(ctx, { x: 0, y: 0, w: splitX, h: ch, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
