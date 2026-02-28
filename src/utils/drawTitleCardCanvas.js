@@ -180,6 +180,16 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
   const bodyLines  = wrapText(ctx, tcBody, bodyMaxW)
   const bodyTotalH = bodyLines.length * subLH
 
+  // ── Pre-wrap headlines to max width (1px inside each guideline)
+  const headlineMaxW = cw - guideX * 2 - 2
+  ctx.font = `400 ${serifSz}px ${serif}`
+  ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
+  const serifLines = tcShowSerifTitle ? wrapText(ctx, tcSerifTitle, headlineMaxW) : []
+  ctx.font = `400 ${sansSz}px ${sans}`
+  ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
+  const sansLines = tcShowSansTitle ? wrapText(ctx, tcSansTitle, headlineMaxW) : []
+  ctx.letterSpacing = '0px'
+
   // ── Build visible sections and compute total text-group height
   const GAP_SECTION = 24  // gap-[24px] between eyebrow / title / sub
   const GAP_SUB     = 8   // gap-[8px] between subheadline and body
@@ -193,11 +203,11 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     let h = 0
     if (tcShowSerifTitle && tcShowSansTitle) {
       // Paired: serif advances by font-size only (no leading) so the two sit as one title block
-      h = serifSz + sansLH
+      h = serifLines.length * serifSz + sansLines.length * sansLH
     } else if (tcShowSerifTitle) {
-      h = serifLH
+      h = serifLines.length * serifLH
     } else {
-      h = sansLH
+      h = sansLines.length * sansLH
     }
     sections.push({ type: 'title', h })
   }
@@ -261,23 +271,27 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
       if (tcShowSerifTitle) {
         ctx.font         = `400 ${serifSz}px ${serif}`
         ctx.letterSpacing = `${(-serifSz * 0.02).toFixed(2)}px`
-        const sTW = ctx.measureText(tcSerifTitle).width
-        ctx.fillStyle = bg
-        ctx.fillRect(Math.round(cw / 2 - sTW / 2), ty, Math.ceil(sTW), Math.ceil(serifLH))
-        ctx.fillStyle    = headlineColor
-        ctx.fillText(tcSerifTitle, cw / 2, ty)
-        // When paired with sans, advance by font-size only (no leading) for a tight title block
-        ty += tcShowSansTitle ? serifSz : serifLH
+        const lineAdv = tcShowSansTitle ? serifSz : serifLH
+        serifLines.forEach((line, i) => {
+          const lTW = ctx.measureText(line).width
+          ctx.fillStyle = bg
+          ctx.fillRect(Math.round(cw / 2 - lTW / 2), ty + i * lineAdv, Math.ceil(lTW), Math.ceil(lineAdv))
+          ctx.fillStyle = headlineColor
+          ctx.fillText(line, cw / 2, ty + i * lineAdv)
+        })
+        ty += serifLines.length * lineAdv
       }
       if (tcShowSansTitle) {
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
-        const sTW = ctx.measureText(tcSansTitle).width
-        ctx.fillStyle = bg
-        ctx.fillRect(Math.round(cw / 2 - sTW / 2), ty, Math.ceil(sTW), Math.ceil(sansLH))
-        ctx.fillStyle    = headlineColor
-        ctx.fillText(tcSansTitle, cw / 2, ty)
-        ty += sansLH
+        sansLines.forEach((line, i) => {
+          const lTW = ctx.measureText(line).width
+          ctx.fillStyle = bg
+          ctx.fillRect(Math.round(cw / 2 - lTW / 2), ty + i * sansLH, Math.ceil(lTW), Math.ceil(sansLH))
+          ctx.fillStyle = headlineColor
+          ctx.fillText(line, cw / 2, ty + i * sansLH)
+        })
+        ty += sansLines.length * sansLH
       }
       ctx.textAlign    = 'left'
       ctx.letterSpacing = '0px'
