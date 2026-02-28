@@ -6,11 +6,13 @@ const CANVAS_BG = '#000d05'
 export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage) {
   const {
     dims,
+    colorMode    = 'green',
     certFullName = 'Firstname Lastname',
   } = settings
 
   const { w: cw, h: ch } = dims
-  const dpr = settings.dpr ?? 1
+  const dpr    = settings.dpr ?? 1
+  const isLand = cw > ch
 
   canvas.width  = cw * dpr
   canvas.height = ch * dpr
@@ -24,7 +26,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   ctx.fillStyle = CANVAS_BG
   ctx.fillRect(0, 0, cw, ch)
 
-  // Floralia (identical to Twitter template, always green accent)
+  // Decoration — exact same logic as Twitter template
   if (settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     if (rotAngle !== 0) {
@@ -34,22 +36,23 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
       ctx.translate(-cw / 2, -ch / 2)
     }
 
-    const fScale   = Math.max(cw, ch) * 1.5
-    const offX     = (cw - fScale) / 2
-    const offY     = (ch - fScale) / 2
-    const dotR     = Math.max(cw, ch) * 0.0022
-    const accent   = STIPPLE_COLORS['green']
+    const guideX   = 40
+    const scale    = Math.max(cw, ch) * 1.5
+    const offX     = (cw - scale) / 2
+    const offY     = (ch - scale) / 2
+    const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
+    const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
     const stepNorm = 0.006
-    const shiftX   = ((40 - offX) / fScale) % stepNorm
-    const shiftY   = ((40 - offY) / fScale) % stepNorm
+    const shiftX   = ((guideX - offX) / scale) % stepNorm
+    const shiftY   = ((guideX - offY) / scale) % stepNorm
 
-    const drawFloraliaDots = (dots, alpha) => {
+    const drawDots = (dots, alpha) => {
       ctx.fillStyle   = accent
       ctx.globalAlpha = alpha
       ctx.beginPath()
       dots.forEach(({ x, y }) => {
-        const px = offX + (x + shiftX) * fScale
-        const py = offY + (y + shiftY) * fScale
+        const px = offX + (x + shiftX) * scale
+        const py = offY + (y + shiftY) * scale
         if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
           ctx.moveTo(px + dotR, py)
           ctx.arc(px, py, dotR, 0, Math.PI * 2)
@@ -59,8 +62,22 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
       ctx.globalAlpha = 1
     }
 
-    // Draw all dots — no glyph mask, full grid coverage
-    drawFloraliaDots([...floralia.insideDots, ...floralia.outsideDots], 0.35)
+    if (settings.decorationStyle === 'inverted') {
+      drawDots(floralia.outsideDots, 0.28)
+      ctx.fillStyle    = CANVAS_BG
+      ctx.globalAlpha  = 1
+      ctx.textBaseline = 'middle'
+      ctx.textAlign    = 'center'
+      floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
+        ctx.font = `${fontSizeNorm * scale}px Floralia`
+        ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
+      })
+      ctx.textAlign    = 'left'
+      ctx.textBaseline = 'top'
+      ctx.globalAlpha  = 1
+    } else {
+      drawDots(floralia.insideDots, 0.35)
+    }
 
     if (rotAngle !== 0) ctx.restore()
   }
