@@ -9,7 +9,7 @@
 
 /* ── Toolbar */
 .canvas-toolbar {
-  padding: 10px 16px;
+  padding: 16px 16px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
