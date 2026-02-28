@@ -81,23 +81,32 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     const accent   = STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green']
     const stepNorm = 0.006
 
-    // Anchor = centre of the floralia pattern in screen space.
+    // Instance anchors — centre of each floralia pattern in screen space.
     // Nudge inward so ~40% of the glyph is visible rather than just the corner sliver.
-    const anchorX = isLand ? cw * 0.06 : cw * 0.06
-    const anchorY = isLand ? ch / 2    : ch * 0.06
-    const offX    = anchorX - scale / 2
-    const offY    = anchorY - scale / 2
-    const shiftX  = ((40 - offX) / scale) % stepNorm
-    const shiftY  = ((40 - offY) / scale) % stepNorm
+    // Instance 1: top-left corner (portrait/square/story) or left-centre (landscape)
+    // Instance 2: bottom-right corner (portrait/square/story) or right-centre (landscape)
+    const anchorX1 = cw * 0.06
+    const anchorY1 = isLand ? ch / 2 : ch * 0.06
+    const offX1    = anchorX1 - scale / 2
+    const offY1    = anchorY1 - scale / 2
+    const shiftX1  = ((40 - offX1) / scale) % stepNorm
+    const shiftY1  = ((40 - offY1) / scale) % stepNorm
 
-    // Draw dots in current transform (called once per instance)
-    const renderDots = (dots, alpha) => {
+    const anchorX2 = cw * 0.94
+    const anchorY2 = isLand ? ch / 2 : ch * 0.94
+    const offX2    = anchorX2 - scale / 2
+    const offY2    = anchorY2 - scale / 2
+    const shiftX2  = ((cw - 40 - offX2) / scale) % stepNorm
+    const shiftY2  = ((ch - 40 - offY2) / scale) % stepNorm
+
+    // Draw dots in current transform — ox/oy/sx/sy per instance
+    const renderDots = (dots, alpha, ox, oy, sx, sy) => {
       ctx.fillStyle   = accent
       ctx.globalAlpha = alpha
       ctx.beginPath()
       dots.forEach(({ x, y }) => {
-        const px = offX + (x + shiftX) * scale
-        const py = offY + (y + shiftY) * scale
+        const px = ox + (x + sx) * scale
+        const py = oy + (y + sy) * scale
         if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
           ctx.moveTo(px + dotR, py)
           ctx.arc(px, py, dotR, 0, Math.PI * 2)
@@ -108,13 +117,13 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     }
 
     // Glyph cutouts (inverted style only)
-    const renderGlyphs = () => {
+    const renderGlyphs = (ox, oy) => {
       ctx.fillStyle    = bg
       ctx.textBaseline = 'middle'
       ctx.textAlign    = 'center'
       floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
         ctx.font = `${fontSizeNorm * scale}px Floralia`
-        ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
+        ctx.fillText(char, ox + cxNorm * scale, oy + cyNorm * scale)
       })
       ctx.textAlign    = 'left'
       ctx.textBaseline = 'top'
@@ -129,10 +138,13 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     }
 
     if (settings.decorationStyle === 'inverted') {
-      renderDots(floralia.outsideDots, 0.28)
-      renderGlyphs()
+      renderDots(floralia.outsideDots, 0.28, offX1, offY1, shiftX1, shiftY1)
+      renderGlyphs(offX1, offY1)
+      renderDots(floralia.outsideDots, 0.28, offX2, offY2, shiftX2, shiftY2)
+      renderGlyphs(offX2, offY2)
     } else {
-      renderDots(floralia.insideDots, 0.35)
+      renderDots(floralia.insideDots, 0.35, offX1, offY1, shiftX1, shiftY1)
+      renderDots(floralia.insideDots, 0.35, offX2, offY2, shiftX2, shiftY2)
     }
 
     ctx.restore()
