@@ -243,9 +243,10 @@ export function drawRichQuoteCanvas(canvas, settings, fontsReady, profileImage, 
     drawContent(ctx, { x: 0, y: contentY, w: cw, h: contentH, pad: 40,
       ...contentArgs, nameSz: 96, quoteSzBase: 56, quoteLH: 1.14 })
 
-    strokeLine(ctx, 0,      rowY,         cw,     rowY)
-    strokeLine(ctx, splitX, rowY,         splitX, rowY + headshotRowH)
-    strokeLine(ctx, 0,      rowY + headshotRowH, cw, rowY + headshotRowH)
+    // Only draw the horizontal that separates content from headshot row — not the canvas-edge line
+    const divY = richFlip ? rowY + headshotRowH : rowY
+    strokeLine(ctx, 0,      divY, cw,     divY)
+    strokeLine(ctx, splitX, rowY, splitX, rowY + headshotRowH)
 
   } else {
     // ── Square: content | photo+logo  (flip swaps left/right)
