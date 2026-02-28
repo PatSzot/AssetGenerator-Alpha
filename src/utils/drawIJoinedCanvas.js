@@ -121,15 +121,13 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const logoGap  = Math.round(8 * s)
   const logoBmp  = buildLogo(M.logoColor, Math.round(logoH * dpr))
 
-  // Container fill — clears any floralia beneath "I joined"
-  ctx.fillStyle = M.bg
-  ctx.fillRect(leftColX, contentY, colW, ijLH)
-
   ctx.textBaseline = 'top'
   ctx.textAlign    = 'left'
-  ctx.fillStyle    = M.text
   ctx.font         = `400 ${ijTextSz}px ${sans}`
   ctx.letterSpacing = `${(-ijTextSz * 0.04).toFixed(2)}px`   // tracking −4%
+  ctx.fillStyle    = M.bg
+  ctx.fillRect(leftColX, contentY, Math.ceil(ctx.measureText('I joined').width), ijLH)
+  ctx.fillStyle    = M.text
   ctx.fillText('I joined', leftColX, contentY)
   ctx.letterSpacing = '0px'
 
@@ -160,31 +158,35 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const bottomGroupH  = nameLH + roleLH + hiringH
   const bottomGroupY  = contentBottom - bottomGroupH
 
-  // Container fill — clears any floralia beneath name, role and hiring
-  ctx.fillStyle = M.bg
-  ctx.fillRect(leftColX, bottomGroupY, colW, bottomGroupH)
-
-  // Name — Serrif VF
-  ctx.fillStyle    = M.text
+  // Name — Serrif VF (measure first, draw tight bg rect, then text)
   ctx.font         = `400 ${nameSz}px ${serif}`
-  ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`    // tracking −2%
+  ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`
   ctx.textBaseline = 'top'
   ctx.textAlign    = 'left'
+  ctx.fillStyle    = M.bg
+  ctx.fillRect(leftColX, bottomGroupY, Math.ceil(ctx.measureText(ijName).width), nameLH)
+  ctx.fillStyle    = M.text
   ctx.fillText(ijName, leftColX, bottomGroupY)
   ctx.letterSpacing = '0px'
 
   // Role — Saans
   ctx.font         = `400 ${roleSz}px ${sans}`
   ctx.letterSpacing = `${(-roleSz * 0.02).toFixed(2)}px`
+  ctx.fillStyle    = M.bg
+  ctx.fillRect(leftColX, bottomGroupY + nameLH, Math.ceil(ctx.measureText(ijRole).width), roleLH)
+  ctx.fillStyle    = M.text
   ctx.fillText(ijRole, leftColX, bottomGroupY + nameLH)
   ctx.letterSpacing = '0px'
 
   // (WE'RE HIRING) — Saans Mono Medium
   if (ijShowHiring) {
+    const hireText = "(WE'RE HIRING)"
     ctx.font         = `500 ${hireSz}px ${mono}`
     ctx.letterSpacing = `${(-hireSz * 0.04).toFixed(2)}px`  // tracking −4%
+    ctx.fillStyle    = M.bg
+    ctx.fillRect(leftColX, bottomGroupY + nameLH + roleLH + hireGap, Math.ceil(ctx.measureText(hireText).width), hireLH)
     ctx.fillStyle    = M.hiringColor
-    ctx.fillText("(WE'RE HIRING)", leftColX, bottomGroupY + nameLH + roleLH + hireGap)
+    ctx.fillText(hireText, leftColX, bottomGroupY + nameLH + roleLH + hireGap)
     ctx.letterSpacing = '0px'
   }
 
