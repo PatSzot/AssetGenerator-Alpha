@@ -222,9 +222,9 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="sec">Content</div>
 
           <div className="tog-row">
-            <label>AirOps Logo</label>
+            <label>Logo &amp; CTA</label>
             <label className="toggle">
-              <input type="checkbox" checked={settings.tcShowLogo} onChange={e => update('tcShowLogo', e.target.checked)} />
+              <input type="checkbox" checked={settings.tcShowLogo} onChange={e => { update('tcShowLogo', e.target.checked); update('tcShowCTA', e.target.checked) }} />
               <div className="ttrack" /><div className="tthumb" />
             </label>
           </div>
@@ -303,15 +303,9 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </div>
           )}
 
-          <div className="tog-row">
-            <label>CTA</label>
-            <label className="toggle">
-              <input type="checkbox" checked={settings.tcShowCTA} onChange={e => update('tcShowCTA', e.target.checked)} />
-              <div className="ttrack" /><div className="tthumb" />
-            </label>
-          </div>
           {settings.tcShowCTA && (
             <div className="field">
+              <label>CTA Text</label>
               <input type="text" value={settings.tcCTAText} onChange={e => update('tcCTAText', e.target.value)} />
             </div>
           )}
