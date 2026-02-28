@@ -150,7 +150,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.drawImage(logoBmp, leftColX, logoY, logoW, logoH)
 
   // ── Left column — name / role / hiring (bottom-aligned)
-  const nameSz  = Math.round(72 * s)
+  const nameSz  = Math.round(76 * s)
   const nameLH  = Math.round(72 * 0.94 * s)
   const roleSz  = Math.round(72 * s)
   const roleLH  = Math.round(72 * 0.94 * s)
@@ -180,27 +180,29 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.textBaseline = 'top'
   ctx.textAlign    = 'left'
 
-  // Name — Serrif VF, one bg rect per line (tight hug)
+  // Name — Serrif VF: all bg rects first, then all text on top so descenders aren't clipped
   ctx.font         = `400 ${nameSz}px ${serif}`
   ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`
+  ctx.fillStyle    = M.bg
   nameLines.forEach((line, i) => {
-    const y = bottomGroupY + i * nameLH
-    ctx.fillStyle = M.bg
-    ctx.fillRect(leftColX, y, Math.ceil(ctx.measureText(line).width), nameLH)
-    ctx.fillStyle = M.text
-    ctx.fillText(line, leftColX, y)
+    ctx.fillRect(leftColX, bottomGroupY + i * nameLH, Math.ceil(ctx.measureText(line).width), nameLH)
+  })
+  ctx.fillStyle    = M.text
+  nameLines.forEach((line, i) => {
+    ctx.fillText(line, leftColX, bottomGroupY + i * nameLH)
   })
   ctx.letterSpacing = '0px'
 
-  // Role — Saans, one bg rect per line
+  // Role — Saans: same two-pass approach
   ctx.font         = `400 ${roleSz}px ${sans}`
   ctx.letterSpacing = `${(-roleSz * 0.02).toFixed(2)}px`
+  ctx.fillStyle    = M.bg
   roleLines.forEach((line, i) => {
-    const y = bottomGroupY + nameH + i * roleLH
-    ctx.fillStyle = M.bg
-    ctx.fillRect(leftColX, y, Math.ceil(ctx.measureText(line).width), roleLH)
-    ctx.fillStyle = M.text
-    ctx.fillText(line, leftColX, y)
+    ctx.fillRect(leftColX, bottomGroupY + nameH + i * roleLH, Math.ceil(ctx.measureText(line).width), roleLH)
+  })
+  ctx.fillStyle    = M.text
+  roleLines.forEach((line, i) => {
+    ctx.fillText(line, leftColX, bottomGroupY + nameH + i * roleLH)
   })
   ctx.letterSpacing = '0px'
 
