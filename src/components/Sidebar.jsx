@@ -252,6 +252,14 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="sec">Content</div>
 
           <div className="tog-row">
+            <label>AirOps Logo</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.tcShowLogo} onChange={e => update('tcShowLogo', e.target.checked)} />
+              <div className="ttrack" /><div className="tthumb" />
+            </label>
+          </div>
+
+          <div className="tog-row">
             <label>Eyebrow</label>
             <label className="toggle">
               <input type="checkbox" checked={settings.tcShowEyebrow} onChange={e => update('tcShowEyebrow', e.target.checked)} />

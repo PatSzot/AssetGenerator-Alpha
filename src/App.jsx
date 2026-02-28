@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
   tcShowSubheadline: true,
   tcBody:            '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
   tcShowBody:        true,
+  tcShowLogo:        true,
   tcCTAText:         'See AirOps in Action',
   tcShowCTA:         true,
   decorationStyle:    'fill',

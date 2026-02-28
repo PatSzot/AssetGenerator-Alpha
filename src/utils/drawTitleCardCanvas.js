@@ -32,6 +32,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     tcShowBody        = true,
     tcCTAText         = 'See AirOps in Action',
     tcShowCTA         = true,
+    tcShowLogo        = true,
   } = settings
 
   const { w: cw, h: ch } = dims
@@ -81,9 +82,11 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
   const logoPadT = isStory ? 360 : guideX
   const logoX    = Math.round((cw - logoW) / 2)
   const logoY    = logoPadT
-  ctx.fillStyle = bg
-  ctx.fillRect(logoX, logoY, logoW, logoH)
-  ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
+  if (tcShowLogo) {
+    ctx.fillStyle = bg
+    ctx.fillRect(logoX, logoY, logoW, logoH)
+    ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
+  }
 
   // ── CTA zone geometry (used for text group centering regardless of visibility)
   const ctaH    = 104
@@ -146,7 +149,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady) {
     + Math.max(0, sections.length - 1) * GAP_SECTION
 
   // Center the text group between logo bottom and CTA top (or bottom pad if no CTA)
-  const zoneTop = logoY + logoH
+  const zoneTop = tcShowLogo ? logoY + logoH : logoPadT
   const zoneBot = tcShowCTA ? ctaTopY : ch - ctaPadB
   let ty = Math.round((zoneTop + zoneBot) / 2 - totalGroupH / 2)
 
