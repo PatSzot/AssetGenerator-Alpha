@@ -267,6 +267,15 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <input type="text" value={settings.tcSansTitle} onChange={e => update('tcSansTitle', e.target.value)} />
             </div>
           )}
+          {settings.tcShowSansTitle && (
+            <div className="tog-row">
+              <label>Emphasize Sans</label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.tcEmphasizeSans ?? false} onChange={e => update('tcEmphasizeSans', e.target.checked)} />
+                <div className="ttrack" /><div className="tthumb" />
+              </label>
+            </div>
+          )}
 
           <div className="tog-row">
             <label>Subheadline</label>

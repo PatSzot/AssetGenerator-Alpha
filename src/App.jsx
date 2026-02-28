@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
   tcShowSerifTitle:  true,
   tcSansTitle:       'Deadline extended',
   tcShowSansTitle:   true,
+  tcEmphasizeSans:   false,
   tcSubheadline:     'Friday @7pm EST',
   tcShowSubheadline: true,
   tcBody:            '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',

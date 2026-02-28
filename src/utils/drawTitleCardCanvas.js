@@ -9,6 +9,18 @@ const EYEBROW_ACCENT = {
   blue:   '#0014a8',
 }
 
+// Emphasis colours for sans headline — light: medium brand accent, dark: neon/fluorescent
+const EMPHASIZE_COLOR = {
+  'green':       '#008c44',
+  'pink':        '#8c0044',
+  'yellow':      '#7a7200',
+  'blue':        '#0014a8',
+  'dark-green':  '#00ff64',
+  'dark-pink':   '#ff00a0',
+  'dark-yellow': '#e6ff00',
+  'dark-blue':   '#6464ff',
+}
+
 // Dark variants — same values as drawTwitterCanvas for consistency
 // eyebrowBg: darkest brand colour in each colorway (matches PHOTO_BG in richquote)
 const DARK_MODES = {
@@ -28,6 +40,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
     tcShowSerifTitle  = true,
     tcSansTitle       = 'Sans Title',
     tcShowSansTitle   = true,
+    tcEmphasizeSans   = false,
     tcSubheadline     = 'Subheadline/Details',
     tcShowSubheadline = true,
     tcBody            = '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
@@ -62,7 +75,8 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
   const lineColor   = isDark ? TM.lineColor   : M.lineColor
   const logoColor   = isDark ? TM.logoColor   : M.text
   const textColor     = isDark ? TM.logoColor : M.text
-  const headlineColor = isDark ? M.bg         : M.text  // one step lighter in dark modes
+  const headlineColor  = isDark ? M.bg         : M.text  // one step lighter in dark modes
+  const sansColor      = tcEmphasizeSans ? (EMPHASIZE_COLOR[colorMode] ?? EMPHASIZE_COLOR['green']) : headlineColor
   const eyebrowBg   = isDark ? TM.eyebrowBg   : '#ffffff'
   const eyebrowBd   = isDark ? TM.lineColor   : (EYEBROW_ACCENT[colorMode.replace('dark-', '')] ?? EYEBROW_ACCENT['green'])
   const eyebrowTxt  = eyebrowBd
@@ -303,7 +317,7 @@ export function drawTitleCardCanvas(canvas, settings, fontsReady, floralia) {
       if (tcShowSansTitle) {
         ctx.font         = `400 ${sansSz}px ${sans}`
         ctx.letterSpacing = `${(-sansSz * 0.02).toFixed(2)}px`
-        ctx.fillStyle = headlineColor
+        ctx.fillStyle = sansColor
         sansLines.forEach((line, i) => ctx.fillText(line, cw / 2, sansTy + i * sansLH))
         ty += sansLines.length * sansLH
       }
