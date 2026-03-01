@@ -31,10 +31,16 @@
 }
 
 .sidebar-gtmgen {
-  height: 16px;
-  width: auto;
   display: block;
-  color: var(--logo);
+  height: 18px;
+  width: 111px;
+  background-color: #000d05;
+  -webkit-mask-image: url('/GTMGen-Logo.svg');
+  mask-image: url('/GTMGen-Logo.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 /* ── Body */
