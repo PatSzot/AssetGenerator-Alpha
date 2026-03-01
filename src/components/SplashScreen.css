@@ -17,5 +17,10 @@
 
 .splash-lottie {
   width: 100%;
-  height: 100%;
+  height: 100vh;
+}
+
+.splash-lottie svg {
+  width: 100% !important;
+  height: 100% !important;
 }
