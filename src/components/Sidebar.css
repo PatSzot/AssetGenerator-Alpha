@@ -34,7 +34,7 @@
   display: block;
   height: 25px;
   width: 155px;
-  background-color: #000d05;
+  background-color: var(--logo);
   -webkit-mask-image: url('/GTMGen-Logo.svg');
   mask-image: url('/GTMGen-Logo.svg');
   -webkit-mask-repeat: no-repeat;
