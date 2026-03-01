@@ -58,6 +58,13 @@
   border-color: var(--accent);
 }
 
+.toolbar-logo {
+  height: 20px;
+  width: auto;
+  color: var(--logo);
+  flex-shrink: 0;
+}
+
 /* ── Canvas display area */
 .canvas-wrap {
   flex: 1;
