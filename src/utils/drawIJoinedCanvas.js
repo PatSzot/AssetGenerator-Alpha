@@ -154,7 +154,7 @@ export function drawIJoinedCanvas(canvas, settings, fontsReady, profileImage, fl
   const nameLH      = Math.round(80 * 0.94 * s)
   const roleSz      = Math.round(80 * s)
   const roleLH      = Math.round(80 * 0.94 * s)
-  const nameRoleGap = Math.round(24 * s)        // gap between name block and role block
+  const nameRoleGap = Math.round(14 * s)        // gap between name block and role block
   const hireSz      = Math.round(40 * s)
   const hireLH      = Math.round(40 * 0.94 * s)
   const hireGap     = Math.round(25 * s)        // Figma: gap-[24.773px]
