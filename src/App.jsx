@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import Sidebar from './components/Sidebar'
 import CanvasPreview from './components/CanvasPreview'
+import SplashScreen from './components/SplashScreen'
 import { loadFonts } from './utils/loadFonts'
 import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
@@ -66,6 +67,7 @@ export default function App() {
   const [settings, setSettings]     = useState(DEFAULT_SETTINGS)
   const [fontsReady, setFontsReady] = useState(false)
   const [uiMode, setUiMode]         = useState('light')
+  const [showSplash, setShowSplash] = useState(true)
 
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
@@ -228,6 +230,7 @@ export default function App() {
 
   return (
     <div className={`app${uiMode === 'light' ? ' light' : ''}`}>
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
       <Sidebar
         settings={settings}
         update={update}
