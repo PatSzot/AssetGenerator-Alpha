@@ -32,8 +32,8 @@
 
 .sidebar-gtmgen {
   display: block;
-  height: 18px;
-  width: 111px;
+  height: 21px;
+  width: 130px;
   background-color: #000d05;
   -webkit-mask-image: url('/GTMGen-Logo.svg');
   mask-image: url('/GTMGen-Logo.svg');
