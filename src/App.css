@@ -38,6 +38,7 @@
   --logo:      #141414;
   --accent:        #006b28;   /* dark green — ~8:1 on white (safe for text)    */
   --accent-hv:     #005220;
-  --toggle-active: #dfeae3;
+  --toggle-active:   #dfeae3;
+  --toggle-inactive: #ffffff;
   --dot:       rgba(0,0,0,0.07);
 }
