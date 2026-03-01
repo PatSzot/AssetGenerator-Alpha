@@ -12,7 +12,7 @@ export default function SplashScreen({ onDone }) {
       renderer:   'svg',
       loop:       false,
       autoplay:   true,
-      path:       '/GTMGen-LoadingAnimation.json',
+      path:       '/GTMGrabBagLoadingAnimation.json',
     })
 
     anim.addEventListener('complete', () => {
