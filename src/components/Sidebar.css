@@ -379,6 +379,16 @@
 }
 .btn-clear-photo:hover { color: var(--text); }
 
+/* ── Batch export hint */
+.batch-hint {
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
 /* ── Footer (theme toggle) */
 .sidebar-footer {
   padding: 12px 16px;

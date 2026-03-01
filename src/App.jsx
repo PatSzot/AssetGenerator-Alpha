@@ -12,6 +12,28 @@ import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
+// ── Batch export helpers
+function parseSheetCsvUrl(raw) {
+  const url = raw.trim()
+  // Already a published-to-web CSV URL
+  if (url.includes('output=csv') || url.includes('tqx=out:csv')) return url
+  // Standard share URL — convert to published CSV export
+  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
+  if (!idMatch) return null
+  const id = idMatch[1]
+  const gidMatch = url.match(/[#&?]gid=(\d+)/)
+  const gid = gidMatch ? gidMatch[1] : '0'
+  return `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
+}
+
+function parseCsvNames(csv) {
+  return csv
+    .split('\n')
+    .slice(1)
+    .map(row => row.split(',')[0].replace(/^"|"$/g, '').trim())
+    .filter(Boolean)
+}
+
 const DEFAULT_SETTINGS = {
   templateType:     'quote',
   quote:            '\u201CThe most successful marketing teams in the AI era will be those who build content for how the internet actually works.\u201D',
@@ -38,6 +60,7 @@ const DEFAULT_SETTINGS = {
   richFlip:          false,
   // Certificate
   certFullName:      'Firstname Lastname',
+  batchSheetUrl:     '',
   // Title Card
   tcEyebrow:         'Deadline extended',
   tcShowEyebrow:     true,
@@ -64,10 +87,11 @@ const DEFAULT_SETTINGS = {
 }
 
 export default function App() {
-  const [settings, setSettings]     = useState(DEFAULT_SETTINGS)
-  const [fontsReady, setFontsReady] = useState(false)
-  const [uiMode, setUiMode]         = useState('light')
-  const [showSplash, setShowSplash] = useState(true)
+  const [settings, setSettings]       = useState(DEFAULT_SETTINGS)
+  const [fontsReady, setFontsReady]   = useState(false)
+  const [uiMode, setUiMode]           = useState('light')
+  const [showSplash, setShowSplash]   = useState(true)
+  const [batchExporting, setBatchExporting] = useState(false)
 
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
@@ -228,6 +252,42 @@ export default function App() {
     })
   }, [exportJpeg, settings.colorMode, settings.templateType])
 
+  const handleBatchExport = useCallback(async () => {
+    const csvUrl = parseSheetCsvUrl(settings.batchSheetUrl ?? '')
+    if (!csvUrl) { alert('Please enter a valid Google Sheets URL.'); return }
+
+    setBatchExporting(true)
+    try {
+      const res = await fetch(csvUrl)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const text = await res.text()
+      const names = parseCsvNames(text)
+      if (names.length === 0) { alert('No names found. Make sure Column A has names starting from row 2.'); return }
+
+      const JSZip = (await import('jszip')).default
+      const zip   = new JSZip()
+
+      for (const name of names) {
+        const s  = { ...settings, certFullName: name }
+        const ec = document.createElement('canvas')
+        draw(ec, s)
+        const base64 = ec.toDataURL('image/jpeg', 0.95).split(',')[1]
+        zip.file(`certificate-${name.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`, base64, { base64: true })
+      }
+
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const a    = document.createElement('a')
+      a.download = 'certificates.zip'
+      a.href     = URL.createObjectURL(blob)
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch (e) {
+      alert('Could not fetch the sheet. Make sure it is published to web as CSV (File → Share → Publish to web → CSV).')
+    } finally {
+      setBatchExporting(false)
+    }
+  }, [settings, draw])
+
   return (
     <div className={`app${uiMode === 'light' ? ' light' : ''}`}>
       {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
@@ -244,6 +304,8 @@ export default function App() {
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
         onRefleuron={handleRefleuron}
+        onBatchExport={handleBatchExport}
+        batchExporting={batchExporting}
       />
       <CanvasPreview
         settings={settings}

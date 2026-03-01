@@ -30,7 +30,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -619,6 +619,31 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           ? null
           : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
         }
+
+        {/* ── Batch Export (certificates only) */}
+        {settings.templateType === 'certificate' && <>
+          <div className="div" />
+          <div className="sec">Batch Export</div>
+          <p className="batch-hint">
+            In Google Sheets: File → Share → Publish to web → select CSV → publish. Paste the URL below. Column A = recipient name, row 1 = header (skipped).
+          </p>
+          <div className="field">
+            <label>Sheet URL</label>
+            <input
+              type="text"
+              placeholder="https://docs.google.com/spreadsheets/..."
+              value={settings.batchSheetUrl ?? ''}
+              onChange={e => update('batchSheetUrl', e.target.value)}
+            />
+          </div>
+          <button
+            className="btn-ex"
+            onClick={onBatchExport}
+            disabled={!settings.batchSheetUrl || batchExporting}
+          >
+            {batchExporting ? 'Generating…' : '↓ Batch Export ZIP'}
+          </button>
+        </>}
 
       </div>
 
