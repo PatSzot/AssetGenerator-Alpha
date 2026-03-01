@@ -15,7 +15,7 @@
 
 /* ── Header */
 .sidebar-header {
-  padding: 13px 16px 9px;
+  padding: 12px 16px 12px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   display: flex;
@@ -32,8 +32,8 @@
 
 .sidebar-gtmgen {
   display: block;
-  height: 21px;
-  width: 130px;
+  height: 25px;
+  width: 155px;
   background-color: #000d05;
   -webkit-mask-image: url('/GTMGen-Logo.svg');
   mask-image: url('/GTMGen-Logo.svg');
