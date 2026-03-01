@@ -13,6 +13,9 @@ export default function SplashScreen({ onDone }) {
       loop:       false,
       autoplay:   true,
       path:       '/GTMGrabBagLoadingAnimation.json',
+      rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice',
+      },
     })
 
     anim.addEventListener('complete', () => {

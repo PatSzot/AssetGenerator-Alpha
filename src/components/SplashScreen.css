@@ -16,8 +16,9 @@
 }
 
 .splash-lottie {
-  width: 100%;
-  height: 100vh;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 .splash-lottie svg {
