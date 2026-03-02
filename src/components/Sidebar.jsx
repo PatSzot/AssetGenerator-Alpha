@@ -30,7 +30,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onBatchExport, batchExporting, highlightActive, highlightStrokes, onToggleHighlight, onUndoStroke, onClearStrokes }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -112,6 +112,24 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <div className="tthumb" />
             </label>
           </div>
+
+          <div className="div" />
+
+          <div className="sec">Highlighter</div>
+          <div className="tog-row">
+            <label>Draw Mode</label>
+            <label className="toggle">
+              <input type="checkbox" checked={!!highlightActive} onChange={onToggleHighlight} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+          {(highlightStrokes?.length > 0) && (
+            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+              <button className="btn-all" style={{ flex: 1 }} onClick={onUndoStroke}>↩ Undo</button>
+              <button className="btn-all" style={{ flex: 1 }} onClick={onClearStrokes}>✕ Clear All</button>
+            </div>
+          )}
 
           <div className="div" />
         </>}

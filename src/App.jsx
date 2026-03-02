@@ -87,11 +87,13 @@ const DEFAULT_SETTINGS = {
 }
 
 export default function App() {
-  const [settings, setSettings]       = useState(DEFAULT_SETTINGS)
-  const [fontsReady, setFontsReady]   = useState(false)
-  const [uiMode, setUiMode]           = useState('light')
-  const [showSplash, setShowSplash]   = useState(true)
+  const [settings, setSettings]             = useState(DEFAULT_SETTINGS)
+  const [fontsReady, setFontsReady]         = useState(false)
+  const [uiMode, setUiMode]                 = useState('light')
+  const [showSplash, setShowSplash]         = useState(true)
   const [batchExporting, setBatchExporting] = useState(false)
+  const [highlightStrokes, setHighlightStrokes] = useState([])
+  const [highlightActive, setHighlightActive]   = useState(false)
 
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
@@ -211,7 +213,26 @@ export default function App() {
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)
-  }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Replay highlight strokes on top (quote block only)
+    if (highlightStrokes.length > 0 && s.templateType === 'quote') {
+      const ctx = canvas.getContext('2d')
+      ctx.save()
+      ctx.globalCompositeOperation = 'multiply'
+      ctx.strokeStyle = 'rgba(255, 213, 0, 0.72)'
+      ctx.lineWidth   = 42
+      ctx.lineCap     = 'round'
+      ctx.lineJoin    = 'round'
+      highlightStrokes.forEach(pts => {
+        if (pts.length < 2) return
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+        ctx.stroke()
+      })
+      ctx.restore()
+    }
+  }, [fontsReady, floraliaReady, highlightStrokes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const exportJpeg = useCallback((w, h, filename) => {
     const ew = w ?? settings.dims.w
@@ -251,6 +272,11 @@ export default function App() {
       )
     })
   }, [exportJpeg, settings.colorMode, settings.templateType])
+
+  const handleStrokeComplete  = useCallback((pts) => setHighlightStrokes(prev => [...prev, pts]), [])
+  const handleUndoStroke      = useCallback(() => setHighlightStrokes(prev => prev.slice(0, -1)), [])
+  const handleClearStrokes    = useCallback(() => setHighlightStrokes([]), [])
+  const handleToggleHighlight = useCallback(() => setHighlightActive(v => !v), [])
 
   const handleBatchExport = useCallback(async () => {
     const csvUrl = parseSheetCsvUrl(settings.batchSheetUrl ?? '')
@@ -306,11 +332,19 @@ export default function App() {
         onRefleuron={handleRefleuron}
         onBatchExport={handleBatchExport}
         batchExporting={batchExporting}
+        highlightActive={highlightActive}
+        highlightStrokes={highlightStrokes}
+        onToggleHighlight={handleToggleHighlight}
+        onUndoStroke={handleUndoStroke}
+        onClearStrokes={handleClearStrokes}
       />
       <CanvasPreview
         settings={settings}
         fontsReady={fontsReady}
         draw={draw}
+        highlightStrokes={highlightStrokes}
+        highlightActive={highlightActive}
+        onStrokeComplete={handleStrokeComplete}
       />
     </div>
   )
