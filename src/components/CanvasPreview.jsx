@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
+import { MODES } from '../utils/drawCanvas'
 import { IJ_MODE_LABELS } from '../utils/drawIJoinedCanvas'
 import './CanvasPreview.css'
 
@@ -8,14 +9,12 @@ const MODE_LABELS = {
 }
 const TEMPLATE_LABELS = { quote: 'Quote Block', richquote: 'Rich Quote', titlecard: 'Title Card', twitter: 'Twitter Post', certificate: 'Certificate', ijoined: 'I Joined' }
 
-export default function CanvasPreview({ settings, fontsReady, draw, highlightStrokes, highlightActive, onStrokeComplete }) {
-  const canvasRef        = useRef(null)
-  const containerRef     = useRef(null)
-  const overlayRef       = useRef(null)
-  const currentStrokeRef = useRef([])
-  const isDrawingRef     = useRef(false)
+export default function CanvasPreview({ settings, fontsReady, draw }) {
+  const canvasRef    = useRef(null)
+  const containerRef = useRef(null)
   const [scale, setScale] = useState(1)
 
+  // Recompute display scale whenever container size or canvas dims change
   const updateScale = useCallback(() => {
     if (!containerRef.current) return
     const { width, height } = containerRef.current.getBoundingClientRect()
@@ -31,6 +30,10 @@ export default function CanvasPreview({ settings, fontsReady, draw, highlightStr
     return () => window.removeEventListener('resize', updateScale)
   }, [updateScale])
 
+  // Redraw at 2× buffer so physical pixels are 1:1 on retina screens.
+  // dpr is passed via settings so draw functions scale the buffer and apply
+  // ctx.scale() — all layout coords stay in 1× px, only the buffer grows.
+  // Pin CSS size to original dims to keep layout correct.
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -40,63 +43,6 @@ export default function CanvasPreview({ settings, fontsReady, draw, highlightStr
     canvas.style.width  = `${w}px`
     canvas.style.height = `${h}px`
   }, [settings, draw])
-
-  // ── Overlay: draws completed strokes + in-progress stroke
-  const drawOverlay = useCallback(() => {
-    const canvas = overlayRef.current
-    if (!canvas) return
-    const { w, h } = settings.dims
-    canvas.width  = Math.round(w * scale)
-    canvas.height = Math.round(h * scale)
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    const all = [
-      ...(highlightStrokes ?? []),
-      ...(currentStrokeRef.current.length > 1 ? [currentStrokeRef.current] : []),
-    ]
-    if (!all.length) return
-
-    ctx.strokeStyle = 'rgba(255, 213, 0, 0.52)'
-    ctx.lineWidth   = 42 * scale
-    ctx.lineCap     = 'round'
-    ctx.lineJoin    = 'round'
-    all.forEach(pts => {
-      if (pts.length < 2) return
-      ctx.beginPath()
-      ctx.moveTo(pts[0].x * scale, pts[0].y * scale)
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * scale, pts[i].y * scale)
-      ctx.stroke()
-    })
-  }, [highlightStrokes, scale, settings.dims])
-
-  useEffect(() => { drawOverlay() }, [drawOverlay])
-
-  // ── Mouse handlers (coords → canvas px space)
-  const getPoint = useCallback((e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale }
-  }, [scale])
-
-  const handleMouseDown = useCallback((e) => {
-    e.preventDefault()
-    isDrawingRef.current     = true
-    currentStrokeRef.current = [getPoint(e)]
-  }, [getPoint])
-
-  const handleMouseMove = useCallback((e) => {
-    if (!isDrawingRef.current) return
-    currentStrokeRef.current = [...currentStrokeRef.current, getPoint(e)]
-    drawOverlay()
-  }, [getPoint, drawOverlay])
-
-  const handleMouseUp = useCallback(() => {
-    if (!isDrawingRef.current) return
-    isDrawingRef.current = false
-    if (currentStrokeRef.current.length > 1) onStrokeComplete?.([...currentStrokeRef.current])
-    currentStrokeRef.current = []
-    drawOverlay()
-  }, [onStrokeComplete, drawOverlay])
 
   const { w, h } = settings.dims
 
@@ -124,21 +70,12 @@ export default function CanvasPreview({ settings, fontsReady, draw, highlightStr
       {/* Canvas display */}
       <div className="canvas-wrap" ref={containerRef}>
         <div
-          className={`canvas-scaler${highlightActive ? ' highlight-active' : ''}`}
+          className="canvas-scaler"
           style={{ width: w * scale, height: h * scale }}
-          onMouseDown={highlightActive ? handleMouseDown : undefined}
-          onMouseMove={highlightActive ? handleMouseMove : undefined}
-          onMouseUp={highlightActive ? handleMouseUp : undefined}
-          onMouseLeave={highlightActive ? handleMouseUp : undefined}
         >
           <canvas
             ref={canvasRef}
             style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}
-          />
-          <canvas
-            ref={overlayRef}
-            className="canvas-overlay"
-            style={{ width: `${Math.round(w * scale)}px`, height: `${Math.round(h * scale)}px` }}
           />
         </div>
       </div>
