@@ -368,24 +368,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             <div className="div" />
 
-            {/* 2 ── Export Size */}
-            <div className="sec">Export Size</div>
-            <div className="dim-grid">
-              {DIMS
-                .filter(({ w, h }) => (w === 1080 && h === 1080) || (w === 1920 && h === 1080))
-                .map(({ w, h, label, sub }) => (
-                  <button
-                    key={label}
-                    className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
-                    onClick={() => update('dims', { w, h })}
-                  >
-                    {label}<span className="dim-sub">{sub}</span>
-                  </button>
-                ))}
-            </div>
-
-            <div className="div" />
-
             {/* 4 ── Batch Export */}
             <div className="sec">Batch Export</div>
             <div className="field">
@@ -495,7 +477,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
               </div>
               <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
-              <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }} style={{ marginTop: 5 }}>↓ Export Both Sizes</button>
               <div className="div" />
             </>}
           </>
