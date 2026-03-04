@@ -30,12 +30,13 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, batchFetching, batchRows, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
   const richLogoInputRef    = useRef(null)
   const ijPhotoInputRef     = useRef(null)
+  const batchCsvInputRef    = useRef(null)
 
   return (
     <div className="sidebar">
@@ -635,11 +636,31 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
           <div className="sec">Batch Export</div>
           <p className="batch-hint">
-            Paste a CSV URL (AirOps grid export, Google Sheets published CSV, etc.). Needs columns: First Name, Last Name, Cohort Date.
+            Export your AirOps grid as CSV, then upload below. Needs columns: First Name, Last Name, Cohort Date.
           </p>
 
+          {/* CSV file upload */}
+          <input
+            ref={batchCsvInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = ev => onBatchCsvUpload(ev.target.result)
+              reader.readAsText(file)
+              e.target.value = ''
+            }}
+          />
+          <button className="btn-ex" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 5 }}>
+            ↑ Upload CSV
+          </button>
+
+          {/* URL fallback */}
+          <p className="batch-hint" style={{ margin: '4px 0' }}>or fetch from a public CSV URL</p>
           <div className="field">
-            <label>CSV URL</label>
             <input
               type="text"
               placeholder="https://..."
@@ -648,16 +669,16 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             />
           </div>
           <button
-            className="btn-ex"
+            className="btn-all"
             onClick={onFetchBatch}
             disabled={!settings.batchSheetUrl || batchFetching}
-            style={{ marginBottom: 5 }}
+            style={{ marginBottom: 8 }}
           >
-            {batchFetching ? 'Fetching…' : 'Fetch'}
+            {batchFetching ? 'Fetching…' : 'Fetch from URL'}
           </button>
 
           {batchRows !== null && (
-            <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)' }}>
+            <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
               {batchRows.length > 0
                 ? `✓ ${batchRows.length} recipients loaded`
                 : '✕ No rows found — check column names'}

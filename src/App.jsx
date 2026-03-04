@@ -14,18 +14,25 @@ import './App.css'
 
 // ── Batch export helpers
 
-// Normalise a Google Sheets share/edit URL to its published CSV export URL.
-// Any other URL is returned as-is (raw CSV links, AirOps exports, etc.)
+// Returns { url, error } — error is a string if the URL can't be fetched as CSV
 function normaliseSheetUrl(raw) {
   const url = raw.trim()
-  if (!url) return null
-  if (url.includes('output=csv') || url.includes('tqx=out:csv')) return url
+  if (!url) return { url: null, error: null }
+
+  // Block AirOps app UI URLs — these return HTML, not CSV
+  if (/app\.airops\.com\/.+\/grids\//.test(url)) {
+    return { url: null, error: 'airops-app-url' }
+  }
+
+  // Google Sheets share/edit URL → published CSV export
   const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
-  if (!idMatch) return url  // return raw URL unchanged
-  const id = idMatch[1]
-  const gidMatch = url.match(/[#&?]gid=(\d+)/)
-  const gid = gidMatch ? gidMatch[1] : '0'
-  return `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
+  if (idMatch) {
+    const id = idMatch[1]
+    const gid = (url.match(/[#&?]gid=(\d+)/) ?? [])[1] ?? '0'
+    return { url: `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`, error: null }
+  }
+
+  return { url, error: null }
 }
 
 // Parse a single CSV line respecting quoted fields
@@ -300,7 +307,11 @@ export default function App() {
   }, [exportJpeg, settings.colorMode, settings.templateType])
 
   const handleFetchBatch = useCallback(async () => {
-    const url = normaliseSheetUrl(settings.batchSheetUrl ?? '')
+    const { url, error } = normaliseSheetUrl(settings.batchSheetUrl ?? '')
+    if (error === 'airops-app-url') {
+      alert('That\'s the AirOps grid page URL — it returns a web page, not data.\n\nIn your grid click Export → Export as CSV, then use the "Upload CSV" button to load the file directly.')
+      return
+    }
     if (!url) { alert('Please enter a CSV URL.'); return }
     setBatchFetching(true)
     try {
@@ -315,6 +326,11 @@ export default function App() {
       setBatchFetching(false)
     }
   }, [settings.batchSheetUrl])
+
+  const handleBatchCsvUpload = useCallback((text) => {
+    const rows = parseCsvRows(text)
+    setBatchRows(rows)
+  }, [])
 
   const handleBatchExport = useCallback(async () => {
     if (!batchRows?.length) return
@@ -366,6 +382,7 @@ export default function App() {
         onIJProfileImageChange={handleIJProfileImageChange}
         onRefleuron={handleRefleuron}
         onFetchBatch={handleFetchBatch}
+        onBatchCsvUpload={handleBatchCsvUpload}
         batchFetching={batchFetching}
         batchRows={batchRows}
         onBatchExport={handleBatchExport}
