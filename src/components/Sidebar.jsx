@@ -391,7 +391,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               </div>
             )}
             <button
-              className="btn-ex"
+              className="btn-all"
               onClick={onFetchBatch}
               disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
               style={{ marginBottom: 5 }}
