@@ -385,12 +385,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             <div className="div" />
 
-            {/* 3 ── Single export buttons */}
-            <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
-            <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }}>↓ Export Both Sizes</button>
-
-            <div className="div" />
-
             {/* 4 ── Batch Export */}
             <div className="sec">Batch Export</div>
             <div className="field">
@@ -483,6 +477,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 <label>Graduation Date</label>
                 <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
               </div>
+              <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
+              <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }} style={{ marginTop: 5 }}>↓ Export Both Sizes</button>
               <div className="div" />
             </>}
           </>

@@ -410,7 +410,7 @@
   transition: color .15s;
 }
 .sec-collapse:hover { color: var(--text); }
-.sec-collapse-chevron { font-size: 8px; opacity: .6; }
+.sec-collapse-chevron { font-size: 14px; opacity: .6; }
 
 /* ── Footer (theme toggle) */
 .sidebar-footer {
