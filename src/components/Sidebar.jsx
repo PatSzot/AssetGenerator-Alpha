@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { IJ_MODE_LABELS } from '../utils/drawIJoinedCanvas'
 import './Sidebar.css'
 
@@ -37,6 +37,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
   const richLogoInputRef    = useRef(null)
   const ijPhotoInputRef     = useRef(null)
   const batchCsvInputRef    = useRef(null)
+  const [certManualOpen, setCertManualOpen] = useState(false)
 
   return (
     <div className="sidebar">
@@ -338,52 +339,154 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Content — Certificate */}
-        {settings.templateType === 'certificate' && <>
-          <div className="sec">Recipient</div>
-
-          <div className="field">
-            <label>Full Name</label>
-            <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
-          </div>
-
-          <div className="field">
-            <label>Cohort Level</label>
-            <input type="text" value={settings.certCohortLevel ?? ''} onChange={e => update('certCohortLevel', e.target.value)} />
-          </div>
-
-          <div className="field">
-            <label>Graduation Date</label>
-            <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
-          </div>
-
-          <div className="div" />
-          <div className="sec">Decoration</div>
-
-          <div className="tog-row">
-            <label>Decoration</label>
-            <label className="toggle">
-              <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
-              <div className="ttrack" />
-              <div className="tthumb" />
-            </label>
-          </div>
-          {settings.showFloralia && (
-            <div style={{ paddingLeft: 12 }}>
-              <div className="tog-row">
-                <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
-                <label className="toggle">
-                  <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
-                  <div className="ttrack" />
-                  <div className="tthumb" />
-                </label>
-              </div>
-              <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+        {/* Content — Certificate (self-contained: all sections live here) */}
+        {settings.templateType === 'certificate' && (() => {
+          const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
+          return <>
+            {/* 1 ── Decoration */}
+            <div className="sec">Decoration</div>
+            <div className="tog-row">
+              <label>Decoration</label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+                <div className="ttrack" /><div className="tthumb" />
+              </label>
             </div>
-          )}
+            {settings.showFloralia && (
+              <div style={{ paddingLeft: 12 }}>
+                <div className="tog-row">
+                  <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                  <label className="toggle">
+                    <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                    <div className="ttrack" /><div className="tthumb" />
+                  </label>
+                </div>
+                <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+              </div>
+            )}
 
-          <div className="div" />
-        </>}
+            <div className="div" />
+
+            {/* 2 ── Export Size */}
+            <div className="sec">Export Size</div>
+            <div className="dim-grid">
+              {DIMS
+                .filter(({ w, h }) => (w === 1080 && h === 1080) || (w === 1920 && h === 1080))
+                .map(({ w, h, label, sub }) => (
+                  <button
+                    key={label}
+                    className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
+                    onClick={() => update('dims', { w, h })}
+                  >
+                    {label}<span className="dim-sub">{sub}</span>
+                  </button>
+                ))}
+            </div>
+
+            <div className="div" />
+
+            {/* 3 ── Single export buttons */}
+            <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
+            <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }}>↓ Export Both Sizes</button>
+
+            <div className="div" />
+
+            {/* 4 ── Batch Export */}
+            <div className="sec">Batch Export</div>
+            <div className="field">
+              <label>Sheet URL</label>
+              <input
+                type="text"
+                placeholder="https://app.airops.com/… or CSV URL"
+                value={settings.batchSheetUrl ?? ''}
+                onChange={e => update('batchSheetUrl', e.target.value)}
+              />
+            </div>
+            {isAirOps && (
+              <div className="field">
+                <label>AirOps API Key</label>
+                <input
+                  type="password"
+                  placeholder="Paste your API key"
+                  value={airopsApiKey ?? ''}
+                  onChange={e => onSetAiropsApiKey(e.target.value)}
+                />
+              </div>
+            )}
+            <button
+              className="btn-ex"
+              onClick={onFetchBatch}
+              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
+              style={{ marginBottom: 5 }}
+            >
+              {batchFetching ? 'Fetching…' : 'Fetch'}
+            </button>
+            <input
+              ref={batchCsvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onBatchCsvUpload(ev.target.result)
+                reader.readAsText(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-all" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 8 }}>
+              ↑ Upload CSV instead
+            </button>
+            {batchRows !== null && (
+              <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
+                {batchRows.length > 0 ? `✓ ${batchRows.length} recipients loaded` : '✕ No rows found — check column names'}
+              </p>
+            )}
+
+            <div className="div" />
+
+            {/* 5 ── Cohort Type (batch-level) */}
+            <div className="sec">Cohort Type</div>
+            <div className="field">
+              <input
+                type="text"
+                value={settings.certCohortLevel ?? ''}
+                onChange={e => update('certCohortLevel', e.target.value)}
+                placeholder="e.g. Content Engineering"
+              />
+            </div>
+            <button
+              className="btn-ex"
+              onClick={onBatchExport}
+              disabled={!batchRows?.length || batchExporting}
+            >
+              {batchExporting ? 'Generating…' : batchRows?.length ? `↓ Batch Export ZIP (${batchRows.length})` : '↓ Batch Export ZIP'}
+            </button>
+
+            <div className="div" />
+
+            {/* 6 ── Manual Input (collapsible) */}
+            <button className="sec-collapse" onClick={() => setCertManualOpen(v => !v)}>
+              Manual Input <span className="sec-collapse-chevron">{certManualOpen ? '▴' : '▾'}</span>
+            </button>
+            {certManualOpen && <>
+              <div className="field">
+                <label>Full Name</label>
+                <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Cohort Level</label>
+                <input type="text" value={settings.certCohortLevel ?? ''} onChange={e => update('certCohortLevel', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Graduation Date</label>
+                <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
+              </div>
+              <div className="div" />
+            </>}
+          </>
+        })()}
 
         {/* Content — Twitter Post */}
         {settings.templateType === 'twitter' && <>
@@ -601,125 +704,34 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Export Size — Certificate: 1080×1080 / 1080×1920 only · I Joined: 1920×1080 only */}
-        <div className="sec">Export Size</div>
-        <div className="dim-grid">
-          {DIMS
-            .filter(({ w, h }) => {
-              if (settings.templateType === 'certificate') return (w === 1080 && h === 1080) || (w === 1920 && h === 1080)
-              if (settings.templateType === 'ijoined')    return w === 1920 && h === 1080
-              return true
-            })
-            .map(({ w, h, label, sub }) => (
-              <button
-                key={label}
-                className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
-                onClick={() => update('dims', { w, h })}
-              >
-                {label}<span className="dim-sub">{sub}</span>
-              </button>
-            ))}
-        </div>
+        {/* Export Size + buttons — all templates except certificate (handled inside its own block) */}
+        {settings.templateType !== 'certificate' && <>
+          <div className="sec">Export Size</div>
+          <div className="dim-grid">
+            {DIMS
+              .filter(({ w, h }) => {
+                if (settings.templateType === 'ijoined') return w === 1920 && h === 1080
+                return true
+              })
+              .map(({ w, h, label, sub }) => (
+                <button
+                  key={label}
+                  className={`dim-btn${dims.w === w && dims.h === h ? ' active' : ''}`}
+                  onClick={() => update('dims', { w, h })}
+                >
+                  {label}<span className="dim-sub">{sub}</span>
+                </button>
+              ))}
+          </div>
 
-        <div className="div" />
+          <div className="div" />
 
-        <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
-        {settings.templateType === 'certificate'
-          ? <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }}>↓ Export Both Sizes</button>
-          : settings.templateType === 'ijoined'
-          ? null
-          : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
-        }
-
-        {/* ── Batch Export (certificates only) */}
-        {settings.templateType === 'certificate' && (() => {
-          const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
-          return <>
-            <div className="div" />
-            <div className="sec">Batch Export</div>
-
-            <div className="field">
-              <label>Sheet URL</label>
-              <input
-                type="text"
-                placeholder="https://app.airops.com/… or CSV URL"
-                value={settings.batchSheetUrl ?? ''}
-                onChange={e => update('batchSheetUrl', e.target.value)}
-              />
-            </div>
-
-            {isAirOps && (
-              <div className="field">
-                <label>AirOps API Key</label>
-                <input
-                  type="password"
-                  placeholder="Paste your API key"
-                  value={airopsApiKey ?? ''}
-                  onChange={e => onSetAiropsApiKey(e.target.value)}
-                />
-              </div>
-            )}
-
-            <button
-              className="btn-ex"
-              onClick={onFetchBatch}
-              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
-              style={{ marginBottom: 5 }}
-            >
-              {batchFetching ? 'Fetching…' : 'Fetch'}
-            </button>
-
-            {/* CSV file upload fallback */}
-            <input
-              ref={batchCsvInputRef}
-              type="file"
-              accept=".csv,text/csv"
-              style={{ display: 'none' }}
-              onChange={e => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                const reader = new FileReader()
-                reader.onload = ev => onBatchCsvUpload(ev.target.result)
-                reader.readAsText(file)
-                e.target.value = ''
-              }}
-            />
-            <button className="btn-all" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 8 }}>
-              ↑ Upload CSV instead
-            </button>
-
-            {batchRows !== null && (
-              <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
-                {batchRows.length > 0
-                  ? `✓ ${batchRows.length} recipients loaded`
-                  : '✕ No rows found — check column names'}
-              </p>
-            )}
-
-            <div className="div" />
-            <div className="sec">Cohort Type</div>
-            <div className="field">
-              <input
-                type="text"
-                value={settings.certCohortLevel ?? ''}
-                onChange={e => update('certCohortLevel', e.target.value)}
-                placeholder="e.g. Content Engineering"
-              />
-            </div>
-
-            <button
-              className="btn-ex"
-              onClick={onBatchExport}
-              disabled={!batchRows?.length || batchExporting}
-            >
-              {batchExporting
-                ? 'Generating…'
-                : batchRows?.length
-                  ? `↓ Batch Export ZIP (${batchRows.length})`
-                  : '↓ Batch Export ZIP'}
-            </button>
-          </>
-        })()}
+          <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
+          {settings.templateType === 'ijoined'
+            ? null
+            : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
+          }
+        </>}
 
       </div>
 

@@ -215,7 +215,7 @@ export default function App() {
       if (key === 'templateType' && value === 'certificate') {
         const { w, h } = next.dims
         const valid = (w === 1080 && h === 1080) || (w === 1920 && h === 1080)
-        if (!valid) next.dims = { w: 1080, h: 1080 }
+        if (!valid) next.dims = { w: 1920, h: 1080 }
       }
       // I Joined is fixed to 1920×1080
       if (key === 'templateType' && value === 'ijoined') {
