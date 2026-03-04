@@ -370,34 +370,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             {/* 4 ── Batch Export */}
             <div className="sec">Batch Export</div>
-            <div className="field">
-              <label>Sheet URL</label>
-              <input
-                type="text"
-                placeholder="https://app.airops.com/… or CSV URL"
-                value={settings.batchSheetUrl ?? ''}
-                onChange={e => update('batchSheetUrl', e.target.value)}
-              />
-            </div>
-            {isAirOps && (
-              <div className="field">
-                <label>AirOps API Key</label>
-                <input
-                  type="password"
-                  placeholder="Paste your API key"
-                  value={airopsApiKey ?? ''}
-                  onChange={e => onSetAiropsApiKey(e.target.value)}
-                />
-              </div>
-            )}
-            <button
-              className="btn-all"
-              onClick={onFetchBatch}
-              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
-              style={{ marginBottom: 5 }}
-            >
-              {batchFetching ? 'Fetching…' : 'Fetch'}
-            </button>
             <input
               ref={batchCsvInputRef}
               type="file"
@@ -431,6 +403,34 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <span className="csv-dropzone-icon">↑</span>
               <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
             </div>
+            <div className="field">
+              <label>Sheet URL</label>
+              <input
+                type="text"
+                placeholder="https://app.airops.com/… or CSV URL"
+                value={settings.batchSheetUrl ?? ''}
+                onChange={e => update('batchSheetUrl', e.target.value)}
+              />
+            </div>
+            {isAirOps && (
+              <div className="field">
+                <label>AirOps API Key</label>
+                <input
+                  type="password"
+                  placeholder="Paste your API key"
+                  value={airopsApiKey ?? ''}
+                  onChange={e => onSetAiropsApiKey(e.target.value)}
+                />
+              </div>
+            )}
+            <button
+              className="btn-all"
+              onClick={onFetchBatch}
+              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
+              style={{ marginBottom: 5 }}
+            >
+              {batchFetching ? 'Fetching…' : 'Fetch'}
+            </button>
             {batchRows !== null && (
               <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
                 {batchRows.length > 0 ? `✓ ${batchRows.length} recipients loaded` : '✕ No rows found — check column names'}
