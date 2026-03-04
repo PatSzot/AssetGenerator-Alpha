@@ -640,24 +640,21 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
           <div className="field">
             <label>CSV URL</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input
-                type="text"
-                placeholder="https://..."
-                value={settings.batchSheetUrl ?? ''}
-                onChange={e => { update('batchSheetUrl', e.target.value) }}
-                style={{ flex: 1, minWidth: 0 }}
-              />
-              <button
-                className="btn-all"
-                style={{ flexShrink: 0, marginBottom: 0, padding: '8px 10px' }}
-                onClick={onFetchBatch}
-                disabled={!settings.batchSheetUrl || batchFetching}
-              >
-                {batchFetching ? '…' : 'Fetch'}
-              </button>
-            </div>
+            <input
+              type="text"
+              placeholder="https://..."
+              value={settings.batchSheetUrl ?? ''}
+              onChange={e => update('batchSheetUrl', e.target.value)}
+            />
           </div>
+          <button
+            className="btn-ex"
+            onClick={onFetchBatch}
+            disabled={!settings.batchSheetUrl || batchFetching}
+            style={{ marginBottom: 5 }}
+          >
+            {batchFetching ? 'Fetching…' : 'Fetch'}
+          </button>
 
           {batchRows !== null && (
             <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)' }}>
