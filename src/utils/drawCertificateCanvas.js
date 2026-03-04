@@ -104,6 +104,15 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
   const s = cW / 1011.115
 
+  // Center vertical guideline (full canvas height, drawn before image)
+  ctx.strokeStyle = '#008c44'
+  ctx.lineWidth   = 2
+  ctx.beginPath()
+  ctx.moveTo(cw / 2, 0)
+  ctx.lineTo(cw / 2, ch)
+  ctx.stroke()
+  ctx.lineWidth = 1
+
   // Draw certificate image
   if (certImage) {
     ctx.drawImage(certImage, cX, cY, cW, cH)
