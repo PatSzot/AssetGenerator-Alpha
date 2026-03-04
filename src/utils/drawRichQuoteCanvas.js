@@ -1,58 +1,27 @@
 import { MODES, buildLogo, wrapText, smartQuotes } from './drawCanvas.js'
 
-// ── Draw photo region as a halftone stipple:
-// Sample the photo's luminance on a regular grid and draw M.bg circles
-// whose radius is proportional to brightness, over a solid M.ctaText background.
-// Works on any photo — no pre-processing required.
+// ── Draw photo region: darkest brand color per colorway (M.ctaText) + hard-light blend
 function drawPhotoSection(ctx, profileImage, x, y, w, h, M) {
   ctx.fillStyle = M.ctaText
   ctx.fillRect(x, y, w, h)
 
   if (!profileImage) return
 
-  const nw = profileImage.naturalWidth  || w
-  const nh = profileImage.naturalHeight || h
-
-  // Aspect-fill into the section
-  const s  = Math.max(w / nw, h / nh)
-  const iw = nw * s
-  const ih = nh * s
-
-  // Draw image to an offscreen canvas so we can sample pixel luminance
-  const off = document.createElement('canvas')
-  off.width  = w
-  off.height = h
-  const oc   = off.getContext('2d')
-  oc.drawImage(profileImage, (w - iw) / 2, (h - ih) / 2, iw, ih)
-  const { data } = oc.getImageData(0, 0, w, h)
-
-  // Dot grid: spacing ~1.6% of the longer edge gives fine halftone detail
-  const step = Math.max(6, Math.round(Math.max(w, h) * 0.016))
-  const maxR = step * 0.52  // slightly overlapping at max so no gaps
+  // Aspect-fill with a small overscan so JPEG edge artifacts land outside the
+  // clip region and are never visible at the section boundaries.
+  const overscan = 4
+  const s  = Math.max((w + overscan * 2) / (profileImage.naturalWidth  || 1),
+                      (h + overscan * 2) / (profileImage.naturalHeight || 1))
+  const iw = profileImage.naturalWidth  * s
+  const ih = profileImage.naturalHeight * s
 
   ctx.save()
   ctx.beginPath()
   ctx.rect(x, y, w, h)
   ctx.clip()
-
-  ctx.fillStyle = M.bg
-  ctx.beginPath()
-  for (let py = step * 0.5; py < h + step; py += step) {
-    for (let px = step * 0.5; px < w + step; px += step) {
-      const sx  = Math.min(Math.round(px), w - 1)
-      const sy  = Math.min(Math.round(py), h - 1)
-      const idx = (sy * w + sx) * 4
-      const lum = (0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]) / 255
-      const r   = maxR * lum  // bright pixel → large light dot
-      if (r > 0.5) {
-        const cx = x + px
-        const cy = y + py
-        ctx.moveTo(cx + r, cy)
-        ctx.arc(cx, cy, r, 0, Math.PI * 2)
-      }
-    }
-  }
-  ctx.fill()
+  ctx.globalCompositeOperation = 'hard-light'
+  ctx.drawImage(profileImage, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih)
+  ctx.globalCompositeOperation = 'source-over'
   ctx.restore()
 }
 
