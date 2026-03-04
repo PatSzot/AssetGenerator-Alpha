@@ -12,6 +12,14 @@ import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
+// ── URL slug ↔ template type
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined'])
+
+function templateFromPath() {
+  const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
+  return VALID_TEMPLATES.has(slug) ? slug : 'quote'
+}
+
 // ── Batch export helpers
 
 // Parse an AirOps grid URL → { gridId, sheetId } or null
@@ -147,7 +155,7 @@ const DEFAULT_SETTINGS = {
 }
 
 export default function App() {
-  const [settings, setSettings]       = useState(DEFAULT_SETTINGS)
+  const [settings, setSettings]       = useState(() => ({ ...DEFAULT_SETTINGS, templateType: templateFromPath() }))
   const [fontsReady, setFontsReady]   = useState(false)
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(true)
@@ -204,7 +212,17 @@ export default function App() {
     img.src = '/GTMGen-Certificate.jpg'
   }, [])
 
+  // Sync browser back/forward to templateType
+  useEffect(() => {
+    const onPop = () => setSettings(prev => ({ ...prev, templateType: templateFromPath() }))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   const update = useCallback((key, value) => {
+    if (key === 'templateType') {
+      window.history.pushState({}, '', value === 'quote' ? '/' : `/${value}`)
+    }
     setSettings(prev => {
       const next = { ...prev, [key]: value }
       // Rich Quote and Quote Block don't support dark modes — reset if switching to them
