@@ -158,7 +158,7 @@ export default function App() {
   const [settings, setSettings]       = useState(() => ({ ...DEFAULT_SETTINGS, templateType: templateFromPath() }))
   const [fontsReady, setFontsReady]   = useState(false)
   const [uiMode, setUiMode]           = useState('light')
-  const [showSplash, setShowSplash]   = useState(true)
+  const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
   const [batchExporting, setBatchExporting] = useState(false)
   const [batchRows, setBatchRows]         = useState(null)
   const [batchFetching, setBatchFetching] = useState(false)
