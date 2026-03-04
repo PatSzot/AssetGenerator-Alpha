@@ -30,7 +30,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -632,82 +632,94 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         }
 
         {/* ── Batch Export (certificates only) */}
-        {settings.templateType === 'certificate' && <>
-          <div className="div" />
-          <div className="sec">Batch Export</div>
-          <p className="batch-hint">
-            Export your AirOps grid as CSV, then upload below. Needs columns: First Name, Last Name, Cohort Date.
-          </p>
+        {settings.templateType === 'certificate' && (() => {
+          const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
+          return <>
+            <div className="div" />
+            <div className="sec">Batch Export</div>
 
-          {/* CSV file upload */}
-          <input
-            ref={batchCsvInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            style={{ display: 'none' }}
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              const reader = new FileReader()
-              reader.onload = ev => onBatchCsvUpload(ev.target.result)
-              reader.readAsText(file)
-              e.target.value = ''
-            }}
-          />
-          <button className="btn-ex" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 5 }}>
-            ↑ Upload CSV
-          </button>
+            <div className="field">
+              <label>Sheet URL</label>
+              <input
+                type="text"
+                placeholder="https://app.airops.com/… or CSV URL"
+                value={settings.batchSheetUrl ?? ''}
+                onChange={e => update('batchSheetUrl', e.target.value)}
+              />
+            </div>
 
-          {/* URL fallback */}
-          <p className="batch-hint" style={{ margin: '4px 0' }}>or fetch from a public CSV URL</p>
-          <div className="field">
+            {isAirOps && (
+              <div className="field">
+                <label>AirOps API Key</label>
+                <input
+                  type="password"
+                  placeholder="Paste your API key"
+                  value={airopsApiKey ?? ''}
+                  onChange={e => onSetAiropsApiKey(e.target.value)}
+                />
+              </div>
+            )}
+
+            <button
+              className="btn-ex"
+              onClick={onFetchBatch}
+              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
+              style={{ marginBottom: 5 }}
+            >
+              {batchFetching ? 'Fetching…' : 'Fetch'}
+            </button>
+
+            {/* CSV file upload fallback */}
             <input
-              type="text"
-              placeholder="https://..."
-              value={settings.batchSheetUrl ?? ''}
-              onChange={e => update('batchSheetUrl', e.target.value)}
+              ref={batchCsvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onBatchCsvUpload(ev.target.result)
+                reader.readAsText(file)
+                e.target.value = ''
+              }}
             />
-          </div>
-          <button
-            className="btn-all"
-            onClick={onFetchBatch}
-            disabled={!settings.batchSheetUrl || batchFetching}
-            style={{ marginBottom: 8 }}
-          >
-            {batchFetching ? 'Fetching…' : 'Fetch from URL'}
-          </button>
+            <button className="btn-all" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 8 }}>
+              ↑ Upload CSV instead
+            </button>
 
-          {batchRows !== null && (
-            <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
-              {batchRows.length > 0
-                ? `✓ ${batchRows.length} recipients loaded`
-                : '✕ No rows found — check column names'}
-            </p>
-          )}
+            {batchRows !== null && (
+              <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
+                {batchRows.length > 0
+                  ? `✓ ${batchRows.length} recipients loaded`
+                  : '✕ No rows found — check column names'}
+              </p>
+            )}
 
-          <div className="div" />
-          <div className="sec">Cohort Type</div>
-          <div className="field">
-            <input
-              type="text"
-              value={settings.certCohortLevel ?? ''}
-              onChange={e => update('certCohortLevel', e.target.value)}
-              placeholder="e.g. Content Engineering"
-            />
-          </div>
+            <div className="div" />
+            <div className="sec">Cohort Type</div>
+            <div className="field">
+              <input
+                type="text"
+                value={settings.certCohortLevel ?? ''}
+                onChange={e => update('certCohortLevel', e.target.value)}
+                placeholder="e.g. Content Engineering"
+              />
+            </div>
 
-          <button
-            className="btn-ex"
-            onClick={onBatchExport}
-            disabled={!batchRows?.length || batchExporting}
-          >
-            {batchExporting
-              ? 'Generating…'
-              : batchRows?.length
-                ? `↓ Batch Export ZIP (${batchRows.length})`
-                : '↓ Batch Export ZIP'}
-          </button>
-        </>}
+            <button
+              className="btn-ex"
+              onClick={onBatchExport}
+              disabled={!batchRows?.length || batchExporting}
+            >
+              {batchExporting
+                ? 'Generating…'
+                : batchRows?.length
+                  ? `↓ Batch Export ZIP (${batchRows.length})`
+                  : '↓ Batch Export ZIP'}
+            </button>
+          </>
+        })()}
 
       </div>
 

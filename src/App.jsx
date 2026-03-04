@@ -14,25 +14,33 @@ import './App.css'
 
 // ── Batch export helpers
 
-// Returns { url, error } — error is a string if the URL can't be fetched as CSV
+// Parse an AirOps grid URL → { gridId, sheetId } or null
+function parseAirOpsUrl(raw) {
+  const m = raw.trim().match(/app\.airops\.com\/[^/]+\/grids\/(\d+)\/sheets\/(\d+)/)
+  return m ? { gridId: m[1], sheetId: m[2] } : null
+}
+
+// Normalise a Google Sheets URL to its published CSV export URL; returns raw URL for anything else
 function normaliseSheetUrl(raw) {
   const url = raw.trim()
-  if (!url) return { url: null, error: null }
-
-  // Block AirOps app UI URLs — these return HTML, not CSV
-  if (/app\.airops\.com\/.+\/grids\//.test(url)) {
-    return { url: null, error: 'airops-app-url' }
-  }
-
-  // Google Sheets share/edit URL → published CSV export
+  if (!url) return null
   const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
-  if (idMatch) {
-    const id = idMatch[1]
-    const gid = (url.match(/[#&?]gid=(\d+)/) ?? [])[1] ?? '0'
-    return { url: `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`, error: null }
-  }
+  if (!idMatch) return url
+  const id  = idMatch[1]
+  const gid = (url.match(/[#&?]gid=(\d+)/) ?? [])[1] ?? '0'
+  return `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
+}
 
-  return { url, error: null }
+// Parse JSON rows from AirOps API into { firstName, lastName, cohortDate }
+function parseAirOpsRows(rows) {
+  return rows.map(row => {
+    const get = (...keys) => { for (const k of keys) if (row[k] != null) return String(row[k]).trim(); return '' }
+    return {
+      firstName:  get('First Name', 'first name', 'firstname'),
+      lastName:   get('Last Name',  'last name',  'lastname'),
+      cohortDate: get('Cohort Date', 'cohort date', 'graduation date'),
+    }
+  }).filter(r => r.firstName || r.lastName)
 }
 
 // Parse a single CSV line respecting quoted fields
@@ -144,8 +152,9 @@ export default function App() {
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(true)
   const [batchExporting, setBatchExporting] = useState(false)
-  const [batchRows, setBatchRows]     = useState(null)   // null=not fetched, []|[...]=fetched
+  const [batchRows, setBatchRows]         = useState(null)
   const [batchFetching, setBatchFetching] = useState(false)
+  const [airopsApiKey, setAiropsApiKey]   = useState(() => localStorage.getItem('airops-api-key') ?? '')
 
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
@@ -306,26 +315,53 @@ export default function App() {
     })
   }, [exportJpeg, settings.colorMode, settings.templateType])
 
+  const handleSetAiropsApiKey = useCallback((key) => {
+    setAiropsApiKey(key)
+    localStorage.setItem('airops-api-key', key)
+  }, [])
+
   const handleFetchBatch = useCallback(async () => {
-    const { url, error } = normaliseSheetUrl(settings.batchSheetUrl ?? '')
-    if (error === 'airops-app-url') {
-      alert('That\'s the AirOps grid page URL — it returns a web page, not data.\n\nIn your grid click Export → Export as CSV, then use the "Upload CSV" button to load the file directly.')
+    const raw = settings.batchSheetUrl?.trim() ?? ''
+    if (!raw) { alert('Please enter a URL.'); return }
+
+    // ── AirOps grid URL path
+    const airops = parseAirOpsUrl(raw)
+    if (airops) {
+      if (!airopsApiKey) { alert('Enter your AirOps API key first.'); return }
+      setBatchFetching(true)
+      try {
+        const r = await fetch('/api/airops-grid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...airops, apiKey: airopsApiKey }),
+        })
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`)
+        setBatchRows(parseAirOpsRows(data.rows ?? []))
+      } catch (e) {
+        alert('AirOps fetch failed: ' + e.message)
+        setBatchRows(null)
+      } finally {
+        setBatchFetching(false)
+      }
       return
     }
-    if (!url) { alert('Please enter a CSV URL.'); return }
+
+    // ── Generic CSV URL path
+    const url = normaliseSheetUrl(raw)
+    if (!url) { alert('Please enter a valid URL.'); return }
     setBatchFetching(true)
     try {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const rows = parseCsvRows(await res.text())
-      setBatchRows(rows)
+      setBatchRows(parseCsvRows(await res.text()))
     } catch (e) {
       alert('Could not fetch the CSV. Make sure the URL is publicly accessible.')
       setBatchRows(null)
     } finally {
       setBatchFetching(false)
     }
-  }, [settings.batchSheetUrl])
+  }, [settings.batchSheetUrl, airopsApiKey])
 
   const handleBatchCsvUpload = useCallback((text) => {
     const rows = parseCsvRows(text)
@@ -385,6 +421,8 @@ export default function App() {
         onBatchCsvUpload={handleBatchCsvUpload}
         batchFetching={batchFetching}
         batchRows={batchRows}
+        airopsApiKey={airopsApiKey}
+        onSetAiropsApiKey={handleSetAiropsApiKey}
         onBatchExport={handleBatchExport}
         batchExporting={batchExporting}
       />
