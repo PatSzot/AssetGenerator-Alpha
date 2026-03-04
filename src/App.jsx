@@ -20,6 +20,68 @@ function templateFromPath() {
   return VALID_TEMPLATES.has(slug) ? slug : 'quote'
 }
 
+// ── Hash-based pre-population
+// Expected payload: { text, customerName, company, role, images: string[] }
+function parseHashData() {
+  const hash = window.location.hash
+  if (!hash.startsWith('#')) return null
+  try {
+    const params = new URLSearchParams(hash.slice(1))
+    const raw = params.get('data')
+    if (!raw) return null
+    // URLSearchParams turns + into spaces — restore for base64
+    const b64 = raw.replace(/ /g, '+')
+    // Support UTF-8 payloads (smart quotes, em dashes, etc.)
+    return JSON.parse(decodeURIComponent(escape(atob(b64))))
+  } catch {
+    return null
+  }
+}
+
+function ensureDataUrl(str) {
+  if (!str) return null
+  if (str.startsWith('data:')) return str
+  return `data:image/jpeg;base64,${str}`
+}
+
+function applyHashPayload(base, payload) {
+  if (!payload) return base
+  const { text, customerName, company, role, images } = payload
+  const next = { ...base }
+
+  if (text) {
+    next.quote         = text
+    next.richQuoteText = text
+    next.tweetText     = text
+  }
+
+  if (customerName) {
+    const spaceIdx      = customerName.indexOf(' ')
+    const firstName     = spaceIdx === -1 ? customerName : customerName.slice(0, spaceIdx)
+    const lastName      = spaceIdx === -1 ? ''           : customerName.slice(spaceIdx + 1)
+    next.firstName      = firstName
+    next.lastName       = lastName
+    next.richFirstName  = firstName
+    next.richLastName   = lastName
+    next.tweetAuthorName = customerName
+    next.ijName         = customerName
+  }
+
+  if (role || company) {
+    const rc              = [role, company].filter(Boolean).join(', ')
+    next.roleCompany      = rc
+    next.richRoleCompany  = rc
+    next.ijRole           = role ?? ''
+  }
+
+  if (images?.[0]) next.richProfileImage  = ensureDataUrl(images[0])
+  if (images?.[0]) next.tweetProfileImage = ensureDataUrl(images[0])
+  if (images?.[0]) next.ijProfileImage    = ensureDataUrl(images[0])
+  if (images?.[1]) next.richCompanyLogo   = ensureDataUrl(images[1])
+
+  return next
+}
+
 // ── Batch export helpers
 
 // Parse an AirOps grid URL → { gridId, sheetId } or null
@@ -155,7 +217,8 @@ const DEFAULT_SETTINGS = {
 }
 
 export default function App() {
-  const [settings, setSettings]       = useState(() => ({ ...DEFAULT_SETTINGS, templateType: templateFromPath() }))
+  const hashPayloadRef = useRef(parseHashData())
+  const [settings, setSettings]       = useState(() => applyHashPayload({ ...DEFAULT_SETTINGS, templateType: templateFromPath() }, hashPayloadRef.current))
   const [fontsReady, setFontsReady]   = useState(false)
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
@@ -183,6 +246,36 @@ export default function App() {
     floraliaDotsRef.current = generateFleuronFontDots()
     setFloraliaReady(v => v + 1)
   }, [fontsReady])
+
+  // Load images from hash payload and clear the hash
+  useEffect(() => {
+    const payload = hashPayloadRef.current
+    if (!payload) return
+
+    // Clear the hash so it doesn't persist on refresh
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+
+    const { images } = payload
+    if (!images?.length) return
+
+    const src0 = ensureDataUrl(images[0])
+    if (src0) {
+      const img = new Image()
+      img.onload = () => {
+        richProfileImageRef.current = img
+        ijProfileImageRef.current   = img
+        profileImageRef.current     = img
+      }
+      img.src = src0
+    }
+
+    const src1 = ensureDataUrl(images[1])
+    if (src1) {
+      const img = new Image()
+      img.onload = () => { richCompanyLogoRef.current = img }
+      img.src = src1
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Preload default Rich Quote + I Joined images from public folder
   useEffect(() => {
