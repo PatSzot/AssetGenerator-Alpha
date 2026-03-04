@@ -265,6 +265,8 @@ export default function App() {
         richProfileImageRef.current = img
         ijProfileImageRef.current   = img
         profileImageRef.current     = img
+        // update() triggers a settings state change → canvas re-render
+        setSettings(prev => ({ ...prev, richProfileImage: src0, ijProfileImage: src0, tweetProfileImage: src0 }))
       }
       img.src = src0
     }
@@ -272,27 +274,37 @@ export default function App() {
     const src1 = ensureDataUrl(images[1])
     if (src1) {
       const img = new Image()
-      img.onload = () => { richCompanyLogoRef.current = img }
+      img.onload = () => {
+        richCompanyLogoRef.current = img
+        setSettings(prev => ({ ...prev, richCompanyLogo: src1 }))
+      }
       img.src = src1
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Preload default Rich Quote + I Joined images from public folder
+  // Skip if hash payload already provides those images
   useEffect(() => {
-    const portrait = new Image()
-    portrait.onload = () => {
-      richProfileImageRef.current = portrait
-      ijProfileImageRef.current   = portrait
-      setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg', ijProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
-    }
-    portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
+    const hashImages = hashPayloadRef.current?.images ?? []
 
-    const logo = new Image()
-    logo.onload = () => {
-      richCompanyLogoRef.current = logo
-      setSettings(prev => ({ ...prev, richCompanyLogo: '/GTMGen-carta_logo.svg.svg' }))
+    if (!hashImages[0]) {
+      const portrait = new Image()
+      portrait.onload = () => {
+        richProfileImageRef.current = portrait
+        ijProfileImageRef.current   = portrait
+        setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg', ijProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
+      }
+      portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
     }
-    logo.src = '/GTMGen-carta_logo.svg.svg'
+
+    if (!hashImages[1]) {
+      const logo = new Image()
+      logo.onload = () => {
+        richCompanyLogoRef.current = logo
+        setSettings(prev => ({ ...prev, richCompanyLogo: '/GTMGen-carta_logo.svg.svg' }))
+      }
+      logo.src = '/GTMGen-carta_logo.svg.svg'
+    }
   }, [])
 
   // Preload certificate background image
