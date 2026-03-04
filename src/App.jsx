@@ -336,7 +336,7 @@ export default function App() {
           body: JSON.stringify({ ...airops, apiKey: airopsApiKey }),
         })
         const data = await r.json()
-        if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`)
+        if (!r.ok) throw new Error((data.error ?? `HTTP ${r.status}`) + (data.detail ? '\n\n' + data.detail : ''))
         setBatchRows(parseAirOpsRows(data.rows ?? []))
       } catch (e) {
         alert('AirOps fetch failed: ' + e.message)

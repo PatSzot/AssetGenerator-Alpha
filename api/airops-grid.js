@@ -10,35 +10,37 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing gridId, sheetId, or apiKey' })
   }
 
-  // Try AirOps grid endpoint patterns (most likely first)
-  const candidates = [
+  // Try AirOps grid endpoint patterns × auth header variants
+  const endpoints = [
     `https://app.airops.com/public_api/grids/${gridId}/rows?sheet_id=${sheetId}`,
     `https://app.airops.com/public_api/grids/${gridId}/sheets/${sheetId}/rows`,
+    `https://app.airops.com/public_api/grid_sheets/${sheetId}/rows`,
     `https://app.airops.com/public_api/sheets/${sheetId}/rows`,
   ]
+  const authHeaders = [`Bearer ${apiKey}`, `Token ${apiKey}`, apiKey]
 
-  let lastError = ''
-  for (const url of candidates) {
-    try {
-      const r = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Accept': 'application/json',
-        }
-      })
-      const body = await r.text()
-      if (!r.ok) { lastError = `${url} → ${r.status}: ${body.slice(0, 300)}`; continue }
-      const data = JSON.parse(body)
-      const rows = Array.isArray(data) ? data
-        : (data.rows ?? data.data ?? data.results ?? [])
-      return res.status(200).json({ rows, endpoint: url })
-    } catch (e) {
-      lastError = `${url} → ${e.message}`
+  const attempts = []
+  for (const url of endpoints) {
+    for (const auth of authHeaders) {
+      try {
+        const r = await fetch(url, {
+          headers: { 'Authorization': auth, 'Accept': 'application/json' }
+        })
+        const body = await r.text()
+        attempts.push(`${r.status} ${url} (${auth.split(' ')[0]})`)
+        if (!r.ok) continue
+        const data = JSON.parse(body)
+        const rows = Array.isArray(data) ? data
+          : (data.rows ?? data.data ?? data.results ?? [])
+        return res.status(200).json({ rows, endpoint: url })
+      } catch (e) {
+        attempts.push(`ERR ${url}: ${e.message}`)
+      }
     }
   }
 
   return res.status(502).json({
     error: 'Could not reach AirOps grid API. Check your API key.',
-    detail: lastError,
+    detail: attempts.join('\n'),
   })
 }
