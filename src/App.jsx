@@ -101,7 +101,7 @@ const DEFAULT_SETTINGS = {
   ctaText:          'See AirOps in Action',
   colorMode:        'green',
   showCTA:          false,
-  dims:             { w: 1080, h: 1080 },
+  dims:             { w: 1920, h: 1080 },
   tweetText:        'Giving AI to sales and marketing teams is easy. Giving AI to the operating layer of revenue is hard, that\'s why AirOps will quietly create more enterprise value than most flashy AI tools.',
   tweetAuthorName:  'Sushil Krishna',
   tweetAuthorHandle:'@ksushil7',
