@@ -344,31 +344,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {settings.templateType === 'certificate' && (() => {
           const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
           return <>
-            {/* 1 ── Decoration */}
-            <div className="sec">Decoration</div>
-            <div className="tog-row">
-              <label>Decoration</label>
-              <label className="toggle">
-                <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
-                <div className="ttrack" /><div className="tthumb" />
-              </label>
-            </div>
-            {settings.showFloralia && (
-              <div style={{ paddingLeft: 12 }}>
-                <div className="tog-row">
-                  <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
-                  <label className="toggle">
-                    <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
-                    <div className="ttrack" /><div className="tthumb" />
-                  </label>
-                </div>
-                <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
-              </div>
-            )}
-
-            <div className="div" />
-
-            {/* 4 ── Batch Export */}
+            {/* 1 ── Batch Export */}
             <div className="sec">Batch Export</div>
             <input
               ref={batchCsvInputRef}
@@ -439,7 +415,31 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             <div className="div" />
 
-            {/* 5 ── Cohort Type (batch-level) */}
+            {/* 2 ── Decoration */}
+            <div className="sec">Decoration</div>
+            <div className="tog-row">
+              <label>Decoration</label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+                <div className="ttrack" /><div className="tthumb" />
+              </label>
+            </div>
+            {settings.showFloralia && (
+              <div style={{ paddingLeft: 12 }}>
+                <div className="tog-row">
+                  <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                  <label className="toggle">
+                    <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                    <div className="ttrack" /><div className="tthumb" />
+                  </label>
+                </div>
+                <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+              </div>
+            )}
+
+            <div className="div" />
+
+            {/* 3 ── Cohort Type (batch-level) */}
             <div className="sec">Cohort Type</div>
             <div className="field">
               <input
