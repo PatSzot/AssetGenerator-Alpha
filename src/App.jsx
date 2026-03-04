@@ -107,7 +107,7 @@ const DEFAULT_SETTINGS = {
   tweetAuthorHandle:'@ksushil7',
   tweetDate:        '2:47 AM · Feb 24, 2026',
   tweetProfileImage: null,
-  showFloralia:       false,
+  showFloralia:       true,
   // Rich Quote template
   richQuoteText:    '\u201CThe most successful marketing teams in the AI era will be those who build content for how the internet actually works.\u201D',
   richFirstName:    'Nicole',
