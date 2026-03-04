@@ -13,25 +13,64 @@ import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 // ── Batch export helpers
-function parseSheetCsvUrl(raw) {
+
+// Normalise a Google Sheets share/edit URL to its published CSV export URL.
+// Any other URL is returned as-is (raw CSV links, AirOps exports, etc.)
+function normaliseSheetUrl(raw) {
   const url = raw.trim()
-  // Already a published-to-web CSV URL
+  if (!url) return null
   if (url.includes('output=csv') || url.includes('tqx=out:csv')) return url
-  // Standard share URL — convert to published CSV export
   const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
-  if (!idMatch) return null
+  if (!idMatch) return url  // return raw URL unchanged
   const id = idMatch[1]
   const gidMatch = url.match(/[#&?]gid=(\d+)/)
   const gid = gidMatch ? gidMatch[1] : '0'
   return `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
 }
 
-function parseCsvNames(csv) {
-  return csv
-    .split('\n')
-    .slice(1)
-    .map(row => row.split(',')[0].replace(/^"|"$/g, '').trim())
-    .filter(Boolean)
+// Parse a single CSV line respecting quoted fields
+function parseCsvLine(line) {
+  const cols = []
+  let cur = ''
+  let inQ = false
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i]
+    if (c === '"') { inQ = !inQ }
+    else if (c === ',' && !inQ) { cols.push(cur); cur = '' }
+    else { cur += c }
+  }
+  cols.push(cur)
+  return cols.map(c => c.trim())
+}
+
+// Parse CSV into rows of { firstName, lastName, cohortDate }
+// Looks for columns by name (case-insensitive, partial match)
+function parseCsvRows(csv) {
+  const lines = csv.split('\n').map(l => l.trim()).filter(Boolean)
+  if (lines.length < 2) return []
+
+  const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase())
+  const findCol = (...names) => {
+    for (const name of names) {
+      const i = headers.findIndex(h => h.includes(name))
+      if (i !== -1) return i
+    }
+    return -1
+  }
+
+  const firstIdx = findCol('first name', 'firstname', 'first')
+  const lastIdx  = findCol('last name',  'lastname',  'last')
+  const dateIdx  = findCol('cohort date', 'graduation date', 'date', 'cohort')
+
+  return lines.slice(1).map(line => {
+    const cols = parseCsvLine(line)
+    const get  = i => (i !== -1 ? cols[i] ?? '' : '')
+    return {
+      firstName:  get(firstIdx),
+      lastName:   get(lastIdx),
+      cohortDate: get(dateIdx),
+    }
+  }).filter(r => r.firstName || r.lastName)
 }
 
 const DEFAULT_SETTINGS = {
@@ -94,6 +133,8 @@ export default function App() {
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(true)
   const [batchExporting, setBatchExporting] = useState(false)
+  const [batchRows, setBatchRows]     = useState(null)   // null=not fetched, []|[...]=fetched
+  const [batchFetching, setBatchFetching] = useState(false)
 
   const profileImageRef      = useRef(null)
   const richProfileImageRef  = useRef(null)
@@ -254,27 +295,41 @@ export default function App() {
     })
   }, [exportJpeg, settings.colorMode, settings.templateType])
 
-  const handleBatchExport = useCallback(async () => {
-    const csvUrl = parseSheetCsvUrl(settings.batchSheetUrl ?? '')
-    if (!csvUrl) { alert('Please enter a valid Google Sheets URL.'); return }
+  const handleFetchBatch = useCallback(async () => {
+    const url = normaliseSheetUrl(settings.batchSheetUrl ?? '')
+    if (!url) { alert('Please enter a CSV URL.'); return }
+    setBatchFetching(true)
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const rows = parseCsvRows(await res.text())
+      setBatchRows(rows)
+    } catch (e) {
+      alert('Could not fetch the CSV. Make sure the URL is publicly accessible.')
+      setBatchRows(null)
+    } finally {
+      setBatchFetching(false)
+    }
+  }, [settings.batchSheetUrl])
 
+  const handleBatchExport = useCallback(async () => {
+    if (!batchRows?.length) return
     setBatchExporting(true)
     try {
-      const res = await fetch(csvUrl)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const text = await res.text()
-      const names = parseCsvNames(text)
-      if (names.length === 0) { alert('No names found. Make sure Column A has names starting from row 2.'); return }
-
       const JSZip = (await import('jszip')).default
       const zip   = new JSZip()
 
-      for (const name of names) {
-        const s  = { ...settings, certFullName: name }
+      for (const row of batchRows) {
+        const fullName = [row.firstName, row.lastName].filter(Boolean).join(' ')
+        const s = {
+          ...settings,
+          certFullName:       fullName || 'Firstname Lastname',
+          certGraduationDate: row.cohortDate || settings.certGraduationDate,
+        }
         const ec = document.createElement('canvas')
         draw(ec, s)
         const base64 = ec.toDataURL('image/jpeg', 0.95).split(',')[1]
-        zip.file(`certificate-${name.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`, base64, { base64: true })
+        zip.file(`certificate-${fullName.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`, base64, { base64: true })
       }
 
       const blob = await zip.generateAsync({ type: 'blob' })
@@ -284,11 +339,11 @@ export default function App() {
       a.click()
       URL.revokeObjectURL(a.href)
     } catch (e) {
-      alert('Could not fetch the sheet. Make sure it is published to web as CSV (File → Share → Publish to web → CSV).')
+      alert('Export failed: ' + e.message)
     } finally {
       setBatchExporting(false)
     }
-  }, [settings, draw])
+  }, [batchRows, settings, draw])
 
   return (
     <div className={`app${uiMode === 'light' ? ' light' : ''}`}>
@@ -306,6 +361,9 @@ export default function App() {
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
         onRefleuron={handleRefleuron}
+        onFetchBatch={handleFetchBatch}
+        batchFetching={batchFetching}
+        batchRows={batchRows}
         onBatchExport={handleBatchExport}
         batchExporting={batchExporting}
       />

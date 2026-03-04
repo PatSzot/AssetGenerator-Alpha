@@ -30,7 +30,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, batchFetching, batchRows, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -635,23 +635,59 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
           <div className="sec">Batch Export</div>
           <p className="batch-hint">
-            In Google Sheets: File → Share → Publish to web → select CSV → publish. Paste the URL below. Column A = recipient name, row 1 = header (skipped).
+            Paste a CSV URL (AirOps grid export, Google Sheets published CSV, etc.). Needs columns: First Name, Last Name, Cohort Date.
           </p>
+
           <div className="field">
-            <label>Sheet URL</label>
+            <label>CSV URL</label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                placeholder="https://..."
+                value={settings.batchSheetUrl ?? ''}
+                onChange={e => { update('batchSheetUrl', e.target.value) }}
+                style={{ flex: 1, minWidth: 0 }}
+              />
+              <button
+                className="btn-all"
+                style={{ flexShrink: 0, marginBottom: 0, padding: '8px 10px' }}
+                onClick={onFetchBatch}
+                disabled={!settings.batchSheetUrl || batchFetching}
+              >
+                {batchFetching ? '…' : 'Fetch'}
+              </button>
+            </div>
+          </div>
+
+          {batchRows !== null && (
+            <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)' }}>
+              {batchRows.length > 0
+                ? `✓ ${batchRows.length} recipients loaded`
+                : '✕ No rows found — check column names'}
+            </p>
+          )}
+
+          <div className="div" />
+          <div className="sec">Cohort Type</div>
+          <div className="field">
             <input
               type="text"
-              placeholder="https://docs.google.com/spreadsheets/..."
-              value={settings.batchSheetUrl ?? ''}
-              onChange={e => update('batchSheetUrl', e.target.value)}
+              value={settings.certCohortLevel ?? ''}
+              onChange={e => update('certCohortLevel', e.target.value)}
+              placeholder="e.g. Content Engineering"
             />
           </div>
+
           <button
             className="btn-ex"
             onClick={onBatchExport}
-            disabled={!settings.batchSheetUrl || batchExporting}
+            disabled={!batchRows?.length || batchExporting}
           >
-            {batchExporting ? 'Generating…' : '↓ Batch Export ZIP'}
+            {batchExporting
+              ? 'Generating…'
+              : batchRows?.length
+                ? `↓ Batch Export ZIP (${batchRows.length})`
+                : '↓ Batch Export ZIP'}
           </button>
         </>}
 
