@@ -44,58 +44,6 @@ function ensureDataUrl(str) {
   return `data:image/jpeg;base64,${str}`
 }
 
-// Convert a photo to a halftone-stippled Image so it looks like the
-// pre-processed portraits when rendered with hard-light blend mode.
-// Returns a Promise<HTMLImageElement>.
-function toStippleImage(src) {
-  return new Promise((resolve) => {
-    const source = new Image()
-    source.onload = () => {
-      const size = 800
-      const scale = Math.max(size / source.naturalWidth, size / source.naturalHeight)
-      const iw = source.naturalWidth  * scale
-      const ih = source.naturalHeight * scale
-
-      const off = document.createElement('canvas')
-      off.width  = size
-      off.height = size
-      const oc   = off.getContext('2d')
-
-      // Sample the photo
-      oc.drawImage(source, (size - iw) / 2, (size - ih) / 2, iw, ih)
-      const { data } = oc.getImageData(0, 0, size, size)
-
-      // White background — hard-light will let this show as the brand bg color
-      oc.fillStyle = '#ffffff'
-      oc.fillRect(0, 0, size, size)
-
-      // Draw black dots sized by (1 - luminance): dark photo pixels → big dark dot
-      const step = Math.max(5, Math.round(size * 0.016))
-      const maxR = step * 0.52
-      oc.fillStyle = '#000000'
-      oc.beginPath()
-      for (let py = step * 0.5; py < size + step; py += step) {
-        for (let px = step * 0.5; px < size + step; px += step) {
-          const sx  = Math.min(Math.round(px), size - 1)
-          const sy  = Math.min(Math.round(py), size - 1)
-          const idx = (sy * size + sx) * 4
-          const lum = (0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]) / 255
-          const r   = maxR * (1 - lum)  // dark pixel → big dot
-          if (r > 0.5) {
-            oc.moveTo(px + r, py)
-            oc.arc(px, py, r, 0, Math.PI * 2)
-          }
-        }
-      }
-      oc.fill()
-
-      const out = new Image()
-      out.onload = () => resolve(out)
-      out.src = off.toDataURL('image/png')
-    }
-    source.src = src
-  })
-}
 
 function applyHashPayload(base, payload) {
   if (!payload) return base
@@ -313,13 +261,14 @@ export default function App() {
 
     const src0 = ensureDataUrl(images[0])
     if (src0) {
-      // Pre-convert to stipple so hard-light blend renders it like the default portraits
-      toStippleImage(src0).then(stippled => {
-        richProfileImageRef.current = stippled
-        ijProfileImageRef.current   = stippled
-        profileImageRef.current     = stippled
+      const img = new Image()
+      img.onload = () => {
+        richProfileImageRef.current = img
+        ijProfileImageRef.current   = img
+        profileImageRef.current     = img
         setSettings(prev => ({ ...prev, richProfileImage: src0, ijProfileImage: src0, tweetProfileImage: src0 }))
-      })
+      }
+      img.src = src0
     }
 
     const src1 = ensureDataUrl(images[1])
