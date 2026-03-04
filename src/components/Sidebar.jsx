@@ -38,6 +38,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
   const ijPhotoInputRef     = useRef(null)
   const batchCsvInputRef    = useRef(null)
   const [certManualOpen, setCertManualOpen] = useState(false)
+  const [csvDragOver, setCsvDragOver]       = useState(false)
 
   return (
     <div className="sidebar">
@@ -429,9 +430,25 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 e.target.value = ''
               }}
             />
-            <button className="btn-all" onClick={() => batchCsvInputRef.current?.click()} style={{ marginBottom: 8 }}>
-              ↑ Upload CSV instead
-            </button>
+            <div
+              className={`csv-dropzone${csvDragOver ? ' over' : ''}`}
+              onClick={() => batchCsvInputRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setCsvDragOver(true) }}
+              onDragEnter={e => { e.preventDefault(); setCsvDragOver(true) }}
+              onDragLeave={() => setCsvDragOver(false)}
+              onDrop={e => {
+                e.preventDefault()
+                setCsvDragOver(false)
+                const file = e.dataTransfer.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onBatchCsvUpload(ev.target.result)
+                reader.readAsText(file)
+              }}
+            >
+              <span className="csv-dropzone-icon">↑</span>
+              <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
+            </div>
             {batchRows !== null && (
               <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
                 {batchRows.length > 0 ? `✓ ${batchRows.length} recipients loaded` : '✕ No rows found — check column names'}
