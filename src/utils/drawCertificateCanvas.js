@@ -1,13 +1,16 @@
 import { STIPPLE_COLORS } from './drawFleurons.js'
 
-const CARD_TEXT = '#002910'
-const CANVAS_BG = '#000d05'
+const CARD_TEXT    = '#002910'
+const CANVAS_BG    = '#000d05'
+const COHORT_COLOR = '#008c44'
 
 export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage) {
   const {
     dims,
-    colorMode    = 'green',
-    certFullName = 'Firstname Lastname',
+    colorMode          = 'green',
+    certFullName       = 'Firstname Lastname',
+    certCohortLevel    = '',
+    certGraduationDate = '',
   } = settings
 
   const { w: cw, h: ch } = dims
@@ -26,7 +29,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   ctx.fillStyle = CANVAS_BG
   ctx.fillRect(0, 0, cw, ch)
 
-  // Decoration — exact same logic as Twitter template
+  // Decoration
   if (settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     if (rotAngle !== 0) {
@@ -82,20 +85,26 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     if (rotAngle !== 0) ctx.restore()
   }
 
-  // Card (16:9 landscape, 93.5% canvas width, centered)
-  const cW = Math.round(cw * 0.935)
-  const cH = Math.round(cW / 1.778)
-  const cX = Math.round((cw - cW) / 2)
-  const cY = Math.round((ch - cH) / 2)
-  const s  = cW / 1009.778  // scale vs Figma 1080×1080 reference
+  // ── Certificate composite geometry
+  // Reference: Figma 1080×1080 composite = 1011.115 × 568.752, centered
+  //            Figma 1920×1080 composite = 1612.004 × 906.752, left: 50%, top: 87px
+  let cX, cY, cW, cH
+  if (isLand) {
+    cH = Math.round(ch * (906.752 / 1080))   // 839.6% of canvas height
+    cW = Math.round(cH * (1612.004 / 906.752)) // 16:9 aspect
+    cX = Math.round((cw - cW) / 2)
+    cY = Math.round(ch * (87 / 1080))         // top padding from Figma
+  } else {
+    cW = Math.round(cw * (1011.115 / 1080))   // 93.6% of canvas width
+    cH = Math.round(cW * (568.752 / 1011.115))
+    cX = Math.round((cw - cW) / 2)
+    cY = Math.round((ch - cH) / 2)
+  }
 
-  // Center vertical guide (full canvas height) — drawn before card image
-  ctx.strokeStyle = '#008c44'
-  ctx.lineWidth   = 2
-  ctx.beginPath(); ctx.moveTo(cw / 2, 0); ctx.lineTo(cw / 2, ch); ctx.stroke()
-  ctx.lineWidth   = 1
+  // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
+  const s = cW / 1011.115
 
-  // Draw certificate image (all design elements)
+  // Draw certificate image
   if (certImage) {
     ctx.drawImage(certImage, cX, cY, cW, cH)
   } else {
@@ -103,17 +112,62 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     ctx.fillRect(cX, cY, cW, cH)
   }
 
-  // Name overlay at Figma-matched position (210px from card top at 1× scale)
-  const nameSz = Math.round(50.49 * s)
-  const nameY  = cY + Math.round(210 * s)
-  ctx.font         = `400 ${nameSz}px ${serif}`
-  ctx.letterSpacing = `${(-nameSz * 0.02).toFixed(2)}px`
-  ctx.fillStyle    = CARD_TEXT
-  ctx.textBaseline = 'top'
-  ctx.textAlign    = 'center'
-  ctx.fillText(certFullName, cX + Math.round(cW / 2), nameY)
+  // ── Name — centered, Serrif VF, color:#002910, dual text shadow
+  // Figma 1080×1080 reference: fontSize=50.56, top=223.3, letterSpacing=-1.0112
+  // Shadow: 2.733 2.733 5.466 white  AND  -2.733 2.283 2.954 rgba(0,0,0,0.15)
+  const nameSz = Math.round(50.56 * s)
+  const nameX  = cX + cW / 2
+  const nameY  = cY + Math.round(223.3 * s)
 
-  ctx.textAlign    = 'left'
-  ctx.textBaseline = 'top'
+  ctx.font          = `400 ${nameSz}px ${serif}`
+  ctx.letterSpacing = `${(-1.0112 * s).toFixed(2)}px`
+  ctx.textBaseline  = 'top'
+  ctx.textAlign     = 'center'
+  ctx.fillStyle     = CARD_TEXT
+
+  // White shadow pass
+  ctx.shadowColor   = 'white'
+  ctx.shadowBlur    = 5.466 * s
+  ctx.shadowOffsetX = 2.733 * s
+  ctx.shadowOffsetY = 2.733 * s
+  ctx.fillText(certFullName, nameX, nameY)
+
+  // Dark shadow pass
+  ctx.shadowColor   = 'rgba(0,0,0,0.15)'
+  ctx.shadowBlur    = 2.954 * s
+  ctx.shadowOffsetX = -2.733 * s
+  ctx.shadowOffsetY = 2.283 * s
+  ctx.fillText(certFullName, nameX, nameY)
+
+  // Clear shadows
+  ctx.shadowColor   = 'transparent'
+  ctx.shadowBlur    = 0
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = 0
+
+  // ── Cohort Level + Graduation Date — right-side, Serrif VF, color:#008c44
+  // Figma 1080×1080 reference: fontSize=21.06, centerX=730.74, tops=382.62 / 463.53
+  if (certCohortLevel || certGraduationDate) {
+    const subSz = Math.round(21.06 * s)
+    const subX  = cX + Math.round(730.74 * s)
+
+    ctx.font          = `400 ${subSz}px ${serif}`
+    ctx.letterSpacing = '0px'
+    ctx.fillStyle     = COHORT_COLOR
+    ctx.textBaseline  = 'top'
+    ctx.textAlign     = 'center'
+
+    if (certCohortLevel) {
+      ctx.fillText(certCohortLevel, subX, cY + Math.round(382.62 * s))
+    }
+
+    if (certGraduationDate) {
+      ctx.fillText(certGraduationDate, subX, cY + Math.round(463.53 * s))
+    }
+  }
+
+  // Reset
+  ctx.textAlign     = 'left'
+  ctx.textBaseline  = 'top'
   ctx.letterSpacing = '0px'
 }

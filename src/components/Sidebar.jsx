@@ -346,6 +346,16 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
           </div>
 
+          <div className="field">
+            <label>Cohort Level</label>
+            <input type="text" value={settings.certCohortLevel ?? ''} onChange={e => update('certCohortLevel', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Graduation Date</label>
+            <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
+          </div>
+
           <div className="div" />
           <div className="sec">Decoration</div>
 
@@ -595,7 +605,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         <div className="dim-grid">
           {DIMS
             .filter(({ w, h }) => {
-              if (settings.templateType === 'certificate') return w === 1080 && (h === 1080 || h === 1920)
+              if (settings.templateType === 'certificate') return (w === 1080 && h === 1080) || (w === 1920 && h === 1080)
               if (settings.templateType === 'ijoined')    return w === 1920 && h === 1080
               return true
             })
@@ -614,7 +624,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
         {settings.templateType === 'certificate'
-          ? <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1080, 1920), 350) }}>↓ Export Both Sizes</button>
+          ? <button className="btn-all" onClick={() => { onExport(1080, 1080); setTimeout(() => onExport(1920, 1080), 350) }}>↓ Export Both Sizes</button>
           : settings.templateType === 'ijoined'
           ? null
           : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>

@@ -59,8 +59,10 @@ const DEFAULT_SETTINGS = {
   richCompanyLogo:   null,
   richFlip:          false,
   // Certificate
-  certFullName:      'Firstname Lastname',
-  batchSheetUrl:     '',
+  certFullName:       'Firstname Lastname',
+  certCohortLevel:    'Content Engineering',
+  certGraduationDate: 'March 2026',
+  batchSheetUrl:      '',
   // Title Card
   tcEyebrow:         'Deadline extended',
   tcShowEyebrow:     true,
@@ -148,10 +150,10 @@ export default function App() {
       if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
-      // Certificate only supports 1080×1080 and 1080×1920 — reset to square if switching to it
+      // Certificate only supports 1080×1080 and 1920×1080 — reset to square if switching to it
       if (key === 'templateType' && value === 'certificate') {
         const { w, h } = next.dims
-        const valid = (w === 1080 && (h === 1080 || h === 1920))
+        const valid = (w === 1080 && h === 1080) || (w === 1920 && h === 1080)
         if (!valid) next.dims = { w: 1080, h: 1080 }
       }
       // I Joined is fixed to 1920×1080
