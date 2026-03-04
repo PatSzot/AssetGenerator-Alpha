@@ -126,7 +126,7 @@ const DEFAULT_SETTINGS = {
   richFlip:          false,
   // Certificate
   certFullName:       'Firstname Lastname',
-  certCohortLevel:    'Content Engineering',
+  certCohortLevel:    'Intermediate',
   certGraduationDate: 'March 2026',
   batchSheetUrl:      '',
   // Title Card

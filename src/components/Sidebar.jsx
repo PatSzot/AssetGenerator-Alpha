@@ -441,13 +441,16 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             {/* 3 ── Cohort Type (batch-level) */}
             <div className="sec">Cohort Type</div>
-            <div className="field">
-              <input
-                type="text"
-                value={settings.certCohortLevel ?? ''}
-                onChange={e => update('certCohortLevel', e.target.value)}
-                placeholder="e.g. Content Engineering"
-              />
+            <div className="dim-grid" style={{ marginBottom: 8 }}>
+              {['Intermediate', 'Advanced'].map(level => (
+                <button
+                  key={level}
+                  className={`dim-btn${(settings.certCohortLevel ?? 'Intermediate') === level ? ' active' : ''}`}
+                  onClick={() => update('certCohortLevel', level)}
+                >
+                  {level}
+                </button>
+              ))}
             </div>
             <button
               className="btn-ex"
