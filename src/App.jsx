@@ -44,13 +44,17 @@ function parseCsvLine(line) {
 }
 
 // Parse CSV into rows of { firstName, lastName, cohortDate }
-// Looks for columns by name (case-insensitive, partial match)
+// Looks for columns by name — exact match first, then partial (case-insensitive)
 function parseCsvRows(csv) {
   const lines = csv.split('\n').map(l => l.trim()).filter(Boolean)
   if (lines.length < 2) return []
 
   const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase())
   const findCol = (...names) => {
+    for (const name of names) {
+      const i = headers.findIndex(h => h === name)
+      if (i !== -1) return i
+    }
     for (const name of names) {
       const i = headers.findIndex(h => h.includes(name))
       if (i !== -1) return i
@@ -60,7 +64,7 @@ function parseCsvRows(csv) {
 
   const firstIdx = findCol('first name', 'firstname', 'first')
   const lastIdx  = findCol('last name',  'lastname',  'last')
-  const dateIdx  = findCol('cohort date', 'graduation date', 'date', 'cohort')
+  const dateIdx  = findCol('cohort date', 'graduation date', 'date')
 
   return lines.slice(1).map(line => {
     const cols = parseCsvLine(line)
