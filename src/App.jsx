@@ -66,6 +66,7 @@ function applyHashPayload(base, payload) {
     next.richLastName   = lastName
     next.tweetAuthorName = customerName
     next.ijName         = customerName
+    next.certFullName   = customerName
   }
 
   if (role || company) {
@@ -74,6 +75,9 @@ function applyHashPayload(base, payload) {
     next.richRoleCompany  = rc
     next.ijRole           = role ?? ''
   }
+
+  if (payload.cohortLevel) next.certCohortLevel    = payload.cohortLevel
+  if (payload.cohortDate)  next.certGraduationDate = payload.cohortDate
 
   if (images?.[0]) next.richProfileImage  = ensureDataUrl(images[0])
   if (images?.[0]) next.tweetProfileImage = ensureDataUrl(images[0])
