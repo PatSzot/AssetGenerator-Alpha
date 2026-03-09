@@ -230,12 +230,13 @@ function drawSpeakerBlock(ctx, x, y, w, h, name, role, img, logoImg, nameSz, rol
 
   const textBlock = nameLH + textPad + roleBlock + (logoImg ? textPad + logoH : 0)
   const photoH    = Math.max(0, h - textBlock - textPad)
+  const photoSide = Math.min(w, photoH)  // enforce square
 
   // Photo
-  drawSpeakerPhoto(ctx, x, y, w, photoH, img, M)
+  drawSpeakerPhoto(ctx, x, y, photoSide, photoSide, img, M)
 
   // Name
-  let ty = y + photoH + textPad
+  let ty = y + photoSide + textPad
   ctx.fillStyle    = M.text
   ctx.font         = `500 ${nameSz}px ${sans}`
   ctx.letterSpacing = '-1.12px'
