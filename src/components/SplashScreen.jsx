@@ -22,7 +22,17 @@ export default function SplashScreen({ onDone }) {
       setFading(true)
     })
 
-    return () => anim.destroy()
+    anim.addEventListener('data_failed', () => {
+      setFading(true)
+    })
+
+    // Fallback: if animation hasn't completed within 5s, skip it
+    const timeout = setTimeout(() => setFading(true), 5000)
+
+    return () => {
+      anim.destroy()
+      clearTimeout(timeout)
+    }
   }, [])
 
   return (
