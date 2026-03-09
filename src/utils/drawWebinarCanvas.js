@@ -485,6 +485,47 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
 }
 
 // ─────────────────────────────────────────────
+// ── BLOG GRAPHIC layout (1920×1080, photos only)
+// ─────────────────────────────────────────────
+function getBadgeWidth(ctx, eyebrow, mono) {
+  ctx.save()
+  ctx.font         = `500 32px ${mono}`
+  ctx.letterSpacing = '1.92px'
+  const w = 51 + ctx.measureText(eyebrow).width + 16
+  ctx.restore()
+  return w
+}
+
+function drawBlogGraphicLayout(ctx, cw, ch, settings, speakers, C, mono, dpr) {
+  const { wbEyebrow = 'WEBINAR' } = settings
+  const n = speakers.length
+
+  // Photo frame sizes (from Figma per speaker count)
+  const photoSz = n === 1 ? 629 : n === 2 ? 629 : n === 3 ? 550 : 439
+  const gap      = 16
+  const groupW   = n * photoSz + (n - 1) * gap
+  const startX   = Math.round((cw - groupW) / 2)
+  const photoY   = Math.round((ch - photoSz) / 2) + 16   // slight down offset for badge
+  const innerPad = Math.round(photoSz * 0.026)            // ~16px for 629, ~14px for 550
+
+  // Badge — centered
+  const badgeW = getBadgeWidth(ctx, wbEyebrow, mono)
+  const badgeX = Math.round((cw - badgeW) / 2)
+  drawBadge(ctx, badgeX, 152, wbEyebrow, C, mono)
+
+  // Bordered photo frames
+  const bw = Math.round(cw * 0.0006)
+  speakers.forEach((sp, i) => {
+    const x = startX + i * (photoSz + gap)
+    ctx.strokeStyle = C.ctaText
+    ctx.lineWidth   = bw
+    ctx.strokeRect(x + bw / 2, photoY + bw / 2, photoSz - bw, photoSz - bw)
+    drawSpeakerPhoto(ctx, x + innerPad, photoY + innerPad,
+      photoSz - innerPad * 2, photoSz - innerPad * 2, sp.image, C)
+  })
+}
+
+// ─────────────────────────────────────────────
 // ── MAIN EXPORT
 // ─────────────────────────────────────────────
 export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, speakerLogos, floraliaDots) {
@@ -557,7 +598,9 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
 
   ctx.textBaseline = 'top'
 
-  if (isLand) {
+  if (settings.wbIsBlog) {
+    drawBlogGraphicLayout(ctx, cw, ch, settings, speakers, C, mono, dpr)
+  } else if (isLand) {
     drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, C, serif, sans, mono, dpr)
   } else {
     drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, C, serif, sans, mono, dpr)
