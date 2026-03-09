@@ -8,16 +8,14 @@ const DARK_MODES = {
   'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff' },
 }
 
-const BADGE_DOT_COLOR = '#e8272a'
-
 // ── WebinarBadge pill (green dot + eyebrow text)
 function drawBadge(ctx, x, y, eyebrow, M, mono) {
-  const h       = 58
-  const dotR    = 9.5
-  const dotPadX = 16
-  const textX   = 51
+  const h        = 58
+  const dotR     = 9.5
+  const dotPadX  = 16
+  const textX    = 51
   const fontSize = 32
-  const bw      = 1.364
+  const bw       = 1.5
 
   ctx.font         = `500 ${fontSize}px ${mono}`
   ctx.letterSpacing = '1.92px'
@@ -25,23 +23,27 @@ function drawBadge(ctx, x, y, eyebrow, M, mono) {
   ctx.letterSpacing = '0px'
   const w = textX + textW + dotPadX
 
-  ctx.fillStyle = M.bg
+  // Background: dark/inverted (ctaText in light modes, canvas bg in dark modes)
+  ctx.fillStyle = M.badgeBg
   ctx.beginPath()
   ctx.roundRect(x, y, w, h, 8)
   ctx.fill()
 
-  ctx.strokeStyle = M.lineColor
+  // Border: light accent (pill in light modes, lineColor in dark modes)
+  ctx.strokeStyle = M.badgeBorder
   ctx.lineWidth   = bw
   ctx.beginPath()
   ctx.roundRect(x + bw / 2, y + bw / 2, w - bw, h - bw, 7)
   ctx.stroke()
 
-  ctx.fillStyle = BADGE_DOT_COLOR
+  // Dot: accent color
+  ctx.fillStyle = M.lineColor
   ctx.beginPath()
   ctx.arc(x + dotPadX + dotR, y + h / 2, dotR, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle    = M.lineColor
+  // Text: light/inverse color
+  ctx.fillStyle    = M.badgeText
   ctx.font         = `500 ${fontSize}px ${mono}`
   ctx.letterSpacing = '1.92px'
   ctx.textBaseline = 'top'
@@ -561,23 +563,29 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
 
   // Unified color token — same shape passed to all helpers
   const C = isDark ? {
-    bg:       M.bg,           // badge pill bg (light paper for contrast)
-    canvasBg: DM.bg,          // main canvas background
-    lineColor: DM.lineColor,  // badge border + accent
-    text:     DM.logoColor,   // speaker name, logo
-    ctaText:  DM.logoColor,   // body text, date, title
-    photoBg:  DM.bg,          // speaker photo fill
-    pill:     DM.bg,          // unused but keeps shape consistent
-    pillText: DM.logoColor,
+    bg:          M.bg,
+    canvasBg:    DM.bg,
+    lineColor:   DM.lineColor,
+    text:        DM.logoColor,
+    ctaText:     DM.logoColor,
+    photoBg:     DM.bg,
+    pill:        DM.bg,
+    pillText:    DM.logoColor,
+    badgeBg:     DM.bg,          // dark canvas bg — border makes it visible
+    badgeBorder: DM.lineColor,   // bright accent
+    badgeText:   DM.logoColor,   // light text
   } : {
-    bg:       M.bg,
-    canvasBg: M.pill,         // webinar uses M.pill as main bg (Figma color-2)
-    lineColor: M.lineColor,
-    text:     M.text,
-    ctaText:  M.ctaText,
-    photoBg:  M.ctaText,
-    pill:     M.pill,
-    pillText: M.pillText,
+    bg:          M.bg,
+    canvasBg:    M.pill,         // webinar uses M.pill as main bg (Figma color-2)
+    lineColor:   M.lineColor,
+    text:        M.text,
+    ctaText:     M.ctaText,
+    photoBg:     M.ctaText,
+    pill:        M.pill,
+    pillText:    M.pillText,
+    badgeBg:     M.ctaText,      // dark/inverted bg (Figma color-4)
+    badgeBorder: M.pill,         // light border (Figma color-2)
+    badgeText:   M.bg,           // near-white text (Figma color-1)
   }
 
   // Background
