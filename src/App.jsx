@@ -456,7 +456,7 @@ export default function App() {
         a.click()
       }, i * 350)
     })
-  }, [settings, draw])
+  }, [settings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleWbLogoChange = useCallback((idx, dataUrl) => {
     const key = `wbSpeaker${idx + 1}Logo`
