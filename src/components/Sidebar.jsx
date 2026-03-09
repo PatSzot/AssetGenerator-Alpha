@@ -23,6 +23,14 @@ const TEMPLATES = [
   { value: 'webinar',     label: 'Webinar',      icon: '/Icon-Webinar.jpg'      },
 ]
 
+const WB_EXPORT_SIZES = [
+  { key: '1920x1080', w: 1920, h: 1080, label: '1920×1080', sub: 'Landscape' },
+  { key: '1080x1080', w: 1080, h: 1080, label: '1080×1080', sub: 'Square' },
+  { key: '1080x1350', w: 1080, h: 1350, label: '1080×1350', sub: 'Portrait 4:5' },
+  { key: '1080x1920', w: 1080, h: 1920, label: '1080×1920', sub: 'Story 9:16' },
+  { key: 'blog',      w: 1920, h: 1080, label: 'Blog Graphic', sub: '1920×1080' },
+]
+
 const DIMS = [
   { w: 1080, h: 1080, label: '1080×1080', sub: 'Square' },
   { w: 1080, h: 1350, label: '1080×1350', sub: 'Portrait 4:5' },
@@ -31,7 +39,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, onWbLogoChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -839,8 +847,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Export Size + buttons — all templates except certificate (handled inside its own block) */}
-        {settings.templateType !== 'certificate' && <>
+        {/* Export Size + buttons — all templates except certificate and webinar */}
+        {settings.templateType !== 'certificate' && settings.templateType !== 'webinar' && <>
           <div className="sec">Export Size</div>
           <div className="dim-grid">
             {DIMS
@@ -867,6 +875,39 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
           }
         </>}
+
+        {/* Export — Webinar multiselect */}
+        {settings.templateType === 'webinar' && (() => {
+          const selected = settings.wbExportSizes ?? WB_EXPORT_SIZES.map(s => s.key)
+          const toggle = (key) => {
+            const next = selected.includes(key)
+              ? selected.filter(k => k !== key)
+              : [...selected, key]
+            if (next.length > 0) update('wbExportSizes', next)
+          }
+          return <>
+            <div className="sec">Export Sizes</div>
+            <div className="dim-grid">
+              {WB_EXPORT_SIZES.map(({ key, label, sub }) => (
+                <button
+                  key={key}
+                  className={`dim-btn${selected.includes(key) ? ' active' : ''}`}
+                  onClick={() => toggle(key)}
+                >
+                  {label}<span className="dim-sub">{sub}</span>
+                </button>
+              ))}
+            </div>
+            <div className="div" />
+            <button
+              className="btn-ex"
+              onClick={onWbExport}
+              disabled={selected.length === 0}
+            >
+              ↓ Export {selected.length === 1 ? '1 Size' : `${selected.length} Sizes`}
+            </button>
+          </>
+        })()}
 
       </div>
 

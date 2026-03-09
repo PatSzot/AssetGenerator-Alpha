@@ -242,6 +242,7 @@ const DEFAULT_SETTINGS = {
   wbSpeaker4Role:    'Title, Company',
   wbSpeaker4Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker4Logo:    null,
+  wbExportSizes:     ['1920x1080', '1080x1080', '1080x1350', '1080x1920', 'blog'],
 }
 
 export default function App() {
@@ -434,6 +435,29 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
+  const handleWbExport = useCallback(() => {
+    const WB_SIZES = [
+      { key: '1920x1080', w: 1920, h: 1080, isBlog: false },
+      { key: '1080x1080', w: 1080, h: 1080, isBlog: false },
+      { key: '1080x1350', w: 1080, h: 1350, isBlog: false },
+      { key: '1080x1920', w: 1080, h: 1920, isBlog: false },
+      { key: 'blog',      w: 1920, h: 1080, isBlog: true  },
+    ]
+    const selected = settings.wbExportSizes ?? WB_SIZES.map(s => s.key)
+    WB_SIZES.filter(s => selected.includes(s.key)).forEach(({ w, h, isBlog }, i) => {
+      setTimeout(() => {
+        const s  = { ...settings, dims: { w, h }, wbIsBlog: isBlog, dpr: 1 }
+        const ec = document.createElement('canvas')
+        draw(ec, s)
+        const suffix = isBlog ? `blog-${w}x${h}` : `${w}x${h}`
+        const a = document.createElement('a')
+        a.download = `airops-webinar-${settings.colorMode}-${suffix}.jpg`
+        a.href = ec.toDataURL('image/jpeg', 0.95)
+        a.click()
+      }, i * 350)
+    })
+  }, [settings, draw])
+
   const handleWbLogoChange = useCallback((idx, dataUrl) => {
     const key = `wbSpeaker${idx + 1}Logo`
     if (!dataUrl) { wbLogoRefs.current[idx] = null; update(key, null); return }
@@ -596,6 +620,7 @@ export default function App() {
         onIJProfileImageChange={handleIJProfileImageChange}
         onWbPhotoChange={handleWbPhotoChange}
         onWbLogoChange={handleWbLogoChange}
+        onWbExport={handleWbExport}
         onRefleuron={handleRefleuron}
         onFetchBatch={handleFetchBatch}
         onBatchCsvUpload={handleBatchCsvUpload}
