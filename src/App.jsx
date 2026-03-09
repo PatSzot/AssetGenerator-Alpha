@@ -228,19 +228,19 @@ const DEFAULT_SETTINGS = {
   wbDate:            'Thursday, December 3rd\n1:00 PM EST',
   wbSpeaker1Name:    'Lily Ray',
   wbSpeaker1Role:    'VP, SEO Strategy & Research, Amsive',
-  wbSpeaker1Image:   null,
+  wbSpeaker1Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker1Logo:    null,
   wbSpeaker2Name:    'Speaker Two',
   wbSpeaker2Role:    'Title, Company',
-  wbSpeaker2Image:   null,
+  wbSpeaker2Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker2Logo:    null,
   wbSpeaker3Name:    'Speaker Three',
   wbSpeaker3Role:    'Title, Company',
-  wbSpeaker3Image:   null,
+  wbSpeaker3Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker3Logo:    null,
   wbSpeaker4Name:    'Speaker Four',
   wbSpeaker4Role:    'Title, Company',
-  wbSpeaker4Image:   null,
+  wbSpeaker4Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker4Logo:    null,
 }
 
@@ -321,7 +321,16 @@ export default function App() {
       portrait.onload = () => {
         richProfileImageRef.current = portrait
         ijProfileImageRef.current   = portrait
-        setSettings(prev => ({ ...prev, richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg', ijProfileImage: '/GTMGen-NicoleBaerPortrait.jpg' }))
+        wbPhotoRefs.current         = [portrait, portrait, portrait, portrait]
+        setSettings(prev => ({
+          ...prev,
+          richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg',
+          ijProfileImage:   '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker1Image:  '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker2Image:  '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker3Image:  '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker4Image:  '/GTMGen-NicoleBaerPortrait.jpg',
+        }))
       }
       portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
     }
