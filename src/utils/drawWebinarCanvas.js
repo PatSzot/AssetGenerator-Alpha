@@ -217,43 +217,45 @@ function drawTitleBlock(ctx, x, y, w, titleClause, mainTitle, clauseSz, mainSz, 
 
 // ── SpeakerBlock: photo + name + role (for 2-4 speakers)
 function drawSpeakerBlock(ctx, x, y, w, h, name, role, img, logoImg, nameSz, roleSz, sans, M) {
-  const textPad = 12
-  const nameLH  = Math.round(nameSz * 1.2)
+  const bw      = 1.5                    // border width (Figma: 1.5px lineColor)
+  const pad     = 16                     // inner padding inside border
+  const gap     = 16                     // gap between photo frame and text
   const logoH   = Math.min(36, Math.round(h * 0.06))
 
-  // Pre-wrap role
-  ctx.font         = `400 ${roleSz}px ${sans}`
-  ctx.letterSpacing = '-0.8px'
-  const roleLines = wrapText(ctx, role, w)
-  const roleLH    = Math.round(roleSz * 1.2)
-  const roleBlock = roleLines.length * roleLH
+  // Photo frame: full-width square with border
+  const photoSide = w
+  ctx.strokeStyle = M.lineColor
+  ctx.lineWidth   = bw
+  ctx.strokeRect(x + bw / 2, y + bw / 2, photoSide - bw, photoSide - bw)
+  const innerSide = photoSide - pad * 2 - bw * 2
+  drawSpeakerPhoto(ctx, x + pad + bw, y + pad + bw, innerSide, innerSide, img, M)
 
-  const textBlock = nameLH + textPad + roleBlock + (logoImg ? textPad + logoH : 0)
-  const photoH    = Math.max(0, h - textBlock - textPad)
-  const photoSide = Math.min(w, photoH)  // enforce square
-
-  // Photo
-  drawSpeakerPhoto(ctx, x, y, photoSide, photoSide, img, M)
+  // Text below photo
+  let ty = y + photoSide + gap
+  const nameLH = Math.round(nameSz * 1.2)
+  const nameLK = `-${(nameSz * 0.02).toFixed(2)}px`
+  const roleLK = `-${(roleSz * 0.02).toFixed(2)}px`
+  const roleLH = Math.round(roleSz * 1.2)
 
   // Name
-  let ty = y + photoSide + textPad
-  ctx.fillStyle    = M.text
+  ctx.fillStyle    = M.ctaText
   ctx.font         = `500 ${nameSz}px ${sans}`
-  ctx.letterSpacing = '-1.12px'
+  ctx.letterSpacing = nameLK
   ctx.textBaseline = 'top'
   ctx.fillText(name, x, ty, w)
-  ty += nameLH + textPad
+  ty += nameLH + 8
 
   // Role
   ctx.font         = `400 ${roleSz}px ${sans}`
-  ctx.letterSpacing = '-0.8px'
+  ctx.letterSpacing = roleLK
   ctx.fillStyle    = M.ctaText
+  const roleLines = wrapText(ctx, role, w)
   roleLines.forEach((line, i) => ctx.fillText(line, x, ty + i * roleLH))
-  ty += roleBlock
+  ty += roleLines.length * roleLH
 
   // Partner logo
   if (logoImg) {
-    drawPartnerLogo(ctx, logoImg, x, ty + textPad, w * 0.7, logoH, M)
+    drawPartnerLogo(ctx, logoImg, x, ty + 12, w * 0.7, logoH, M)
   }
 
   ctx.letterSpacing = '0px'
@@ -353,8 +355,8 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
     const gap  = 16
     const totalGap = (n - 1) * gap
     const blockW   = Math.round((innerW - totalGap) / n)
-    const nameSz   = Math.max(24, Math.round(blockW * 0.085))
-    const roleSz   = Math.max(18, Math.round(blockW * 0.06))
+    const nameSz   = Math.max(20, Math.round(blockW * 0.14))
+    const roleSz   = Math.max(14, Math.round(blockW * 0.10))
 
     speakers.forEach((sp, i) => {
       const bx = innerX + i * (blockW + gap)
@@ -474,8 +476,8 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     // SpeakerBlocks
     const blockH = n === 2 ? Math.round(ch * 0.54) : Math.round(ch * 0.40)
     const speakerY = n === 2 ? pad : Math.round(ch * 0.52)
-    const nameSz = Math.max(28, Math.round(blockW * 0.085))
-    const roleSz = Math.max(20, Math.round(blockW * 0.06))
+    const nameSz = Math.max(20, Math.round(blockW * 0.14))
+    const roleSz = Math.max(14, Math.round(blockW * 0.10))
 
     speakers.forEach((sp, i) => {
       const bx = speakersX + i * (blockW + gap)
