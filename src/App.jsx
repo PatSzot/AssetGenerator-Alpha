@@ -9,11 +9,12 @@ import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
 import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
+import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 // ── URL slug ↔ template type
-const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined'])
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar'])
 
 function templateFromPath() {
   const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
@@ -219,6 +220,28 @@ const DEFAULT_SETTINGS = {
   ijRole:            'Marketing Strategist',
   ijShowHiring:      true,
   ijProfileImage:    null,
+  // Webinar template
+  wbNumSpeakers:     1,
+  wbEyebrow:         'WEBINAR',
+  wbTitleClause:     'Stop blaming attribution:',
+  wbMainTitle:       'Alignment is the only scoreboard that matters.',
+  wbDate:            'Thursday, December 3rd\n1:00 PM EST',
+  wbSpeaker1Name:    'Lily Ray',
+  wbSpeaker1Role:    'VP, SEO Strategy & Research, Amsive',
+  wbSpeaker1Image:   null,
+  wbSpeaker1Logo:    null,
+  wbSpeaker2Name:    'Speaker Two',
+  wbSpeaker2Role:    'Title, Company',
+  wbSpeaker2Image:   null,
+  wbSpeaker2Logo:    null,
+  wbSpeaker3Name:    'Speaker Three',
+  wbSpeaker3Role:    'Title, Company',
+  wbSpeaker3Image:   null,
+  wbSpeaker3Logo:    null,
+  wbSpeaker4Name:    'Speaker Four',
+  wbSpeaker4Role:    'Title, Company',
+  wbSpeaker4Image:   null,
+  wbSpeaker4Logo:    null,
 }
 
 export default function App() {
@@ -237,6 +260,8 @@ export default function App() {
   const richCompanyLogoRef   = useRef(null)
   const certImageRef         = useRef(null)
   const ijProfileImageRef    = useRef(null)
+  const wbPhotoRefs          = useRef([null, null, null, null])
+  const wbLogoRefs           = useRef([null, null, null, null])
   const floraliaDotsRef      = useRef([])
   const [floraliaReady, setFloraliaReady] = useState(0)
 
@@ -335,7 +360,7 @@ export default function App() {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
       // Rich Quote and Quote Block don't support dark modes — reset if switching to them
-      if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
+      if (key === 'templateType' && ['quote', 'richquote', 'webinar'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
       // Certificate is fixed to 1920×1080
@@ -392,12 +417,29 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
+  const handleWbPhotoChange = useCallback((idx, dataUrl) => {
+    const key = `wbSpeaker${idx + 1}Image`
+    if (!dataUrl) { wbPhotoRefs.current[idx] = null; update(key, null); return }
+    const img = new Image()
+    img.onload = () => { wbPhotoRefs.current[idx] = img; update(key, dataUrl) }
+    img.src = dataUrl
+  }, [update])
+
+  const handleWbLogoChange = useCallback((idx, dataUrl) => {
+    const key = `wbSpeaker${idx + 1}Logo`
+    if (!dataUrl) { wbLogoRefs.current[idx] = null; update(key, null); return }
+    const img = new Image()
+    img.onload = () => { wbLogoRefs.current[idx] = img; update(key, dataUrl) }
+    img.src = dataUrl
+  }, [update])
+
   const draw = useCallback((canvas, s) => {
     if (s.templateType === 'twitter')          drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')   drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -412,6 +454,7 @@ export default function App() {
       : settings.templateType === 'titlecard'               ? 'airops-titlecard'
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'ijoined'                 ? 'airops-ijoined'
+      : settings.templateType === 'webinar'                 ? 'airops-webinar'
       : 'airops-quote'
     const modeTag = settings.templateType === 'ijoined' ? settings.ijMode : settings.colorMode
     const a = document.createElement('a')
@@ -431,6 +474,7 @@ export default function App() {
       : settings.templateType === 'richquote'               ? 'airops-richquote'
       : settings.templateType === 'titlecard'               ? 'airops-titlecard'
       : settings.templateType === 'certificate'             ? 'airops-certificate'
+      : settings.templateType === 'webinar'                 ? 'airops-webinar'
       : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(
@@ -541,6 +585,8 @@ export default function App() {
         onRichProfileImageChange={handleRichProfileImageChange}
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
+        onWbPhotoChange={handleWbPhotoChange}
+        onWbLogoChange={handleWbLogoChange}
         onRefleuron={handleRefleuron}
         onFetchBatch={handleFetchBatch}
         onBatchCsvUpload={handleBatchCsvUpload}

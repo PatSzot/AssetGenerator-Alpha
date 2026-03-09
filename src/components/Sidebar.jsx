@@ -20,6 +20,7 @@ const TEMPLATES = [
   { value: 'twitter',     label: 'Twitter Post', icon: '/Icon-Twitter.jpg'      },
   { value: 'certificate', label: 'Certificate',  icon: '/Icon-Certificate.jpg'  },
   { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
+  { value: 'webinar',     label: 'Webinar',      icon: '/Icon-Webinar.jpg'      },
 ]
 
 const DIMS = [
@@ -30,12 +31,14 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, onWbLogoChange, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
   const richLogoInputRef    = useRef(null)
   const ijPhotoInputRef     = useRef(null)
+  const wbPhotoInputRefs    = [useRef(null), useRef(null), useRef(null), useRef(null)]
+  const wbLogoInputRefs     = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const batchCsvInputRef    = useRef(null)
   const [certManualOpen, setCertManualOpen] = useState(false)
   const [csvDragOver, setCsvDragOver]       = useState(false)
@@ -676,6 +679,141 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
           <div className="div" />
         </>}
+
+        {/* Content — Webinar */}
+        {settings.templateType === 'webinar' && (() => {
+          const n = settings.wbNumSpeakers ?? 1
+          return <>
+            <div className="sec">Content</div>
+
+            <div className="field">
+              <label>Eyebrow</label>
+              <input type="text" value={settings.wbEyebrow ?? 'WEBINAR'} onChange={e => update('wbEyebrow', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Title Clause (serif)</label>
+              <input type="text" value={settings.wbTitleClause ?? ''} onChange={e => update('wbTitleClause', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Main Title</label>
+              <textarea value={settings.wbMainTitle ?? ''} onChange={e => update('wbMainTitle', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Date &amp; Time</label>
+              <input type="text" placeholder="Thursday, December 3rd\n1:00 PM EST" value={settings.wbDate ?? ''} onChange={e => update('wbDate', e.target.value)} />
+            </div>
+
+            <div className="div" />
+
+            <div className="sec">
+              Speakers
+              <div className="dim-grid" style={{ marginTop: 8 }}>
+                {[1, 2, 3, 4].map(num => (
+                  <button
+                    key={num}
+                    className={`dim-btn${n === num ? ' active' : ''}`}
+                    onClick={() => update('wbNumSpeakers', num)}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {Array.from({ length: n }, (_, i) => {
+              const idx = i
+              const sNum = i + 1
+              const photoKey = `wbSpeaker${sNum}Image`
+              const logoKey  = `wbSpeaker${sNum}Logo`
+              return (
+                <div key={sNum}>
+                  <div className="div" />
+                  <div className="sec">Speaker {sNum}</div>
+
+                  <div className="field">
+                    <label>Name</label>
+                    <input type="text" value={settings[`wbSpeaker${sNum}Name`] ?? ''} onChange={e => update(`wbSpeaker${sNum}Name`, e.target.value)} />
+                  </div>
+
+                  <div className="field">
+                    <label>Title &amp; Company</label>
+                    <input type="text" value={settings[`wbSpeaker${sNum}Role`] ?? ''} onChange={e => update(`wbSpeaker${sNum}Role`, e.target.value)} />
+                  </div>
+
+                  <div className="field">
+                    <label>Headshot Photo</label>
+                    <input
+                      ref={wbPhotoInputRefs[idx]}
+                      type="file" accept="image/*" style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = ev => onWbPhotoChange(idx, ev.target.result)
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }}
+                    />
+                    <button className="btn-upload" onClick={() => wbPhotoInputRefs[idx].current?.click()}>
+                      {settings[photoKey] ? '↺ Replace Photo' : '↑ Upload Photo'}
+                    </button>
+                    {settings[photoKey] && (
+                      <button className="btn-clear-photo" onClick={() => onWbPhotoChange(idx, null)}>✕ Remove photo</button>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label>Partner Logo</label>
+                    <input
+                      ref={wbLogoInputRefs[idx]}
+                      type="file" accept="image/svg+xml,image/png,image/*" style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = ev => onWbLogoChange(idx, ev.target.result)
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }}
+                    />
+                    <button className="btn-upload" onClick={() => wbLogoInputRefs[idx].current?.click()}>
+                      {settings[logoKey] ? '↺ Replace Logo' : '↑ Upload Logo'}
+                    </button>
+                    {settings[logoKey] && (
+                      <button className="btn-clear-photo" onClick={() => onWbLogoChange(idx, null)}>✕ Remove logo</button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+
+            <div className="div" />
+            <div className="sec">Decoration</div>
+            <div className="tog-row">
+              <label>Decoration</label>
+              <label className="toggle">
+                <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+                <div className="ttrack" /><div className="tthumb" />
+              </label>
+            </div>
+            {settings.showFloralia && (
+              <div style={{ paddingLeft: 12 }}>
+                <div className="tog-row">
+                  <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                  <label className="toggle">
+                    <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                    <div className="ttrack" /><div className="tthumb" />
+                  </label>
+                </div>
+                <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+              </div>
+            )}
+            <div className="div" />
+          </>
+        })()}
 
         {/* Color Mode — hidden for Certificate and I Joined (have their own palettes) */}
         {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined' && <>
