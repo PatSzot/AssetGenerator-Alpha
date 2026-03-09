@@ -42,13 +42,14 @@ function drawBadge(ctx, x, y, eyebrow, M, mono) {
   ctx.arc(x + dotPadX + dotR, y + h / 2, dotR, 0, Math.PI * 2)
   ctx.fill()
 
-  // Text: light/inverse color
+  // Text: light/inverse color, vertically centered
   ctx.fillStyle    = M.badgeText
   ctx.font         = `500 ${fontSize}px ${mono}`
   ctx.letterSpacing = '1.92px'
-  ctx.textBaseline = 'top'
-  ctx.fillText(eyebrow, x + textX, y + 8)
+  ctx.textBaseline = 'middle'
+  ctx.fillText(eyebrow, x + textX, y + h / 2)
   ctx.letterSpacing = '0px'
+  ctx.textBaseline = 'top'
 
   return w
 }
