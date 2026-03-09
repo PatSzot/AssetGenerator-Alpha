@@ -65,7 +65,7 @@ function drawSpeakerPhoto(ctx, x, y, w, h, img, M) {
   ctx.beginPath()
   ctx.rect(x, y, w, h)
   ctx.clip()
-  ctx.globalCompositeOperation = 'hard-light'
+  ctx.globalCompositeOperation = 'screen'
   ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih)
   ctx.globalCompositeOperation = 'source-over'
   ctx.restore()
@@ -177,25 +177,25 @@ function drawDate(ctx, date, x, y, maxW, sans, M) {
 function sizeMainTitle(ctx, text, maxW, maxH, maxFontSize, minFontSize, sans) {
   for (let f = maxFontSize; f >= minFontSize; f -= 2) {
     ctx.font         = `500 ${f}px ${sans}`
-    ctx.letterSpacing = '-2px'
+    ctx.letterSpacing = `-${(f * 0.02).toFixed(2)}px`
     const lines = wrapText(ctx, text, maxW)
     const totalH = lines.length * f * 0.94
     if (totalH <= maxH) return { lines, fontSize: f }
   }
   ctx.font         = `500 ${minFontSize}px ${sans}`
-  ctx.letterSpacing = '-2px'
+  ctx.letterSpacing = `-${(minFontSize * 0.02).toFixed(2)}px`
   return { lines: wrapText(ctx, text, maxW), fontSize: minFontSize }
 }
 
 // ── Draw title block (clause + main title), returns bottom y
 function drawTitleBlock(ctx, x, y, w, titleClause, mainTitle, clauseSz, mainSz, M, serif, sans) {
   const clauseLH = clauseSz * 0.94
-  const lk       = '-2px'
+  const lk       = `-${(mainSz * 0.02).toFixed(2)}px`
 
   // Clause
   if (titleClause) {
     ctx.font         = `400 ${clauseSz}px ${serif}`
-    ctx.letterSpacing = '-4px'
+    ctx.letterSpacing = `-${(clauseSz * 0.04).toFixed(2)}px`
     ctx.fillStyle    = M.ctaText
     ctx.textBaseline = 'top'
     ctx.fillText(titleClause, x, y)
@@ -313,10 +313,10 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
     // 1 speaker: bordered photo + name/role/logo block
     const sp      = speakers[0]
     const photoSz = Math.min(320, speakerH - 8)
-    const bw      = Math.round(cw * 0.001)
+    const bw      = 2
 
     // Bordered container
-    ctx.strokeStyle = M.ctaText
+    ctx.strokeStyle = M.lineColor
     ctx.lineWidth   = bw
     ctx.strokeRect(innerX + bw / 2, speakerY + bw / 2, photoSz - bw, photoSz - bw)
 
@@ -380,7 +380,7 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
   const n = speakers.length
 
   const innerH = ch - pad * 2
-  const logoH  = 56
+  const logoH  = n >= 3 ? 56 : 48
 
   if (n === 1) {
     // ── Left column (badge, partner logo row, title, airops logo)
@@ -410,8 +410,8 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     drawAirOpsLogo(ctx, pad, ch - pad - logoH, logoH, M, dpr)
 
     // Right: bordered photo square
-    const bw = Math.round(cw * 0.0006)
-    ctx.strokeStyle = M.ctaText
+    const bw = 2
+    ctx.strokeStyle = M.lineColor
     ctx.lineWidth   = bw
     ctx.strokeRect(rightX + bw / 2, pad + bw / 2, photoSz - bw, photoSz - bw)
     const ip = 8
@@ -514,10 +514,10 @@ function drawBlogGraphicLayout(ctx, cw, ch, settings, speakers, C, mono, dpr) {
   drawBadge(ctx, badgeX, 152, wbEyebrow, C, mono)
 
   // Bordered photo frames
-  const bw = Math.round(cw * 0.0006)
+  const bw = 2
   speakers.forEach((sp, i) => {
     const x = startX + i * (photoSz + gap)
-    ctx.strokeStyle = C.ctaText
+    ctx.strokeStyle = C.lineColor
     ctx.lineWidth   = bw
     ctx.strokeRect(x + bw / 2, photoY + bw / 2, photoSz - bw, photoSz - bw)
     drawSpeakerPhoto(ctx, x + innerPad, photoY + innerPad,
