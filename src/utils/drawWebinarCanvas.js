@@ -1,6 +1,13 @@
 import { MODES, buildLogo, wrapText } from './drawCanvas.js'
 import { STIPPLE_COLORS } from './drawFleurons.js'
 
+const DARK_MODES = {
+  'dark-green':  { bg: '#0f2412', lineColor: 'rgba(0,210,80,1)',    logoColor: '#e8f5ee' },
+  'dark-pink':   { bg: '#230a1e', lineColor: 'rgba(210,0,160,1)',   logoColor: '#f5e8f2' },
+  'dark-yellow': { bg: '#1c1d03', lineColor: 'rgba(190,190,0,1)',   logoColor: '#f5f5e0' },
+  'dark-blue':   { bg: '#0f0f5a', lineColor: 'rgba(100,100,255,1)', logoColor: '#e5e5ff' },
+}
+
 const BADGE_DOT_COLOR = '#e8272a'
 
 // ── WebinarBadge pill (green dot + eyebrow text)
@@ -46,7 +53,7 @@ function drawBadge(ctx, x, y, eyebrow, M, mono) {
 
 // ── Speaker photo box: dark bg + aspect-fill headshot with hard-light blend
 function drawSpeakerPhoto(ctx, x, y, w, h, img, M) {
-  ctx.fillStyle = M.ctaText
+  ctx.fillStyle = M.photoBg
   ctx.fillRect(x, y, w, h)
   if (!img) return
   const overscan = 4
@@ -87,7 +94,7 @@ function drawPartnerLogo(ctx, logoImg, x, y, maxW, maxH, M) {
 function drawAirOpsLogo(ctx, x, y, logoH, M, dpr) {
   const logoW = Math.round(784 * logoH / 252)
   const bmp   = buildLogo(M.text, Math.round(logoH * dpr))
-  ctx.fillStyle = M.pill
+  ctx.fillStyle = M.canvasBg
   ctx.fillRect(x, y, logoW, logoH)
   ctx.drawImage(bmp, x, y, logoW, logoH)
 }
@@ -133,7 +140,7 @@ function drawFloralia(ctx, settings, cw, ch, isLand, M) {
 
   if (settings.decorationStyle === 'inverted') {
     drawDots(floralia.outsideDots ?? floralia.insideDots, 0.28)
-    ctx.fillStyle = M.pill
+    ctx.fillStyle = M.canvasBg
     floralia.glyphs?.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
       ctx.font = `${fontSizeNorm * scale}px Floralia`
       ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
@@ -503,15 +510,39 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
   const sans  = fontsReady ? "'Saans', sans-serif"                : 'sans-serif'
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
-  const M = MODES[colorMode] ?? MODES['green']
+  const isDark   = colorMode?.startsWith('dark-')
+  const baseMode = isDark ? colorMode.replace('dark-', '') : colorMode
+  const M        = MODES[baseMode] ?? MODES['green']
+  const DM       = isDark ? DARK_MODES[colorMode] : null
 
-  // Background: Webinar uses M.pill (color-2) as main bg per Figma
-  ctx.fillStyle = M.pill
+  // Unified color token — same shape passed to all helpers
+  const C = isDark ? {
+    bg:       M.bg,           // badge pill bg (light paper for contrast)
+    canvasBg: DM.bg,          // main canvas background
+    lineColor: DM.lineColor,  // badge border + accent
+    text:     DM.logoColor,   // speaker name, logo
+    ctaText:  DM.logoColor,   // body text, date, title
+    photoBg:  DM.bg,          // speaker photo fill
+    pill:     DM.bg,          // unused but keeps shape consistent
+    pillText: DM.logoColor,
+  } : {
+    bg:       M.bg,
+    canvasBg: M.pill,         // webinar uses M.pill as main bg (Figma color-2)
+    lineColor: M.lineColor,
+    text:     M.text,
+    ctaText:  M.ctaText,
+    photoBg:  M.ctaText,
+    pill:     M.pill,
+    pillText: M.pillText,
+  }
+
+  // Background
+  ctx.fillStyle = C.canvasBg
   ctx.fillRect(0, 0, cw, ch)
 
   // Floralia decoration (drawn before content)
   const settingsWithFloralia = { ...settings, _floralia: floraliaDots }
-  drawFloralia(ctx, settingsWithFloralia, cw, ch, isLand, M)
+  drawFloralia(ctx, settingsWithFloralia, cw, ch, isLand, C)
 
   const n = Math.max(1, Math.min(4, wbNumSpeakers))
   const speakers = Array.from({ length: n }, (_, i) => ({
@@ -527,8 +558,8 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
   ctx.textBaseline = 'top'
 
   if (isLand) {
-    drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, sans, mono, dpr)
+    drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, C, serif, sans, mono, dpr)
   } else {
-    drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, serif, sans, mono, dpr)
+    drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, C, serif, sans, mono, dpr)
   }
 }

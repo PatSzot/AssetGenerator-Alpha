@@ -369,7 +369,7 @@ export default function App() {
     setSettings(prev => {
       const next = { ...prev, [key]: value }
       // Rich Quote and Quote Block don't support dark modes — reset if switching to them
-      if (key === 'templateType' && ['quote', 'richquote', 'webinar'].includes(value) && next.colorMode.startsWith('dark-')) {
+      if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
       // Certificate is fixed to 1920×1080

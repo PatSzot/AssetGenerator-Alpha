@@ -819,7 +819,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined' && <>
           <div className="sec">Color Mode</div>
           {(() => {
-            const modes = ['twitter', 'titlecard'].includes(settings.templateType)
+            const modes = ['twitter', 'titlecard', 'webinar'].includes(settings.templateType)
               ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
               : ['green', 'pink', 'yellow', 'blue']
             return (
