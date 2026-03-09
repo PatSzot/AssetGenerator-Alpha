@@ -70,18 +70,6 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
     if (isWebinar) setWbZoom(null)
   }, [isWebinar])
 
-  // ── Scroll-wheel zoom for webinar
-  useEffect(() => {
-    if (!isWebinar || !containerRef.current) return
-    const el = containerRef.current
-    const onWheel = (e) => {
-      e.preventDefault()
-      const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
-      setWbZoom(z => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, (z ?? 0.15) + delta)))
-    }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [isWebinar])
 
   // ── Draw single canvas
   useEffect(() => {
