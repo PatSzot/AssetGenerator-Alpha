@@ -296,19 +296,16 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
   const logoY    = innerY + innerH - logoH
 
   if (n === 1) {
-    // ── 1 speaker: title top-anchored, speaker below, logo at bottom
-    const speakerH = Math.min(320 + 180 + logoH + 24, innerH * 0.42)
-    const speakerY = logoY - logoH - speakerH - 16
+    // ── 1 speaker: title flows, speaker block anchored below title
+    const sp = speakers[0]
 
-    const titleY    = innerY + headerH + 24
-    const titleH    = innerH - headerH - 24 - speakerH - 24 - logoH - 16
-    const clauseH   = wbTitleClause ? Math.round(clauseSz * 0.94) + 24 : 0
-    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, titleH - clauseH, 130, 36, sans)
-    drawTitleBlock(ctx, innerX, titleY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
+    const contentY = innerY + headerH + 24
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, 9999, 130, 36, sans)
+    const titleBottomY = drawTitleBlock(ctx, innerX, contentY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
 
-    const sp      = speakers[0]
-    const photoSz = Math.min(320, speakerH - 8)
-    const bw      = 1.5
+    const speakerY = titleBottomY + 24
+    const photoSz  = 320
+    const bw       = 1.5
     ctx.strokeStyle = M.lineColor
     ctx.lineWidth   = bw
     ctx.strokeRect(innerX + bw / 2, speakerY + bw / 2, photoSz - bw, photoSz - bw)
@@ -316,9 +313,9 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
     drawSpeakerPhoto(ctx, innerX + innerPad, speakerY + innerPad,
       photoSz - innerPad * 2, photoSz - innerPad * 2, sp.image, M)
 
-    const textX = innerX + photoSz + 24
-    const textW = innerW - photoSz - 24
-    let ty      = speakerY
+    const textX  = innerX + photoSz + 24
+    const textW  = innerW - photoSz - 24
+    let ty       = speakerY
     const nameSz = Math.round(textW * 0.085)
     ctx.font         = `500 ${nameSz}px ${sans}`
     ctx.letterSpacing = `-${(nameSz * 0.02).toFixed(2)}px`
