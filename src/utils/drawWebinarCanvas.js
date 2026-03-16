@@ -473,20 +473,29 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     //   TitleContainer: left=40, w=1840, h=503, justify-between (badge top / title bottom)
     //   Speakers:       left=972, w=908, top=603.92, gap=16
 
-    const spGap     = 16
-    const spZoneW   = 908                              // Figma: speakers container width
-    const spZoneX   = cw - pad - spZoneW               // = 972
-    const blockW    = Math.floor((spZoneW - (n - 1) * spGap) / n)
+    const spGap         = 16
+    const TITLE_SP_GAP  = 24
+    const TC_H_REF      = 503  // same TC_H used by title block below
 
-    // Speaker text sizing (Figma: name=45px, role=32px at blockW=292)
+    // Target block height = space from title bottom to canvas bottom
+    // spBlockH = ch - pad(top) - TC_H - TITLE_SP_GAP - pad(bottom)
+    const targetBlockH  = ch - 2 * pad - TC_H_REF - TITLE_SP_GAP
+
+    // Back-solve blockW: targetBlockH = blockW + gap(16) + nameLH + 8 + roleLH*2
+    // nameLH ≈ blockW*0.185, roleLH ≈ blockW*0.132 → blockW ≈ (targetBlockH - 24) / 1.449
+    const blockW    = Math.round((targetBlockH - 24) / 1.449)
+
     const nameSz    = Math.max(18, Math.round(blockW * 0.154))
     const roleSz    = Math.max(13, Math.round(blockW * 0.110))
     const nameLH    = Math.round(nameSz * 1.2)
     const roleLH    = Math.round(roleSz * 1.2)
 
-    // Speaker blocks bottom-aligned (bottom = ch - pad)
+    // Actual block height (may differ by 1-2px from target due to rounding)
     const spBlockH  = blockW + 16 + nameLH + 8 + roleLH * 2
     const spY       = ch - pad - spBlockH
+
+    const spZoneW   = n * blockW + (n - 1) * spGap
+    const spZoneX   = cw - pad - spZoneW
 
     // ── Badge (top-left)
     drawBadge(ctx, pad, pad, wbEyebrow, M, mono)
