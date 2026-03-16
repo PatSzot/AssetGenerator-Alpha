@@ -293,23 +293,30 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
 
   const headerH = 96
 
-  // ── Speaker section height (bottom of content)
+  // ── Block dimensions for 2-4 speakers (needed to compute speakerH)
+  const blockGap = 16
+  const blockW = n < 2 ? 0
+    : n === 2 ? Math.round(innerW * 0.346)   // not full-width; left-aligned pair (Figma)
+    : Math.round((innerW - (n - 1) * blockGap) / n)
+  const nameSz_n = Math.max(20, Math.round(blockW * 0.14))
+  const roleSz_n = Math.max(14, Math.round(blockW * 0.10))
+
+  // ── Speaker section height — derived from block for n≥2, fixed for n=1
   const speakerH = n === 1
     ? Math.min(320 + 180 + logoH + 24, innerH * 0.42)
-    : n === 2 ? Math.round(innerH * 0.44)
-    : n === 3 ? Math.round(innerH * 0.40)
-    : Math.round(innerH * 0.34)
+    : blockW + blockGap + Math.round(nameSz_n * 1.2) + 8 + Math.round(roleSz_n * 1.2) * 2
 
   // ── Logo space at bottom
   const logoY = innerY + innerH - logoH
 
   // ── Title block
-  const titleY   = innerY + headerH + 24
-  const titleH   = innerH - headerH - 24 - speakerH - 24 - logoH - 16
-  const clauseSz = Math.min(72, Math.round(cw * 0.067))
-  const clauseH  = titleClause => titleClause ? Math.round(clauseSz * 0.94) + 24 : 0
+  const titleY    = innerY + headerH + 24
+  const titleH    = innerH - headerH - 24 - speakerH - 24 - logoH - 16
+  const clauseSz  = Math.min(72, Math.round(cw * 0.067))
+  const clauseH   = titleClause => titleClause ? Math.round(clauseSz * 0.94) + 24 : 0
   const availMain = titleH - clauseH(wbTitleClause)
-  const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, availMain, 130, 36, sans)
+  const maxMainSz = n === 1 ? 130 : 90   // Figma: 2+ speakers use 90px max
+  const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, availMain, maxMainSz, 36, sans)
   drawTitleBlock(ctx, innerX, titleY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
 
   // ── Speaker section
@@ -319,7 +326,7 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
     // 1 speaker: bordered photo + name/role/logo block
     const sp      = speakers[0]
     const photoSz = Math.min(320, speakerH - 8)
-    const bw      = 2
+    const bw      = 1.5
 
     // Bordered container
     ctx.strokeStyle = M.lineColor
@@ -355,16 +362,10 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
 
   } else {
     // 2-4 speakers: row of SpeakerBlocks
-    const gap  = 16
-    const totalGap = (n - 1) * gap
-    const blockW   = Math.round((innerW - totalGap) / n)
-    const nameSz   = Math.max(20, Math.round(blockW * 0.14))
-    const roleSz   = Math.max(14, Math.round(blockW * 0.10))
-
     speakers.forEach((sp, i) => {
-      const bx = innerX + i * (blockW + gap)
+      const bx = innerX + i * (blockW + blockGap)
       drawSpeakerBlock(ctx, bx, speakerY, blockW, speakerH,
-        sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M)
+        sp.name, sp.role, sp.image, sp.logo, nameSz_n, roleSz_n, sans, M)
     })
   }
 
