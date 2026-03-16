@@ -633,7 +633,7 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
 
   const pad       = 40
   const padTop    = isStory ? 240 : pad
-  const padBottom = isStory ? 240 : pad
+  const padBottom = isStory ? 360 : pad
 
   ctx.textBaseline = 'top'
 
