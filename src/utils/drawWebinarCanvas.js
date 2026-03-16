@@ -160,8 +160,8 @@ function dateLines(date) {
   return date.replace(/\\n/g, '\n').split('\n')
 }
 
-// ── Draw multi-line date/time block, right-aligned in box (x,y,w)
-function drawDate(ctx, date, x, y, maxW, sans, M) {
+// ── Draw multi-line date/time block; align='right' anchors to x+maxW, 'left' anchors to x
+function drawDate(ctx, date, x, y, maxW, sans, M, align = 'right') {
   const fontSize = 40
   const lh       = fontSize * 1.2
   const lines    = dateLines(date)
@@ -169,8 +169,9 @@ function drawDate(ctx, date, x, y, maxW, sans, M) {
   ctx.letterSpacing = '-0.8px'
   ctx.fillStyle    = M.ctaText
   ctx.textBaseline = 'top'
-  ctx.textAlign    = 'right'
-  lines.forEach((line, i) => ctx.fillText(line, x + maxW, y + i * lh))
+  ctx.textAlign    = align
+  const tx = align === 'right' ? x + maxW : x
+  lines.forEach((line, i) => ctx.fillText(line, tx, y + i * lh))
   ctx.textAlign    = 'left'
   ctx.letterSpacing = '0px'
   return lines.length * lh
@@ -267,7 +268,7 @@ function drawSpeakerBlock(ctx, x, y, w, name, role, img, logoImg, nameSz, roleSz
 // ─────────────────────────────────────────────
 // ── PORTRAIT / SQUARE / STORY layout (1080-wide)
 // ─────────────────────────────────────────────
-function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, serif, sans, mono, dpr) {
+function drawPortraitLayout(ctx, cw, ch, pad, padTop, padBottom, settings, speakers, M, serif, sans, mono, dpr) {
   const {
     wbTitleClause = 'Stop blaming attribution:',
     wbMainTitle   = 'Alignment is the only scoreboard that matters.',
@@ -280,7 +281,7 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
   const innerY = padTop
   const innerW = cw - pad * 2
   const logoH  = 48
-  const innerH = ch - padTop - pad  // available height
+  const innerH = ch - padTop - padBottom  // available height
 
   // ── Badge
   const badgeW = drawBadge(ctx, innerX, innerY, wbEyebrow, M, mono)
@@ -445,7 +446,11 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     const roleSz    = Math.max(14, Math.round(blockW * 0.10))
 
     drawBadge(ctx, pad, pad, wbEyebrow, M, mono)
-    drawDate(ctx, wbDate, speakersX, pad, speakersW, sans, M)
+
+    // Date: bottom-left of speaker zone, left-aligned (Figma: left=1056, top=934)
+    const dateLineCount = dateLines(wbDate).length
+    const dateH = dateLineCount * 40 * 1.2
+    drawDate(ctx, wbDate, speakersX, ch - pad - dateH, 0, sans, M, 'left')
 
     const titleY = Math.round(ch * 0.2)
     const titleW = leftW - pad
@@ -461,40 +466,56 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     })
 
   } else {
-    // ── 3-4 speakers: symmetric split, speakers right-half bottom-aligned (Figma)
-    const gap       = 16
-    const innerW    = cw - 2 * pad
-    const rightW    = Math.round((innerW - 24) / 2)   // half of inner width
-    const speakersX = cw - pad - rightW
-    const blockW    = Math.round((rightW - (n - 1) * gap) / n)
-    const nameSz    = Math.max(20, Math.round(blockW * 0.14))
-    const roleSz    = Math.max(14, Math.round(blockW * 0.10))
+    // ── 3-4 speakers (Figma node 2015:27424)
+    // Layout: full-width title top-half, speakers bottom-right half
+    // ─────────────────────────────────────────
+    // Measurements from Figma (1920×1080, pad=40):
+    //   TitleContainer: left=40, w=1840, h=503, justify-between (badge top / title bottom)
+    //   Speakers:       left=972, w=908, top=603.92, gap=16
+
+    const spGap     = 16
+    const spZoneW   = 908                              // Figma: speakers container width
+    const spZoneX   = cw - pad - spZoneW               // = 972
+    const blockW    = Math.floor((spZoneW - (n - 1) * spGap) / n)
+
+    // Speaker text sizing (Figma: name=45px, role=32px at blockW=292)
+    const nameSz    = Math.max(18, Math.round(blockW * 0.154))
+    const roleSz    = Math.max(13, Math.round(blockW * 0.110))
     const nameLH    = Math.round(nameSz * 1.2)
     const roleLH    = Math.round(roleSz * 1.2)
 
-    // Speaker blocks are bottom-aligned: bottom edge = ch - pad
-    const speakerBlockH = blockW + gap + nameLH + 8 + roleLH * 2
-    const speakerY      = ch - pad - speakerBlockH
+    // Speaker blocks bottom-aligned (bottom = ch - pad)
+    const spBlockH  = blockW + 16 + nameLH + 8 + roleLH * 2
+    const spY       = ch - pad - spBlockH
 
-    // Badge top-left
+    // ── Badge (top-left)
     drawBadge(ctx, pad, pad, wbEyebrow, M, mono)
 
-    // Date top-right, right-aligned within right column
-    drawDate(ctx, wbDate, speakersX, pad, rightW, sans, M)
+    // ── Date (top-right of speaker zone, right-aligned)
+    drawDate(ctx, wbDate, spZoneX, pad, spZoneW, sans, M)
 
-    // Title left half, from badge row down to speaker level
-    const titleY = pad + 80
-    const titleW = Math.round((innerW - 24) / 2)
-    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, titleW, speakerY - titleY, 130, 36, sans)
-    drawTitleBlock(ctx, pad, titleY, titleW, wbTitleClause, wbMainTitle, 72, mainSz, M, serif, sans)
+    // ── Title block: spans full inner width (cw - 2*pad = 1840)
+    //    Positioned at bottom of a 503px top container (Figma justify-between)
+    const TW          = cw - pad - pad               // = 1840 (full inner width)
+    const CLAUSE_SZ   = 72
+    const CLAUSE_LH   = Math.round(CLAUSE_SZ * 0.94) // ≈ 68
+    const TC_H        = 503                           // Figma TitleContainer height
+    const maxMainH    = TC_H - CLAUSE_LH - 24
+    const { lines: titleLines, fontSize: mainSz } =
+      sizeMainTitle(ctx, wbMainTitle, TW, maxMainH, 130, 36, sans)
+    const titleBlockH = CLAUSE_LH + 24 + Math.round(titleLines.length * mainSz * 0.94)
+    const titleY      = pad + TC_H - titleBlockH     // justify-between: pin title to bottom
+    drawTitleBlock(ctx, pad, titleY, TW, wbTitleClause, wbMainTitle, CLAUSE_SZ, mainSz, M, serif, sans)
 
+    // ── AirOps logo (bottom-left)
     drawAirOpsLogo(ctx, pad, ch - pad - logoH, logoH, M, dpr)
 
-    // Speaker blocks
+    // ── Speaker blocks (bottom-right)
     speakers.forEach((sp, i) => {
-      const bx = speakersX + i * (blockW + gap)
-      drawSpeakerBlock(ctx, bx, speakerY, blockW,
-        sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M)
+      drawSpeakerBlock(
+        ctx, spZoneX + i * (blockW + spGap), spY, blockW,
+        sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M,
+      )
     })
   }
 }
@@ -581,7 +602,7 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
     photoBg:  DM.bg,
     pill:     DM.bg,
     pillText: DM.logoColor,
-    badgeDot: DM.lineColor,    // accent dot in dark modes
+    badgeDot: '#e8272a',       // always red (Figma spec)
   } : {
     bg:       M.bg,
     canvasBg: M.pill,          // webinar uses M.pill as main bg (Figma color-2)
@@ -610,8 +631,9 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
     logo:  speakerLogos[i]  ?? null,
   }))
 
-  const pad    = 40
-  const padTop = isStory ? 240 : pad
+  const pad       = 40
+  const padTop    = isStory ? 240 : pad
+  const padBottom = isStory ? 240 : pad
 
   ctx.textBaseline = 'top'
 
@@ -620,6 +642,6 @@ export function drawWebinarCanvas(canvas, settings, fontsReady, speakerImages, s
   } else if (isLand) {
     drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, C, serif, sans, mono, dpr)
   } else {
-    drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, C, serif, sans, mono, dpr)
+    drawPortraitLayout(ctx, cw, ch, pad, padTop, padBottom, settings, speakers, C, serif, sans, mono, dpr)
   }
 }
