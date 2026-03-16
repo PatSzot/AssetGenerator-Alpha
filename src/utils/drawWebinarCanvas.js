@@ -219,11 +219,11 @@ function drawTitleBlock(ctx, x, y, w, titleClause, mainTitle, clauseSz, mainSz, 
 }
 
 // ── SpeakerBlock: photo + name + role (for 2-4 speakers)
-function drawSpeakerBlock(ctx, x, y, w, h, name, role, img, logoImg, nameSz, roleSz, sans, M) {
+function drawSpeakerBlock(ctx, x, y, w, name, role, img, logoImg, nameSz, roleSz, sans, M) {
   const bw      = 1.5                    // border width (Figma: 1.5px lineColor)
   const pad     = 16                     // inner padding inside border
   const gap     = 16                     // gap between photo frame and text
-  const logoH   = Math.min(36, Math.round(h * 0.06))
+  const logoH   = 32
 
   // Photo frame: full-width square with border
   const photoSide = w
@@ -291,81 +291,65 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, settings, speakers, M, ser
   const dateBoxW   = innerW - badgeW - 16
   drawDate(ctx, wbDate, dateBoxX, innerY + (58 - dateFontH) / 2, dateBoxW, sans, M)
 
-  const headerH = 96
-
-  // ── Block dimensions for 2-4 speakers (needed to compute speakerH)
-  const blockGap = 16
-  const blockW = n < 2 ? 0
-    : n === 2 ? Math.round(innerW * 0.346)   // not full-width; left-aligned pair (Figma)
-    : Math.round((innerW - (n - 1) * blockGap) / n)
-  const nameSz_n = Math.max(20, Math.round(blockW * 0.14))
-  const roleSz_n = Math.max(14, Math.round(blockW * 0.10))
-
-  // ── Speaker section height — derived from block for n≥2, fixed for n=1
-  const speakerH = n === 1
-    ? Math.min(320 + 180 + logoH + 24, innerH * 0.42)
-    : blockW + blockGap + Math.round(nameSz_n * 1.2) + 8 + Math.round(roleSz_n * 1.2) * 2
-
-  // ── Logo space at bottom
-  const logoY = innerY + innerH - logoH
-
-  // ── Title block
-  const titleY    = innerY + headerH + 24
-  const titleH    = innerH - headerH - 24 - speakerH - 24 - logoH - 16
-  const clauseSz  = Math.min(72, Math.round(cw * 0.067))
-  const clauseH   = titleClause => titleClause ? Math.round(clauseSz * 0.94) + 24 : 0
-  const availMain = titleH - clauseH(wbTitleClause)
-  const maxMainSz = n === 1 ? 130 : 90   // Figma: 2+ speakers use 90px max
-  const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, availMain, maxMainSz, 36, sans)
-  drawTitleBlock(ctx, innerX, titleY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
-
-  // ── Speaker section
-  const speakerY = logoY - logoH - speakerH - 16
+  const headerH  = 96
+  const clauseSz = Math.min(72, Math.round(cw * 0.067))
+  const logoY    = innerY + innerH - logoH
 
   if (n === 1) {
-    // 1 speaker: bordered photo + name/role/logo block
+    // ── 1 speaker: title top-anchored, speaker below, logo at bottom
+    const speakerH = Math.min(320 + 180 + logoH + 24, innerH * 0.42)
+    const speakerY = logoY - logoH - speakerH - 16
+
+    const titleY    = innerY + headerH + 24
+    const titleH    = innerH - headerH - 24 - speakerH - 24 - logoH - 16
+    const clauseH   = wbTitleClause ? Math.round(clauseSz * 0.94) + 24 : 0
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, titleH - clauseH, 130, 36, sans)
+    drawTitleBlock(ctx, innerX, titleY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
+
     const sp      = speakers[0]
     const photoSz = Math.min(320, speakerH - 8)
     const bw      = 1.5
-
-    // Bordered container
     ctx.strokeStyle = M.lineColor
     ctx.lineWidth   = bw
     ctx.strokeRect(innerX + bw / 2, speakerY + bw / 2, photoSz - bw, photoSz - bw)
-
     const innerPad = 8
     drawSpeakerPhoto(ctx, innerX + innerPad, speakerY + innerPad,
       photoSz - innerPad * 2, photoSz - innerPad * 2, sp.image, M)
 
-    // Name + role + logo to the right
-    const textX  = innerX + photoSz + 24
-    const textW  = innerW - photoSz - 24
-    let ty       = speakerY
-
-    ctx.font         = `500 ${Math.round(textW * 0.085)}px ${sans}`
-    ctx.letterSpacing = '-1.12px'
-    ctx.fillStyle    = M.text
-    ctx.textBaseline = 'top'
+    const textX = innerX + photoSz + 24
+    const textW = innerW - photoSz - 24
+    let ty      = speakerY
     const nameSz = Math.round(textW * 0.085)
+    ctx.font         = `500 ${nameSz}px ${sans}`
+    ctx.letterSpacing = `-${(nameSz * 0.02).toFixed(2)}px`
+    ctx.fillStyle    = M.ctaText
+    ctx.textBaseline = 'top'
     ctx.fillText(sp.name, textX, ty, textW)
     ty += Math.round(nameSz * 1.2) + 8
-
     const roleSz = Math.round(textW * 0.06)
     ctx.font         = `400 ${roleSz}px ${sans}`
-    ctx.letterSpacing = '-0.8px'
-    ctx.fillStyle    = M.ctaText
+    ctx.letterSpacing = `-${(roleSz * 0.02).toFixed(2)}px`
     const roleLines  = wrapText(ctx, sp.role, textW)
     roleLines.forEach((line, i) => ctx.fillText(line, textX, ty + i * Math.round(roleSz * 1.2)))
     ty += roleLines.length * Math.round(roleSz * 1.2) + 12
-
     if (sp.logo) drawPartnerLogo(ctx, sp.logo, textX, ty, textW * 0.65, 44, M)
 
   } else {
-    // 2-4 speakers: row of SpeakerBlocks
+    // ── 2-4 speakers: title flows into speakers (Figma justify-between: header / [title+speakers] / logo)
+    const blockGap = 16
+    const blockW   = n === 2 ? Math.round(innerW * 0.346) : Math.round((innerW - (n - 1) * blockGap) / n)
+    const nameSz   = Math.max(20, Math.round(blockW * 0.14))
+    const roleSz   = Math.max(14, Math.round(blockW * 0.10))
+
+    const contentY     = innerY + headerH + 24
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, 9999, 90, 36, sans)
+    const titleBottomY = drawTitleBlock(ctx, innerX, contentY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
+
+    const speakerY = titleBottomY + 24
     speakers.forEach((sp, i) => {
       const bx = innerX + i * (blockW + blockGap)
-      drawSpeakerBlock(ctx, bx, speakerY, blockW, speakerH,
-        sp.name, sp.role, sp.image, sp.logo, nameSz_n, roleSz_n, sans, M)
+      drawSpeakerBlock(ctx, bx, speakerY, blockW,
+        sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M)
     })
   }
 
@@ -485,7 +469,7 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
 
     speakers.forEach((sp, i) => {
       const bx = speakersX + i * (blockW + gap)
-      drawSpeakerBlock(ctx, bx, speakerY, blockW, blockH,
+      drawSpeakerBlock(ctx, bx, speakerY, blockW,
         sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M)
     })
   }
