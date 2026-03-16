@@ -434,36 +434,63 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     ctx.textAlign    = 'left'
     ctx.letterSpacing = '0px'
 
-  } else {
-    // ── 2-4 speakers
-    const leftW   = n === 2 ? Math.round(cw * 0.48) : Math.round(cw * 0.47)
+  } else if (n === 2) {
+    // ── 2 speakers: side-by-side, speakers top-aligned on right
+    const leftW     = Math.round(cw * 0.48)
     const speakersX = leftW + pad
     const speakersW = cw - speakersX - pad
     const gap       = 16
-    const blockW    = Math.round((speakersW - (n - 1) * gap) / n)
+    const blockW    = Math.round((speakersW - gap) / 2)
+    const nameSz    = Math.max(20, Math.round(blockW * 0.14))
+    const roleSz    = Math.max(14, Math.round(blockW * 0.10))
 
-    // Badge (top left)
     drawBadge(ctx, pad, pad, wbEyebrow, M, mono)
-
-    // Date (top right)
     drawDate(ctx, wbDate, speakersX, pad, speakersW, sans, M)
 
-    // Title block (left, vertically centered)
-    const titleY = n === 2 ? Math.round(ch * 0.2) : Math.round(ch * 0.15)
+    const titleY = Math.round(ch * 0.2)
     const titleW = leftW - pad
-    const availH = ch - titleY - pad
-    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, titleW, availH * 0.75, 130, 36, sans)
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, titleW, (ch - titleY - pad) * 0.75, 130, 36, sans)
     drawTitleBlock(ctx, pad, titleY, titleW, wbTitleClause, wbMainTitle, 72, mainSz, M, serif, sans)
 
-    // AirOps logo
     drawAirOpsLogo(ctx, pad, ch - pad - logoH, logoH, M, dpr)
 
-    // SpeakerBlocks
-    const blockH = n === 2 ? Math.round(ch * 0.54) : Math.round(ch * 0.40)
-    const speakerY = n === 2 ? pad : Math.round(ch * 0.52)
-    const nameSz = Math.max(20, Math.round(blockW * 0.14))
-    const roleSz = Math.max(14, Math.round(blockW * 0.10))
+    speakers.forEach((sp, i) => {
+      const bx = speakersX + i * (blockW + gap)
+      drawSpeakerBlock(ctx, bx, pad, blockW,
+        sp.name, sp.role, sp.image, sp.logo, nameSz, roleSz, sans, M)
+    })
 
+  } else {
+    // ── 3-4 speakers: symmetric split, speakers right-half bottom-aligned (Figma)
+    const gap       = 16
+    const innerW    = cw - 2 * pad
+    const rightW    = Math.round((innerW - 24) / 2)   // half of inner width
+    const speakersX = cw - pad - rightW
+    const blockW    = Math.round((rightW - (n - 1) * gap) / n)
+    const nameSz    = Math.max(20, Math.round(blockW * 0.14))
+    const roleSz    = Math.max(14, Math.round(blockW * 0.10))
+    const nameLH    = Math.round(nameSz * 1.2)
+    const roleLH    = Math.round(roleSz * 1.2)
+
+    // Speaker blocks are bottom-aligned: bottom edge = ch - pad
+    const speakerBlockH = blockW + gap + nameLH + 8 + roleLH * 2
+    const speakerY      = ch - pad - speakerBlockH
+
+    // Badge top-left
+    drawBadge(ctx, pad, pad, wbEyebrow, M, mono)
+
+    // Date top-right, right-aligned within right column
+    drawDate(ctx, wbDate, speakersX, pad, rightW, sans, M)
+
+    // Title left half, from badge row down to speaker level
+    const titleY = pad + 80
+    const titleW = Math.round((innerW - 24) / 2)
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, titleW, speakerY - titleY, 130, 36, sans)
+    drawTitleBlock(ctx, pad, titleY, titleW, wbTitleClause, wbMainTitle, 72, mainSz, M, serif, sans)
+
+    drawAirOpsLogo(ctx, pad, ch - pad - logoH, logoH, M, dpr)
+
+    // Speaker blocks
     speakers.forEach((sp, i) => {
       const bx = speakersX + i * (blockW + gap)
       drawSpeakerBlock(ctx, bx, speakerY, blockW,
