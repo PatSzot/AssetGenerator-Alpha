@@ -422,7 +422,7 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     const roleLines = wrapText(ctx, sp.role, rightW)
     roleLines.forEach((line, i) => ctx.fillText(line, rightX, roleY + i * Math.round(roleSz * 1.2)))
 
-    // Date bottom-right
+    // Date bottom-left of right column (aligned with name/role)
     const dateLinesArr = dateLines(wbDate)
     const dateSz = 40
     const dateLH = dateSz * 1.2
@@ -430,9 +430,7 @@ function drawLandscapeLayout(ctx, cw, ch, pad, settings, speakers, M, serif, san
     ctx.font         = `400 ${dateSz}px ${sans}`
     ctx.letterSpacing = '-0.8px'
     ctx.fillStyle    = M.ctaText
-    ctx.textAlign    = 'right'
-    dateLinesArr.forEach((line, i) => ctx.fillText(line, cw - pad, dateY + i * dateLH))
-    ctx.textAlign    = 'left'
+    dateLinesArr.forEach((line, i) => ctx.fillText(line, rightX, dateY + i * dateLH))
     ctx.letterSpacing = '0px'
 
   } else if (n === 2) {
