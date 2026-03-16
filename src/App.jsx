@@ -10,6 +10,7 @@ import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
 import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
+import { drawCEDCanvas } from './utils/drawCEDCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -221,6 +222,7 @@ const DEFAULT_SETTINGS = {
   ijShowHiring:      true,
   ijProfileImage:    null,
   // Webinar template
+  wbStyle:           'regular',
   wbNumSpeakers:     1,
   wbEyebrow:         'WEBINAR',
   wbTitleClause:     'Stop blaming attribution:',
@@ -498,6 +500,7 @@ export default function App() {
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)
   }, [fontsReady, floraliaReady]) // eslint-disable-line react-hooks/exhaustive-deps

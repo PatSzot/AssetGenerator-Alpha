@@ -7,6 +7,7 @@ export async function loadFonts() {
     new FontFace('Saans', 'url(/Saans-Bold.ttf)', { weight: '700' }),
     new FontFace('Saans Mono', 'url(/SaansMono-Medium.ttf)', { weight: '500' }),
     new FontFace('Floralia', 'url(/Floralia.ttf)'),
+    new FontFace('Saraband', 'url(/SarabandLettering.ttf)'),
   ];
   await Promise.all(faces.map(async f => { await f.load(); document.fonts.add(f); }));
 

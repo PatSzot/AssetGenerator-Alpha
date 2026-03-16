@@ -692,6 +692,24 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {settings.templateType === 'webinar' && (() => {
           const n = settings.wbNumSpeakers ?? 1
           return <>
+            <div className="sec">Style</div>
+
+            <div className="field">
+              <div className="mode-grid-wide" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                {[
+                  { value: 'regular', label: 'Regular' },
+                  { value: 'ced',     label: 'Content Eng. Dept.' },
+                ].map(s => (
+                  <button
+                    key={s.value}
+                    className={`mode-btn${(settings.wbStyle ?? 'regular') === s.value ? ' active' : ''}`}
+                    onClick={() => update('wbStyle', s.value)}
+                  >{s.label}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="div" />
             <div className="sec">Content</div>
 
             <div className="field">
@@ -699,10 +717,10 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <input type="text" value={settings.wbEyebrow ?? 'WEBINAR'} onChange={e => update('wbEyebrow', e.target.value)} />
             </div>
 
-            <div className="field">
+            {(settings.wbStyle ?? 'regular') === 'regular' && <div className="field">
               <label>Title Clause (serif)</label>
               <input type="text" value={settings.wbTitleClause ?? ''} onChange={e => update('wbTitleClause', e.target.value)} />
-            </div>
+            </div>}
 
             <div className="field">
               <label>Main Title</label>
@@ -823,8 +841,9 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           </>
         })()}
 
-        {/* Color Mode — hidden for Certificate and I Joined (have their own palettes) */}
-        {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined' && <>
+        {/* Color Mode — hidden for Certificate, I Joined, and CED webinar (dark-only) */}
+        {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined'
+         && !(settings.templateType === 'webinar' && settings.wbStyle === 'ced') && <>
           <div className="sec">Color Mode</div>
           {(() => {
             const modes = ['twitter', 'titlecard', 'webinar'].includes(settings.templateType)
