@@ -252,8 +252,9 @@ export default function App() {
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
   const [batchExporting, setBatchExporting] = useState(false)
-  const [batchRows, setBatchRows]         = useState(null)
-  const [batchFetching, setBatchFetching] = useState(false)
+  const [batchRows, setBatchRows]             = useState(null)
+  const [batchFetching, setBatchFetching]     = useState(false)
+  const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
   const [airopsApiKey, setAiropsApiKey]   = useState(() => localStorage.getItem('airops-api-key') ?? '')
 
   const profileImageRef      = useRef(null)
@@ -427,12 +428,37 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
-  const handleWbPhotoChange = useCallback((idx, dataUrl) => {
+  const handleWbPhotoChange = useCallback(async (idx, dataUrl) => {
     const key = `wbSpeaker${idx + 1}Image`
     if (!dataUrl) { wbPhotoRefs.current[idx] = null; update(key, null); return }
+
+    // Mark as processing
+    setWbPhotoProcessing(prev => new Set([...prev, idx]))
+
+    let finalUrl = dataUrl
+    try {
+      const [header, base64] = dataUrl.split(',')
+      const mimeType = header.match(/:(.*?);/)[1]
+      const resp = await fetch('/api/stipple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType }),
+      })
+      if (resp.ok) {
+        const { image: stippled, mimeType: outMime } = await resp.json()
+        finalUrl = `data:${outMime};base64,${stippled}`
+      }
+    } catch (e) {
+      console.warn('Stipple effect failed, using original', e)
+    }
+
     const img = new Image()
-    img.onload = () => { wbPhotoRefs.current[idx] = img; update(key, dataUrl) }
-    img.src = dataUrl
+    img.onload = () => {
+      wbPhotoRefs.current[idx] = img
+      update(key, finalUrl)
+      setWbPhotoProcessing(prev => { const s = new Set(prev); s.delete(idx); return s })
+    }
+    img.src = finalUrl
   }, [update])
 
   const handleWbExport = useCallback(() => {
@@ -619,6 +645,7 @@ export default function App() {
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
         onWbPhotoChange={handleWbPhotoChange}
+        wbPhotoProcessing={wbPhotoProcessing}
         onWbLogoChange={handleWbLogoChange}
         onWbExport={handleWbExport}
         onRefleuron={handleRefleuron}

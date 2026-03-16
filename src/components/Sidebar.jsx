@@ -39,7 +39,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -765,8 +765,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                         e.target.value = ''
                       }}
                     />
-                    <button className="btn-upload" onClick={() => wbPhotoInputRefs[idx].current?.click()}>
-                      {settings[photoKey] ? '↺ Replace Photo' : '↑ Upload Photo'}
+                    <button className="btn-upload" onClick={() => wbPhotoInputRefs[idx].current?.click()} disabled={wbPhotoProcessing?.has(idx)}>
+                      {wbPhotoProcessing?.has(idx) ? '⏳ Processing...' : settings[photoKey] ? '↺ Replace Photo' : '↑ Upload Photo'}
                     </button>
                     {settings[photoKey] && (
                       <button className="btn-clear-photo" onClick={() => onWbPhotoChange(idx, null)}>✕ Remove photo</button>

@@ -3,6 +3,9 @@
     "api/certificate.js": {
       "memory": 1024,
       "maxDuration": 45
+    },
+    "api/stipple.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
