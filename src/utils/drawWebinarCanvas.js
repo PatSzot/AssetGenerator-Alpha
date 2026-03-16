@@ -222,7 +222,7 @@ function drawTitleBlock(ctx, x, y, w, titleClause, mainTitle, clauseSz, mainSz, 
 // ── SpeakerBlock: photo + name + role (for 2-4 speakers)
 function drawSpeakerBlock(ctx, x, y, w, name, role, img, logoImg, nameSz, roleSz, sans, M) {
   const bw      = 1.5                    // border width (Figma: 1.5px lineColor)
-  const pad     = 16                     // inner padding inside border
+  const pad     = 8                      // inner padding inside border
   const gap     = 16                     // gap between photo frame and text
   const logoH   = 32
 
