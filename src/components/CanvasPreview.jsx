@@ -111,14 +111,6 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
       <span className={`fpill${fontsReady ? ' ready' : ''}`}>
         {fontsReady ? 'Fonts ready' : 'Loading fonts…'}
       </span>
-      {isWebinar && (
-        <div className="zoom-controls">
-          <button className="zoom-btn" onClick={() => setWbZoom(z => Math.max(ZOOM_MIN, (z ?? zoom) - ZOOM_STEP))}>−</button>
-          <span className="zoom-pct">{zoomPct}%</span>
-          <button className="zoom-btn" onClick={() => setWbZoom(z => Math.min(ZOOM_MAX, (z ?? zoom) + ZOOM_STEP))}>+</button>
-          <button className="zoom-btn zoom-fit" onClick={computeWbFit} title="Fit">⊡</button>
-        </div>
-      )}
       <svg className="toolbar-logo" viewBox="0 0 784 252" fill="none">
         <path d="M111.828 65.6415V88.4663C101.564 72.0112 85.627 61.9258 65.9084 61.9258C23.7703 61.9258 0 92.9782 0 134.647C0 176.581 24.0404 208.695 66.4487 208.695C86.1672 208.695 101.834 198.609 111.828 182.154V204.979H144.782V65.6415H111.828ZM72.9315 181.093C48.8911 181.093 35.1152 159.064 35.1152 134.647C35.1152 110.76 48.621 89.7933 73.4717 89.7933C94.0006 89.7933 111.558 104.391 111.558 134.116C111.558 163.31 94.8109 181.093 72.9315 181.093Z" fill="currentColor"/>
         <path d="M173.137 65.6494V204.987H208.252V65.6494H173.137Z" fill="currentColor"/>
@@ -152,6 +144,12 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
                 <span className="wb-canvas-label">{label}</span>
               </div>
             ))}
+          </div>
+          <div className="zoom-controls">
+            <button className="zoom-btn" onClick={() => setWbZoom(z => Math.max(ZOOM_MIN, (z ?? zoom) - ZOOM_STEP))}>−</button>
+            <span className="zoom-pct">{zoomPct}%</span>
+            <button className="zoom-btn" onClick={() => setWbZoom(z => Math.min(ZOOM_MAX, (z ?? zoom) + ZOOM_STEP))}>+</button>
+            <button className="zoom-btn zoom-fit" onClick={computeWbFit} title="Fit">⊡</button>
           </div>
         </div>
       </div>

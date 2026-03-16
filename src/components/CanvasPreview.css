@@ -97,6 +97,7 @@
   align-items: center;
   justify-content: flex-start;
   padding: 24px 40px;
+  position: relative;
 }
 
 .wb-canvas-row {
@@ -124,27 +125,35 @@
   white-space: nowrap;
 }
 
-/* ── Zoom controls */
+/* ── Zoom controls (floating, bottom-left of canvas area) */
 .zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+  z-index: 10;
 }
 
 .zoom-btn {
   background: none;
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 5px;
   padding: 0;
   transition: background .15s, color .15s;
 }
@@ -152,25 +161,18 @@
   background: rgba(128,128,128,.12);
 }
 .zoom-fit {
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .zoom-pct {
   font-family: 'Saans Mono', 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
   color: var(--text-dim);
   letter-spacing: .04em;
-  min-width: 32px;
+  min-width: 40px;
   text-align: center;
 }
 
-/* Push logo to the right when zoom controls are present */
-.canvas-toolbar:has(.zoom-controls) .toolbar-logo {
-  margin-left: 0;
-}
 .canvas-toolbar .fpill {
   margin-left: auto;
-}
-.canvas-toolbar:has(.zoom-controls) .fpill {
-  margin-left: 0;
 }
