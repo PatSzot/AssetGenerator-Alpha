@@ -14,16 +14,16 @@ import { join } from 'path'
 
 const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'ijoined'])
 
-// Color palettes matching drawCanvas.js MODES
+// Color palettes matching drawCanvas.js MODES + drawTitleCardCanvas.js accents
 const PALETTES = {
-  green:        { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', lineColor: '#008c44' },
-  pink:         { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', lineColor: '#8c0044' },
-  yellow:       { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', lineColor: '#7a7200' },
-  blue:         { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', lineColor: '#0014a8' },
-  'dark-green': { bg: '#002910', text: '#f8fffa', pill: '#001d0b', pillText: '#c0ffd2', lineColor: '#00ff64' },
-  'dark-pink':  { bg: '#3a092c', text: '#fff7ff', pill: '#2a0620', pillText: '#c54b9b', lineColor: '#c54b9b' },
-  'dark-yellow':{ bg: '#242603', text: '#fdfff3', pill: '#1a1c02', pillText: '#d4e87a', lineColor: '#7a7200' },
-  'dark-blue':  { bg: '#0f0f57', text: '#f5f6ff', pill: '#0a0a3d', pillText: '#d0d0ff', lineColor: '#0014a8' },
+  green:        { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', lineColor: '#008c44', ctaText: '#002910', accent: '#008c44' },
+  pink:         { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', lineColor: '#8c0044', ctaText: '#3a092c', accent: '#8c0044' },
+  yellow:       { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', lineColor: '#7a7200', ctaText: '#242603', accent: '#7a7200' },
+  blue:         { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', lineColor: '#0014a8', ctaText: '#0e0e57', accent: '#0014a8' },
+  'dark-green': { bg: '#0f2412', text: '#e8f5ee', pill: '#001408', pillText: '#c0ffd2', lineColor: 'rgba(0,210,80,1)', ctaText: '#002910', accent: 'rgba(0,210,80,1)' },
+  'dark-pink':  { bg: '#230a1e', text: '#f5e8f2', pill: '#140006', pillText: '#c54b9b', lineColor: 'rgba(210,0,160,1)', ctaText: '#3a092c', accent: 'rgba(210,0,160,1)' },
+  'dark-yellow':{ bg: '#1c1d03', text: '#f5f5e0', pill: '#0e0e00', pillText: '#d4e87a', lineColor: 'rgba(190,190,0,1)', ctaText: '#242603', accent: 'rgba(190,190,0,1)' },
+  'dark-blue':  { bg: '#0f0f5a', text: '#e5e5ff', pill: '#00000e', pillText: '#d0d0ff', lineColor: 'rgba(100,100,255,1)', ctaText: '#0e0e57', accent: 'rgba(100,100,255,1)' },
 }
 
 // AirOps logo as SVG string for embedding
@@ -92,10 +92,6 @@ function quoteCard(p, palette, w, h) {
   else if (len > 140) qFont = Math.max(64, baseQ - 18)
   else if (len > 80) qFont = Math.max(72, baseQ - 10)
 
-  // Name size scales with canvas
-  const nameSz = 64
-  const dashSz = 56
-  const pillSz = 32
   const logoH = 72
 
   return {
@@ -170,7 +166,7 @@ function quoteCard(p, palette, w, h) {
                           display: 'flex',
                           alignSelf: 'flex-start',
                           marginLeft: '68px',
-                          marginTop: '8px',
+                          marginTop: '4px',
                         },
                         children: [{
                           type: 'div',
@@ -221,22 +217,28 @@ function quoteCard(p, palette, w, h) {
 }
 
 function richQuoteCard(p, palette, w, h) {
-  const pad = 40
+  const isLand = w > h
+  const contentPad = isLand ? 53 : 40
   const half = Math.floor(w / 2)
   const text = p.text || ''
   const firstName = p.customerName ? p.customerName.split(' ')[0] : ''
   const lastName = p.customerName ? p.customerName.split(' ').slice(1).join(' ') : ''
   const role = p.role || ''
 
+  // Responsive sizes matching drawRichQuoteCanvas
+  const nameSz = isLand ? 120 : 96
+  const nameLH = nameSz * 0.84
+  const quoteSzBase = isLand ? 64 : 56
+
   // Auto-size quote text
   const len = text.length
-  let qFont = 56
-  if (len > 300) qFont = 36
-  else if (len > 200) qFont = 42
-  else if (len > 120) qFont = 48
+  let qFont = quoteSzBase
+  if (len > 300) qFont = Math.max(28, quoteSzBase - 24)
+  else if (len > 200) qFont = Math.max(36, quoteSzBase - 16)
+  else if (len > 120) qFont = Math.max(44, quoteSzBase - 8)
 
-  // Left column: stippled headshot (top ~75%) + company logo (bottom ~25%)
-  const logoAreaH = Math.floor(h * 0.2)
+  // Left column: stippled headshot (top) + company logo panel (bottom)
+  const logoAreaH = isLand ? 203 : Math.floor(h * 0.2)
   const photoAreaH = h - logoAreaH
 
   const leftChildren = [
@@ -331,7 +333,7 @@ function richQuoteCard(p, palette, w, h) {
               justifyContent: 'flex-start',
               width: `${half}px`,
               height: '100%',
-              padding: `${pad}px ${pad}px`,
+              padding: `${contentPad}px ${contentPad}px`,
             },
             children: [
               // First name (serif)
@@ -340,10 +342,10 @@ function richQuoteCard(p, palette, w, h) {
                 props: {
                   style: {
                     display: 'flex',
-                    fontSize: '96px',
+                    fontSize: `${nameSz}px`,
                     fontFamily: 'Serrif',
                     color: palette.text,
-                    lineHeight: 1.0,
+                    lineHeight: 0.84,
                     letterSpacing: '-0.02em',
                   },
                   children: firstName,
@@ -355,13 +357,13 @@ function richQuoteCard(p, palette, w, h) {
                 props: {
                   style: {
                     display: 'flex',
-                    fontSize: '96px',
+                    fontSize: `${nameSz}px`,
                     fontFamily: 'Saans',
                     fontWeight: 700,
                     color: palette.text,
-                    lineHeight: 1.0,
+                    lineHeight: 0.84,
                     letterSpacing: '-0.02em',
-                    marginBottom: '8px',
+                    marginBottom: '24px',
                   },
                   children: lastName,
                 },
@@ -377,7 +379,7 @@ function richQuoteCard(p, palette, w, h) {
                     fontWeight: 500,
                     color: palette.text,
                     lineHeight: 1.3,
-                    marginBottom: '32px',
+                    marginBottom: '24px',
                   },
                   children: role,
                 },
@@ -394,8 +396,7 @@ function richQuoteCard(p, palette, w, h) {
                     fontFamily: 'Saans',
                     fontWeight: 700,
                     color: palette.text,
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.02em',
+                    lineHeight: 1.14,
                   },
                   children: text,
                 },
@@ -408,149 +409,301 @@ function richQuoteCard(p, palette, w, h) {
   }
 }
 
-function titleCard(p, palette) {
+function titleCard(p, palette, w, h) {
+  const pad = 40
+  const isLand = w > h
+  const serifSz = isLand ? 148 : 112
+  const sansSz = isLand ? 144 : 108
+  const subSz = 40
+  const eyebrowSz = 28
+  const logoH = 56
+
   return {
     type: 'div',
     props: {
       style: {
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
         width: '100%',
         height: '100%',
         backgroundColor: palette.bg,
-        padding: '80px',
+        position: 'relative',
         fontFamily: 'Saans',
       },
       children: [
-        p.eyebrow ? {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              fontSize: '14px',
-              fontFamily: 'SaansMono',
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              color: palette.accent,
-              marginBottom: '24px',
-              padding: '8px 16px',
-              border: `1px solid ${palette.pillBorder}`,
-              backgroundColor: palette.pill,
-              borderRadius: '5px',
-              alignSelf: 'flex-start',
-            },
-            children: p.eyebrow,
-          },
-        } : null,
+        // Left vertical line
+        { type: 'div', props: { style: { position: 'absolute', left: `${pad}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
+        // Right vertical line
+        { type: 'div', props: { style: { position: 'absolute', right: `${pad}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
+        // Content
         {
           type: 'div',
           props: {
             style: {
               display: 'flex',
-              fontSize: '72px',
-              fontFamily: 'Serrif',
-              color: palette.text,
-              lineHeight: 1.04,
-              letterSpacing: '-0.02em',
-              marginBottom: '8px',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
+              padding: `${pad}px ${pad + 8}px`,
             },
-            children: p.serifTitle || '',
+            children: [
+              // Logo top center
+              {
+                type: 'div',
+                props: {
+                  style: { display: 'flex', marginBottom: '32px' },
+                  children: [{
+                    type: 'img',
+                    props: {
+                      src: `data:image/svg+xml,${encodeURIComponent(AIROPS_LOGO_SVG.replace(/currentColor/g, palette.text))}`,
+                      width: Math.round(784 * logoH / 252),
+                      height: logoH,
+                      style: { display: 'flex' },
+                    },
+                  }],
+                },
+              },
+              // Eyebrow pill
+              p.eyebrow ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: `${eyebrowSz}px`,
+                    fontFamily: 'SaansMono',
+                    fontWeight: 500,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: palette.accent,
+                    marginBottom: '24px',
+                    padding: '8px 16px',
+                    border: `1.5px solid ${palette.accent}`,
+                    backgroundColor: '#ffffff',
+                    borderRadius: '8px',
+                  },
+                  children: p.eyebrow,
+                },
+              } : null,
+              // Serif title
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: `${serifSz}px`,
+                    fontFamily: 'Serrif',
+                    color: palette.text,
+                    lineHeight: 1.08,
+                    letterSpacing: '-0.02em',
+                    textAlign: 'center',
+                    justifyContent: 'center',
+                  },
+                  children: p.serifTitle || '',
+                },
+              },
+              // Sans title
+              p.sansTitle ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: `${sansSz}px`,
+                    fontFamily: 'Saans',
+                    color: palette.text,
+                    lineHeight: 1.08,
+                    letterSpacing: '-0.02em',
+                    textAlign: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '24px',
+                  },
+                  children: p.sansTitle,
+                },
+              } : null,
+              // Body / subheadline
+              p.body ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: `${subSz}px`,
+                    color: palette.text,
+                    lineHeight: 1.14,
+                    marginBottom: '8px',
+                    textAlign: 'center',
+                    justifyContent: 'center',
+                    maxWidth: '1000px',
+                  },
+                  children: p.body,
+                },
+              } : null,
+              // CTA pill
+              p.cta ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: '40px',
+                    fontWeight: 600,
+                    color: palette.ctaText,
+                    backgroundColor: '#00ff64',
+                    padding: '20px 48px',
+                    borderRadius: '52px',
+                    marginTop: '24px',
+                  },
+                  children: p.cta,
+                },
+              } : null,
+            ].filter(Boolean),
           },
         },
-        p.sansTitle ? {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              fontSize: '72px',
-              fontFamily: 'Saans',
-              color: palette.text,
-              lineHeight: 1.04,
-              letterSpacing: '-0.03em',
-              marginBottom: '32px',
-            },
-            children: p.sansTitle,
-          },
-        } : null,
-        p.body ? {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              fontSize: '24px',
-              color: palette.text,
-              lineHeight: 1.3,
-              marginBottom: '32px',
-              opacity: 0.8,
-            },
-            children: p.body,
-          },
-        } : null,
-        p.cta ? {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              fontSize: '20px',
-              fontWeight: 500,
-              color: '#002910',
-              backgroundColor: '#00ff64',
-              padding: '16px 32px',
-              borderRadius: '58px',
-              alignSelf: 'flex-start',
-            },
-            children: p.cta,
-          },
-        } : null,
-      ].filter(Boolean),
+      ],
     },
   }
 }
 
-function tweetCard(p, palette) {
+function tweetCard(p, palette, w, h) {
+  const pad = 40
+  const isLand = w > h
+  const nameSz = isLand ? 36 : 46
+  const handleSz = isLand ? 24 : 30
+  const avatarSz = Math.round(nameSz * 1.15 + handleSz)
+  const boxPadX = isLand ? 52 : 64
+  const boxPadY = isLand ? 52 : 64
+  const logoH = 72
+
+  // Auto-size tweet text
+  const baseTFont = isLand ? 52 : 68
+  const len = (p.text || '').length
+  let tFont = baseTFont
+  if (len > 300) tFont = Math.max(28, baseTFont - 30)
+  else if (len > 200) tFont = Math.max(34, baseTFont - 20)
+  else if (len > 120) tFont = Math.max(40, baseTFont - 12)
+
+  const handle = p.authorHandle ? (p.authorHandle.startsWith('@') ? p.authorHandle : `@${p.authorHandle}`) : ''
+  const initials = (p.authorName || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?'
+
   return {
     type: 'div',
     props: {
       style: {
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
         width: '100%',
         height: '100%',
         backgroundColor: palette.bg,
-        padding: '80px',
-        fontFamily: 'Saans',
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
       },
       children: [
+        // Left vertical line
+        { type: 'div', props: { style: { position: 'absolute', left: `${pad}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
+        // Right vertical line
+        { type: 'div', props: { style: { position: 'absolute', right: `${pad}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
+        // White content box
         {
           type: 'div',
           props: {
-            style: { display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '32px' },
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              width: `${w - pad * 2}px`,
+              backgroundColor: '#ffffff',
+              padding: `${boxPadY}px ${boxPadX}px`,
+              // Horizontal guide lines as borders
+              borderTop: `2px solid ${palette.lineColor}`,
+              borderBottom: `2px solid ${palette.lineColor}`,
+            },
             children: [
+              // Author row: avatar + name/handle
               {
                 type: 'div',
                 props: {
-                  style: { display: 'flex', fontSize: '20px', fontWeight: 500, color: palette.text },
-                  children: p.authorName || '',
+                  style: { display: 'flex', alignItems: 'center', marginBottom: '36px' },
+                  children: [
+                    // Avatar circle with initials
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          width: `${avatarSz}px`,
+                          height: `${avatarSz}px`,
+                          borderRadius: '50%',
+                          backgroundColor: palette.pill,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: `${Math.round(avatarSz * 0.38)}px`,
+                          fontWeight: 500,
+                          color: palette.pillText,
+                          marginRight: '20px',
+                          flexShrink: 0,
+                        },
+                        children: initials,
+                      },
+                    },
+                    // Name + handle
+                    {
+                      type: 'div',
+                      props: {
+                        style: { display: 'flex', flexDirection: 'column' },
+                        children: [
+                          {
+                            type: 'div',
+                            props: {
+                              style: { display: 'flex', fontSize: `${nameSz}px`, fontWeight: 700, color: palette.text },
+                              children: p.authorName || '',
+                            },
+                          },
+                          handle ? {
+                            type: 'div',
+                            props: {
+                              style: { display: 'flex', fontSize: `${handleSz}px`, fontWeight: 500, fontFamily: 'SaansMono', letterSpacing: '0.02em', color: palette.pillText, opacity: 0.55 },
+                              children: handle,
+                            },
+                          } : null,
+                        ].filter(Boolean),
+                      },
+                    },
+                  ],
                 },
               },
+              // Tweet text
               {
                 type: 'div',
                 props: {
-                  style: { display: 'flex', fontSize: '16px', color: palette.accent },
-                  children: p.authorHandle ? `@${p.authorHandle.replace('@', '')}` : '',
+                  style: {
+                    display: 'flex',
+                    fontSize: `${tFont}px`,
+                    fontWeight: 500,
+                    color: palette.text,
+                    lineHeight: 1.2,
+                  },
+                  children: p.text || '',
                 },
               },
             ],
           },
         },
+        // Logo bottom center
         {
           type: 'div',
           props: {
-            style: { display: 'flex', fontSize: '32px', color: palette.text, lineHeight: 1.4 },
-            children: p.text || '',
+            style: {
+              position: 'absolute',
+              bottom: `${pad}px`,
+              left: '50%',
+              transform: 'translateX(-50%)',
+            },
+            children: [{
+              type: 'img',
+              props: {
+                src: `data:image/svg+xml,${encodeURIComponent(AIROPS_LOGO_SVG.replace(/currentColor/g, palette.text))}`,
+                width: Math.round(784 * logoH / 252),
+                height: logoH,
+                style: { display: 'flex' },
+              },
+            }],
           },
         },
       ],
@@ -565,9 +718,9 @@ function buildCard(template, params, palette, w, h) {
     case 'richquote':
       return richQuoteCard(params, palette, w, h)
     case 'titlecard':
-      return titleCard(params, palette)
+      return titleCard(params, palette, w, h)
     case 'twitter':
-      return tweetCard(params, palette)
+      return tweetCard(params, palette, w, h)
     default:
       return quoteCard(params, palette, w, h)
   }
