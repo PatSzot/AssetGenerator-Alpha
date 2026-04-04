@@ -1,4 +1,4 @@
-import chromium from '@sparticuz/chromium-min'
+import chromium from '@sparticuz/chromium'
 import puppeteer from 'puppeteer-core'
 
 /**
@@ -18,9 +18,6 @@ const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', '
 function encodeHashPayload(payload) {
   return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64')
 }
-
-const CHROMIUM_URL =
-  'https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.tar'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -52,7 +49,7 @@ export default async function handler(req, res) {
 
   const executablePath =
     process.env.CHROMIUM_PATH ||
-    (await chromium.executablePath(CHROMIUM_URL))
+    (await chromium.executablePath())
 
   let browser
   try {
