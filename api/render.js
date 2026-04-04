@@ -1,4 +1,4 @@
-import chromium from '@sparticuz/chromium'
+import chromium from '@sparticuz/chromium-min'
 import puppeteer from 'puppeteer-core'
 
 /**
@@ -47,9 +47,11 @@ export default async function handler(req, res) {
   const hashPayload = encodeHashPayload(fields)
   const targetUrl = `${appUrl}/${template}#data=${hashPayload}`
 
+  const CHROMIUM_URL =
+    'https://github.com/Sparticuz/chromium/releases/download/v130.0.0/chromium-v130.0.0-pack.tar'
   const executablePath =
     process.env.CHROMIUM_PATH ||
-    (await chromium.executablePath())
+    (await chromium.executablePath(CHROMIUM_URL))
 
   let browser
   try {
@@ -62,7 +64,7 @@ export default async function handler(req, res) {
       args,
       defaultViewport: { width: Number(w), height: Number(h) },
       executablePath,
-      headless: true,
+      headless: 'shell',
     })
 
     const page = await browser.newPage()

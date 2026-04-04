@@ -1,4 +1,4 @@
-import chromium from '@sparticuz/chromium'
+import chromium from '@sparticuz/chromium-min'
 import puppeteer from 'puppeteer-core'
 
 // Encode payload to match App.jsx parseHashData:
@@ -39,9 +39,11 @@ export default async function handler(req, res) {
   // Navigate to /certificate with the data hash — App.jsx reads this via parseHashData()
   const targetUrl = `${appUrl}/certificate#data=${hashPayload}`
 
+  const CHROMIUM_URL =
+    'https://github.com/Sparticuz/chromium/releases/download/v130.0.0/chromium-v130.0.0-pack.tar'
   const executablePath =
     process.env.CHROMIUM_PATH ||
-    (await chromium.executablePath())
+    (await chromium.executablePath(CHROMIUM_URL))
 
   let browser
   try {
@@ -57,7 +59,7 @@ export default async function handler(req, res) {
       args,
       defaultViewport: { width: 1920, height: 1080 },
       executablePath,
-      headless:        true,
+      headless:        'shell',
     })
 
     const page = await browser.newPage()
