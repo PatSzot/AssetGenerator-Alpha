@@ -2,14 +2,16 @@
   "functions": {
     "api/certificate.js": {
       "memory": 1024,
-      "maxDuration": 45
+      "maxDuration": 45,
+      "runtime": "nodejs18.x"
     },
     "api/stipple.js": {
       "maxDuration": 60
     },
     "api/render.js": {
-      "memory": 3009,
-      "maxDuration": 60
+      "memory": 1024,
+      "maxDuration": 60,
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
