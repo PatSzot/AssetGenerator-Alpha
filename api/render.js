@@ -1,6 +1,6 @@
 import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
 /**
@@ -60,6 +60,17 @@ function getFonts() {
   if (serif) fonts.push({ name: 'Serrif', data: serif, weight: 400, style: 'normal' })
 
   return fonts
+}
+
+// ─── Bundled customer logos ─────────────────────────────────────────────────
+
+function loadCustomerLogo(companyName) {
+  if (!companyName) return null
+  const key = companyName.toLowerCase().replace(/[.\s]+/g, '').replace(/,/g, '')
+  const svgPath = join(process.cwd(), 'public', 'logos', `${key}.svg`)
+  if (!existsSync(svgPath)) return null
+  const svg = readFileSync(svgPath, 'utf8')
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
 }
 
 // ─── Card layouts ──────────────────────────────────────────────────────────
@@ -588,6 +599,12 @@ export default async function handler(req, res) {
     const fonts = getFonts()
     if (fonts.length === 0) {
       return res.status(500).json({ error: 'No fonts found' })
+    }
+
+    // Auto-load bundled customer logo if company is provided but no logo image
+    if (fields.company && !fields.companyLogoImage) {
+      const bundled = loadCustomerLogo(fields.company)
+      if (bundled) fields.companyLogoImage = bundled
     }
 
     const element = buildCard(template, fields, palette, w, h)
