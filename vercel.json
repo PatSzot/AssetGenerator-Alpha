@@ -6,6 +6,10 @@
     },
     "api/stipple.js": {
       "maxDuration": 60
+    },
+    "api/render.js": {
+      "memory": 1024,
+      "maxDuration": 45
     }
   },
   "rewrites": [
