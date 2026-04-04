@@ -10,8 +10,7 @@
     },
     "api/render.js": {
       "memory": 1024,
-      "maxDuration": 60,
-      "runtime": "nodejs18.x"
+      "maxDuration": 30
     }
   },
   "rewrites": [
