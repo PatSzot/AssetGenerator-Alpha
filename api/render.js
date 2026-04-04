@@ -12,7 +12,7 @@ import { join } from 'path'
  *         serifTitle, sansTitle, body, cta, colorMode, w, h }
  */
 
-const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'ijoined'])
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'ijoined', 'dataviz'])
 
 // Color palettes matching drawCanvas.js MODES + drawTitleCardCanvas.js accents
 const PALETTES = {
@@ -711,6 +711,144 @@ function tweetCard(p, palette, w, h) {
   }
 }
 
+// ─── Data Viz fallback (Satori-based bar chart) ───────────────────────────
+
+function dataVizCard(p, palette, w, h) {
+  const pad = 40
+  const isDark = (p.colorMode || 'light') === 'dark' || (p.colorMode || '') === 'midnight'
+  const bg = isDark ? '#00250e' : '#ffffff'
+  const textColor = isDark ? '#f8fffa' : '#002910'
+  const barFill = '#ccffe0'
+  const barAccent = '#eeff8c'
+  const borderColor = '#009b32'
+  const axisColor = '#a9a9a9'
+
+  // Parse data
+  const rows = (p.data || '').split('\n').filter(Boolean).map(line => {
+    const [label, ...rest] = line.split(':')
+    const val = parseFloat(rest.join(':').replace(/[,%$]/g, '').trim()) || 0
+    return { label: label.trim(), value: val }
+  })
+
+  const maxVal = Math.max(...rows.map(r => r.value), 1)
+  const chartAreaW = w - pad * 4
+  const barMaxH = h * 0.45
+  const barW = Math.min(80, (chartAreaW / rows.length) * 0.6)
+  const barGap = rows.length > 0 ? (chartAreaW - barW * rows.length) / (rows.length + 1) : 0
+
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        backgroundColor: bg,
+        border: `1px solid ${borderColor}`,
+        padding: `${pad}px`,
+        fontFamily: 'Saans',
+        position: 'relative',
+      },
+      children: [
+        // Title
+        p.title ? {
+          type: 'div',
+          props: {
+            style: { display: 'flex', fontSize: '40px', fontFamily: 'Serrif', color: textColor, letterSpacing: '-0.02em', marginBottom: '8px' },
+            children: p.title,
+          },
+        } : null,
+        // Subtitle
+        p.subtitle ? {
+          type: 'div',
+          props: {
+            style: { display: 'flex', fontSize: '14px', fontFamily: 'SaansMono', color: axisColor, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '24px' },
+            children: p.subtitle,
+          },
+        } : null,
+        // Subcopy
+        p.subcopy ? {
+          type: 'div',
+          props: {
+            style: { display: 'flex', fontSize: '18px', color: textColor, marginBottom: '32px', lineHeight: 1.4 },
+            children: p.subcopy,
+          },
+        } : null,
+        // Bar chart area
+        {
+          type: 'div',
+          props: {
+            style: { display: 'flex', flexGrow: 1, alignItems: 'flex-end', justifyContent: 'center', gap: `${barGap}px`, paddingBottom: '40px' },
+            children: rows.map((row, i) => ({
+              type: 'div',
+              props: {
+                style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
+                children: [
+                  // Value label
+                  {
+                    type: 'div',
+                    props: {
+                      style: { display: 'flex', fontSize: '14px', fontFamily: 'SaansMono', fontWeight: 500, color: textColor },
+                      children: String(row.value),
+                    },
+                  },
+                  // Bar
+                  {
+                    type: 'div',
+                    props: {
+                      style: {
+                        display: 'flex',
+                        width: `${barW}px`,
+                        height: `${Math.max(4, (row.value / maxVal) * barMaxH)}px`,
+                        backgroundColor: i === rows.length - 1 ? barAccent : barFill,
+                        border: `1px solid ${isDark ? borderColor : '#002910'}`,
+                      },
+                    },
+                  },
+                  // Label
+                  {
+                    type: 'div',
+                    props: {
+                      style: { display: 'flex', fontSize: '12px', fontFamily: 'SaansMono', fontWeight: 500, color: axisColor, textTransform: 'uppercase', letterSpacing: '0.08em' },
+                      children: row.label,
+                    },
+                  },
+                ],
+              },
+            })),
+          },
+        },
+        // AirOps Research logo bottom-right
+        {
+          type: 'div',
+          props: {
+            style: {
+              position: 'absolute',
+              bottom: '-1px',
+              right: '-1px',
+              border: `1px solid ${borderColor}`,
+              backgroundColor: '#ffffff',
+              padding: '6px 12px',
+              display: 'flex',
+              alignItems: 'center',
+            },
+            children: [{
+              type: 'img',
+              props: {
+                src: `data:image/svg+xml,${encodeURIComponent(AIROPS_LOGO_SVG.replace(/currentColor/g, '#001408'))}`,
+                width: 100,
+                height: 32,
+                style: { display: 'flex' },
+              },
+            }],
+          },
+        },
+      ].filter(Boolean),
+    },
+  }
+}
+
 function buildCard(template, params, palette, w, h) {
   switch (template) {
     case 'quote':
@@ -721,6 +859,8 @@ function buildCard(template, params, palette, w, h) {
       return titleCard(params, palette, w, h)
     case 'twitter':
       return tweetCard(params, palette, w, h)
+    case 'dataviz':
+      return dataVizCard(params, palette, w, h)
     default:
       return quoteCard(params, palette, w, h)
   }
