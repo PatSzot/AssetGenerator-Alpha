@@ -10,7 +10,7 @@ function encodeHashPayload(payload) {
 
 // URL of the pre-built Chromium binary for Vercel
 const CHROMIUM_URL =
-  'https://github.com/Sparticuz/chromium/releases/download/v130.0.0/chromium-v130.0.0-pack.tar'
+  'https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.tar'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')

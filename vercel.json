@@ -8,8 +8,8 @@
       "maxDuration": 60
     },
     "api/render.js": {
-      "memory": 1024,
-      "maxDuration": 45
+      "memory": 3009,
+      "maxDuration": 60
     }
   },
   "rewrites": [
