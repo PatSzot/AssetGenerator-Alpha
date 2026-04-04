@@ -2,8 +2,7 @@
   "functions": {
     "api/certificate.js": {
       "memory": 1024,
-      "maxDuration": 45,
-      "runtime": "nodejs18.x"
+      "maxDuration": 45
     },
     "api/stipple.js": {
       "maxDuration": 60
