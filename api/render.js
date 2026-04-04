@@ -2,6 +2,7 @@ import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
+import { saans, saansMed, saansBold, mono, serif } from './fonts.js'
 
 /**
  * Server-side card renderer using Satori (SVG) + resvg (PNG).
@@ -37,39 +38,15 @@ const AIROPS_LOGO_SVG = `<svg viewBox="0 0 784 252" fill="none" xmlns="http://ww
 <path d="M191.339 48.6576C176.921 48.6576 166.578 38.4949 166.578 24.6368C166.578 10.7786 176.921 0 191.339 0C205.13 0 216.1 10.7786 216.1 24.6368C216.1 38.4949 205.13 48.6576 191.339 48.6576Z" fill="currentColor"/>
 </svg>`
 
-function loadFont(name) {
-  // Try multiple paths — Vercel serverless functions have different cwd than local
-  const paths = [
-    join(process.cwd(), 'public', name),
-    join(__dirname, '..', 'public', name),
-    join('/var/task', 'public', name),
-  ]
-  for (const p of paths) {
-    try {
-      const data = readFileSync(p)
-      console.log(`[render] Font loaded: ${name} from ${p} (${data.length} bytes)`)
-      return data
-    } catch {}
-  }
-  console.error(`[render] Font NOT found: ${name}, tried: ${paths.join(', ')}`)
-  return null
-}
-
+// Fonts are imported as Buffers from fonts.js (embedded base64)
 function getFonts() {
-  const fonts = []
-  const saans = loadFont('Saans-Regular.ttf')
-  const saansMed = loadFont('Saans-Medium.ttf')
-  const saansBold = loadFont('Saans-Bold.ttf')
-  const mono = loadFont('SaansMono-Medium.ttf')
-  const serif = loadFont('Serrif-Regular.otf')
-
-  if (saans) fonts.push({ name: 'Saans', data: saans, weight: 400, style: 'normal' })
-  if (saansMed) fonts.push({ name: 'Saans', data: saansMed, weight: 500, style: 'normal' })
-  if (saansBold) fonts.push({ name: 'Saans', data: saansBold, weight: 700, style: 'normal' })
-  if (mono) fonts.push({ name: 'SaansMono', data: mono, weight: 500, style: 'normal' })
-  if (serif) fonts.push({ name: 'Serrif', data: serif, weight: 400, style: 'normal' })
-
-  return fonts
+  return [
+    { name: 'Saans', data: saans, weight: 400, style: 'normal' },
+    { name: 'Saans', data: saansMed, weight: 500, style: 'normal' },
+    { name: 'Saans', data: saansBold, weight: 700, style: 'normal' },
+    { name: 'SaansMono', data: mono, weight: 500, style: 'normal' },
+    { name: 'Serrif', data: serif, weight: 400, style: 'normal' },
+  ]
 }
 
 // ─── Bundled customer logos ─────────────────────────────────────────────────
