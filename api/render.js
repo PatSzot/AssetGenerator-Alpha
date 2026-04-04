@@ -66,17 +66,26 @@ function getFonts() {
 
 function quoteCard(p, palette, w, h) {
   const pad = 40
+  const isLand = w > h
   const text = p.text ? `\u201C${p.text}\u201D` : ''
   const firstName = p.customerName ? p.customerName.split(' ')[0] : ''
   const lastName = p.customerName ? p.customerName.split(' ').slice(1).join(' ') : ''
-  const roleCompany = [p.role, p.company].filter(Boolean).join(', ').toUpperCase()
+  const roleCompany = [p.role, p.company].filter(Boolean).join(',  ').toUpperCase()
 
-  // Scale quote font based on text length
+  // Auto-shrink quote font to fit — start large like the canvas renderer
+  const baseQ = isLand ? 120 : 96
   const len = text.length
-  let qFont = 96
-  if (len > 200) qFont = 64
-  else if (len > 140) qFont = 72
-  else if (len > 80) qFont = 84
+  let qFont = baseQ
+  if (len > 300) qFont = Math.max(48, baseQ - 40)
+  else if (len > 200) qFont = Math.max(56, baseQ - 28)
+  else if (len > 140) qFont = Math.max(64, baseQ - 18)
+  else if (len > 80) qFont = Math.max(72, baseQ - 10)
+
+  // Name size scales with canvas
+  const nameSz = 64
+  const dashSz = 56
+  const pillSz = 32
+  const logoH = 72
 
   return {
     type: 'div',
@@ -103,77 +112,61 @@ function quoteCard(p, palette, w, h) {
               justifyContent: 'space-between',
               width: '100%',
               height: '100%',
-              padding: `${pad}px ${pad + 16}px`,
+              padding: `${pad}px ${pad + 8}px`,
             },
             children: [
-              // Quote text
+              // Quote text — fills top area
               {
                 type: 'div',
                 props: {
                   style: {
                     display: 'flex',
-                    flexDirection: 'column',
-                    flexGrow: 1,
-                    justifyContent: 'flex-start',
-                    paddingTop: '0px',
+                    fontSize: `${qFont}px`,
+                    fontFamily: 'Serrif',
+                    color: palette.text,
+                    lineHeight: 1.08,
+                    letterSpacing: '-0.02em',
                   },
-                  children: [
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          fontSize: `${qFont}px`,
-                          fontFamily: 'Serrif',
-                          color: palette.text,
-                          lineHeight: 1.08,
-                          letterSpacing: '-0.02em',
-                        },
-                        children: text,
-                      },
-                    },
-                  ],
+                  children: text,
                 },
               },
-              // Attribution + logo
+              // Bottom section: attribution + logo
               {
                 type: 'div',
                 props: {
                   style: {
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '4px',
                   },
                   children: [
-                    // Name line: — FirstName LastName
+                    // — FirstName LastName
                     p.customerName ? {
                       type: 'div',
                       props: {
-                        style: { display: 'flex', alignItems: 'baseline', gap: '0px' },
+                        style: { display: 'flex', alignItems: 'baseline' },
                         children: [
-                          { type: 'div', props: { style: { display: 'flex', fontSize: '56px', fontFamily: 'Serrif', color: palette.text, letterSpacing: '-0.02em' }, children: '\u2014' } },
-                          { type: 'div', props: { style: { display: 'flex', fontSize: '64px', fontFamily: 'Serrif', color: palette.text, letterSpacing: '-0.02em', marginLeft: '8px' }, children: firstName } },
-                          { type: 'div', props: { style: { display: 'flex', fontSize: '64px', fontFamily: 'Saans', color: palette.text, marginLeft: '8px' }, children: lastName } },
-                        ],
+                          { type: 'div', props: { style: { display: 'flex', fontSize: `${dashSz}px`, fontFamily: 'Serrif', color: palette.text, letterSpacing: '-0.02em' }, children: '\u2014' } },
+                          { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Serrif', color: palette.text, letterSpacing: '-0.02em', marginLeft: '8px' }, children: firstName } },
+                          lastName ? { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Saans', color: palette.text, marginLeft: '10px' }, children: lastName } } : null,
+                        ].filter(Boolean),
                       },
                     } : null,
-                    // Role/Company pill
+                    // ROLE, COMPANY pill — indented under the dash
                     roleCompany ? {
                       type: 'div',
                       props: {
                         style: {
                           display: 'flex',
                           alignSelf: 'flex-start',
-                          marginLeft: '64px',
-                          marginTop: '4px',
-                          marginBottom: '24px',
+                          marginLeft: '68px',
+                          marginTop: '8px',
                         },
                         children: [{
                           type: 'div',
                           props: {
                             style: {
                               display: 'flex',
-                              fontSize: '32px',
+                              fontSize: `${pillSz}px`,
                               fontFamily: 'SaansMono',
                               fontWeight: 500,
                               letterSpacing: '0.06em',
@@ -186,23 +179,20 @@ function quoteCard(p, palette, w, h) {
                         }],
                       },
                     } : null,
-                    // AirOps logo
+                    // AirOps logo — bottom left with space above
                     {
                       type: 'div',
                       props: {
                         style: {
                           display: 'flex',
-                          marginTop: '16px',
-                          color: palette.text,
-                          height: '72px',
-                          width: '224px',
+                          marginTop: '40px',
                         },
                         children: [{
                           type: 'img',
                           props: {
                             src: `data:image/svg+xml,${encodeURIComponent(AIROPS_LOGO_SVG.replace(/currentColor/g, palette.text))}`,
                             width: 224,
-                            height: 72,
+                            height: logoH,
                             style: { display: 'flex' },
                           },
                         }],
