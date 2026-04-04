@@ -209,6 +209,194 @@ function quoteCard(p, palette, w, h) {
   }
 }
 
+function richQuoteCard(p, palette, w, h) {
+  const pad = 40
+  const half = Math.floor(w / 2)
+  const text = p.text || ''
+  const firstName = p.customerName ? p.customerName.split(' ')[0] : ''
+  const lastName = p.customerName ? p.customerName.split(' ').slice(1).join(' ') : ''
+  const role = p.role || ''
+
+  // Auto-size quote text
+  const len = text.length
+  let qFont = 56
+  if (len > 300) qFont = 36
+  else if (len > 200) qFont = 42
+  else if (len > 120) qFont = 48
+
+  // Left column: stippled headshot (top ~75%) + company logo (bottom ~25%)
+  const logoAreaH = Math.floor(h * 0.2)
+  const photoAreaH = h - logoAreaH
+
+  const leftChildren = [
+    // Headshot image
+    p.headshotImage ? {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          width: `${half}px`,
+          height: `${photoAreaH}px`,
+          overflow: 'hidden',
+        },
+        children: [{
+          type: 'img',
+          props: {
+            src: p.headshotImage,
+            width: half,
+            height: photoAreaH,
+            style: { display: 'flex', objectFit: 'cover', width: '100%', height: '100%' },
+          },
+        }],
+      },
+    } : {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          width: `${half}px`,
+          height: `${photoAreaH}px`,
+          backgroundColor: palette.pill,
+        },
+      },
+    },
+    // Company logo area
+    {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          width: `${half}px`,
+          height: `${logoAreaH}px`,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px 40px',
+        },
+        children: p.companyLogoImage ? [{
+          type: 'img',
+          props: {
+            src: p.companyLogoImage,
+            height: Math.floor(logoAreaH * 0.5),
+            style: { display: 'flex', maxWidth: `${half - 80}px`, objectFit: 'contain' },
+          },
+        }] : [],
+      },
+    },
+  ].filter(Boolean)
+
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        backgroundColor: palette.bg,
+        position: 'relative',
+      },
+      children: [
+        // Vertical divider line at center
+        { type: 'div', props: { style: { position: 'absolute', left: `${half}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
+        // Left column
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              width: `${half}px`,
+              height: '100%',
+            },
+            children: leftChildren,
+          },
+        },
+        // Right column: name + role + quote
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              width: `${half}px`,
+              height: '100%',
+              padding: `${pad}px ${pad}px`,
+            },
+            children: [
+              // First name (serif)
+              firstName ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: '96px',
+                    fontFamily: 'Serrif',
+                    color: palette.text,
+                    lineHeight: 1.0,
+                    letterSpacing: '-0.02em',
+                  },
+                  children: firstName,
+                },
+              } : null,
+              // Last name (sans)
+              lastName ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: '96px',
+                    fontFamily: 'Saans',
+                    fontWeight: 700,
+                    color: palette.text,
+                    lineHeight: 1.0,
+                    letterSpacing: '-0.02em',
+                    marginBottom: '8px',
+                  },
+                  children: lastName,
+                },
+              } : null,
+              // Role
+              role ? {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    fontSize: '28px',
+                    fontFamily: 'Saans',
+                    fontWeight: 500,
+                    color: palette.text,
+                    lineHeight: 1.3,
+                    marginBottom: '32px',
+                  },
+                  children: role,
+                },
+              } : null,
+              // Quote text
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexGrow: 1,
+                    alignItems: 'flex-end',
+                    fontSize: `${qFont}px`,
+                    fontFamily: 'Saans',
+                    fontWeight: 700,
+                    color: palette.text,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.02em',
+                  },
+                  children: text,
+                },
+              },
+            ].filter(Boolean),
+          },
+        },
+      ],
+    },
+  }
+}
+
 function titleCard(p, palette) {
   return {
     type: 'div',
@@ -362,8 +550,9 @@ function tweetCard(p, palette) {
 function buildCard(template, params, palette, w, h) {
   switch (template) {
     case 'quote':
-    case 'richquote':
       return quoteCard(params, palette, w, h)
+    case 'richquote':
+      return richQuoteCard(params, palette, w, h)
     case 'titlecard':
       return titleCard(params, palette)
     case 'twitter':
