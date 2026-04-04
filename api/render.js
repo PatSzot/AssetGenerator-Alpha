@@ -40,15 +40,13 @@ function getFonts() {
   const saansMed = loadFont('Saans-Medium.ttf')
   const saansBold = loadFont('Saans-Bold.ttf')
   const mono = loadFont('SaansMono-Medium.ttf')
+  const serif = loadFont('Serrif-Regular.otf')
 
   if (saans) fonts.push({ name: 'Saans', data: saans, weight: 400, style: 'normal' })
   if (saansMed) fonts.push({ name: 'Saans', data: saansMed, weight: 500, style: 'normal' })
   if (saansBold) fonts.push({ name: 'Saans', data: saansBold, weight: 700, style: 'normal' })
   if (mono) fonts.push({ name: 'SaansMono', data: mono, weight: 500, style: 'normal' })
-
-  // Use Saans as fallback for Serrif since SerrifVF is a variable font
-  // that Satori can't parse. Serrif references in layouts will fall back to Saans.
-  if (saans) fonts.push({ name: 'Serrif', data: saans, weight: 400, style: 'normal' })
+  if (serif) fonts.push({ name: 'Serrif', data: serif, weight: 400, style: 'normal' })
 
   return fonts
 }
