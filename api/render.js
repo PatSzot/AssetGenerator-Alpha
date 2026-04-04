@@ -39,8 +39,12 @@ const AIROPS_LOGO_SVG = `<svg viewBox="0 0 784 252" fill="none" xmlns="http://ww
 
 function loadFont(name) {
   try {
-    return readFileSync(join(process.cwd(), 'public', name))
-  } catch {
+    const p = join(process.cwd(), 'public', name)
+    const data = readFileSync(p)
+    console.log(`[render] Font loaded: ${name} (${data.length} bytes)`)
+    return data
+  } catch (e) {
+    console.error(`[render] Font NOT found: ${name}`, e.message)
     return null
   }
 }
