@@ -3,42 +3,40 @@
   height: 100vh;
   overflow: hidden;
 
-  /* ── Dark mode (default)
-     All text pairs verified ≥ 4.5:1 on their respective surfaces        */
-  --bg:        #060e07;   /* near-black canvas area                        */
-  --surface:   #0d1a10;   /* sidebar / toolbar (distinct from --bg)        */
-  --border:    #1f4030;   /* input/button borders, decorative dividers     */
-  --text:      #f0f5f2;   /* primary text  — ~16:1 on surface              */
-  --text-dim:  #8db49a;   /* secondary/label text — ~6.4:1 on surface      */
-  --label:     #45c06a;   /* section headers — ~6.4:1 on surface           */
-  --hover-bd:  #356045;   /* hover border highlight                        */
+  /* ── Dark mode — AirOps design system green tokens */
+  --bg:        #000d05;   /* near_black — canvas area                      */
+  --surface:   #002910;   /* forest — sidebar / toolbar                    */
+  --border:    #0d3b1e;   /* subtle dark border                            */
+  --text:      #f8fffa;   /* text_on_dark                                  */
+  --text-dim:  rgba(248,255,250,0.5);  /* muted on forest                 */
+  --label:     #00ff64;   /* interaction_green — section labels            */
+  --hover-bd:  #057a28;   /* brand_green                                   */
   --input-bg:  rgba(0,0,0,0.28);
   --logo:      #00ff64;
-  --accent:        #00ff64;   /* neon: used for bg fills & active borders      */
-  --accent-hv:     #00dc55;
+  --accent:        #00ff64;   /* interaction_green                         */
+  --accent-hv:     #00cc50;   /* hover_green                               */
   --toggle-active:   #000d05;
-  --toggle-inactive: #002910;
-  --dot:       rgba(255,255,255,0.07);
+  --toggle-inactive: #001b0a;
+  --dot:       rgba(212,232,218,0.07);  /* brand_stroke at low opacity     */
 
   background: var(--bg);
   color: var(--text);
 }
 
-/* ── Light mode overrides
-   Neutral white — minimal green tint, high contrast throughout           */
+/* ── Light mode — AirOps design system light tokens */
 .app.light {
-  --bg:        #f4f4f4;   /* off-white page background                     */
-  --surface:   #ffffff;   /* pure white sidebar / toolbar                  */
-  --border:    #c8c8c8;   /* neutral gray borders (visible)                */
-  --text:      #141414;   /* near-black — ~16:1 on surface                 */
-  --text-dim:  #6b6b6b;   /* secondary text — ~4.7:1 on white              */
-  --label:     #444444;   /* section headers — ~9.5:1 on white             */
-  --hover-bd:  #999999;
+  --bg:        #F8FFFA;   /* off_white — page background                   */
+  --surface:   #ffffff;   /* white — sidebar / toolbar                     */
+  --border:    #d4e8da;   /* brand_stroke                                  */
+  --text:      #002910;   /* forest / text_primary                         */
+  --text-dim:  #008c44;   /* mid_green — secondary text                    */
+  --label:     #008c44;   /* mid_green — eyebrow / section labels          */
+  --hover-bd:  #057a28;   /* brand_green                                   */
   --input-bg:  #ffffff;
-  --logo:      #141414;
-  --accent:        #006b28;   /* dark green — ~8:1 on white (safe for text)    */
+  --logo:      #002910;
+  --accent:        #006b28;   /* dark green — safe for text on white       */
   --accent-hv:     #005220;
-  --toggle-active:   #dfeae3;
-  --toggle-inactive: #ffffff;
-  --dot:       rgba(0,0,0,0.07);
+  --toggle-active:   #dfeae3;   /* green_100                               */
+  --toggle-inactive: #eef9f3;   /* pale_green                              */
+  --dot:       rgba(212,232,218,0.9);  /* brand_stroke                     */
 }

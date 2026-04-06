@@ -80,9 +80,6 @@
 .canvas-scaler {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 0 1px var(--border), 0 20px 60px rgba(0,0,0,.4);
-}
-.app.light .canvas-scaler {
   box-shadow: 0 0 0 1px var(--border);
 }
 
@@ -135,7 +132,7 @@
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 0;
   padding: 8px 12px;
   z-index: 10;
 }
@@ -152,7 +149,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 0;
   padding: 0;
   transition: background .15s, color .15s;
 }
