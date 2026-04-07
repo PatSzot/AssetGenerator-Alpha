@@ -17,10 +17,11 @@ const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', '
 
 // Color palettes matching drawCanvas.js MODES + drawTitleCardCanvas.js accents
 const PALETTES = {
-  green:        { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#000d05', lineColor: '#008c44', ctaText: '#002910', accent: '#008c44' },
-  pink:         { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#0d020a', lineColor: '#8c0044', ctaText: '#3a092c', accent: '#8c0044' },
-  yellow:       { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#0c0d01', lineColor: '#7a7200', ctaText: '#242603', accent: '#7a7200' },
-  blue:         { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#02020c', lineColor: '#0014a8', ctaText: '#0e0e57', accent: '#0014a8' },
+  green:        { bg: '#f8fffb', text: '#000d05', pill: '#dfeae3', pillText: '#002910', lineColor: '#008c44', ctaText: '#002910', accent: '#008c44' },
+  pink:         { bg: '#fff7ff', text: '#0d020a', pill: '#fee7fd', pillText: '#3a092c', lineColor: '#c54b9b', ctaText: '#3a092c', accent: '#c54b9b' },
+  yellow:       { bg: '#fdfff3', text: '#0c0d01', pill: '#eeff8c', pillText: '#242603', lineColor: '#586605', ctaText: '#242603', accent: '#586605' },
+  blue:         { bg: '#f5f6ff', text: '#02020c', pill: '#e5e5ff', pillText: '#0f0f57', lineColor: '#1b1b8f', ctaText: '#0f0f57', accent: '#1b1b8f' },
+  teal:         { bg: '#f2fcff', text: '#020b0d', pill: '#c9ebf2', pillText: '#0a3945', lineColor: '#196c80', ctaText: '#0a3945', accent: '#196c80' },
   'dark-green': { bg: '#0f2412', text: '#e8f5ee', pill: '#001408', pillText: '#c0ffd2', lineColor: 'rgba(0,210,80,1)', ctaText: '#002910', accent: 'rgba(0,210,80,1)' },
   'dark-pink':  { bg: '#230a1e', text: '#f5e8f2', pill: '#140006', pillText: '#c54b9b', lineColor: 'rgba(210,0,160,1)', ctaText: '#3a092c', accent: 'rgba(210,0,160,1)' },
   'dark-yellow':{ bg: '#1c1d03', text: '#f5f5e0', pill: '#0e0e00', pillText: '#d4e87a', lineColor: 'rgba(190,190,0,1)', ctaText: '#242603', accent: 'rgba(190,190,0,1)' },
@@ -204,191 +205,270 @@ function quoteCard(p, palette, w, h) {
 }
 
 function richQuoteCard(p, palette, w, h) {
-  const isLand = w > h
-  const contentPad = isLand ? 53 : 40
-  const half = Math.floor(w / 2)
+  const isStory = h > w * 1.5  // 1080x1920 vertical format
+  const isLand = w > h          // 1200x628 or 1920x1080
+  const isSquare = !isStory && !isLand  // 1200x1200 or 1080x1080
+
   const text = p.text || ''
   const firstName = p.customerName ? p.customerName.split(' ')[0] : ''
   const lastName = p.customerName ? p.customerName.split(' ').slice(1).join(' ') : ''
   const role = p.role || ''
+  const company = p.company || ''
+  const roleDisplay = company ? `${role}, ${company}` : role
 
-  // Responsive sizes matching drawRichQuoteCanvas
-  const nameSz = isLand ? 120 : 96
-  const nameLH = nameSz * 0.84
-  const quoteSzBase = isLand ? 64 : 56
+  // Scale factor for different sizes
+  const scale = isLand ? (w / 1200) : 1
+  const pad = Math.round((isLand ? 33.333 : 40) * scale)
 
-  // Auto-size quote text
+  // Name sizes per layout
+  const nameSz = isLand ? Math.round(60 * scale) : 96
+  const nameTrk = `${(-0.04 * nameSz).toFixed(1)}px`
+
+  // Title/role badge size
+  const roleSz = isLand ? Math.round(23 * scale) : 40
+
+  // Quote sizes - auto-scale based on length
+  const quoteSzBase = isLand ? Math.round(42 * scale) : (isStory ? 56 : 64)
   const len = text.length
   let qFont = quoteSzBase
-  if (len > 300) qFont = Math.max(28, quoteSzBase - 24)
-  else if (len > 200) qFont = Math.max(36, quoteSzBase - 16)
-  else if (len > 120) qFont = Math.max(44, quoteSzBase - 8)
+  if (len > 300) qFont = Math.max(Math.round(quoteSzBase * 0.6), 28)
+  else if (len > 200) qFont = Math.max(Math.round(quoteSzBase * 0.75), 36)
+  else if (len > 120) qFont = Math.max(Math.round(quoteSzBase * 0.85), 44)
 
-  // Left column: stippled headshot (top) + company logo panel (bottom)
-  const logoAreaH = isLand ? 203 : Math.floor(h * 0.2)
+  // Logo area height
+  const logoAreaH = isLand ? Math.round(127 * scale) : (isStory ? Math.round(h * 0.28) : Math.round(h * 0.23))
+
+  if (isStory) {
+    // ── STORY FORMAT (1080x1920): vertical stack ──
+    // Content top -> headshot+logo side by side -> AirOps logo bottom
+    const contentH = Math.round(h * 0.36)
+    const headshotH = Math.round(h * 0.28)
+
+    return {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex', flexDirection: 'column', width: '100%', height: '100%',
+          backgroundColor: palette.bg,
+        },
+        children: [
+          // Content section
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                padding: `${pad}px`, height: `${contentH}px`,
+              },
+              children: [
+                // Name block
+                {
+                  type: 'div',
+                  props: {
+                    style: { display: 'flex', flexDirection: 'column', gap: '24px' },
+                    children: [
+                      // Name
+                      {
+                        type: 'div',
+                        props: {
+                          style: { display: 'flex', flexDirection: 'column', gap: '10px' },
+                          children: [
+                            firstName ? { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Serrif', lineHeight: 0.84, letterSpacing: nameTrk, color: palette.text }, children: firstName } } : null,
+                            lastName ? { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Saans', fontWeight: 400, lineHeight: 0.84, letterSpacing: nameTrk, color: palette.text }, children: lastName } } : null,
+                          ].filter(Boolean),
+                        },
+                      },
+                      // Role badge
+                      roleDisplay ? {
+                        type: 'div',
+                        props: {
+                          style: { display: 'flex' },
+                          children: [{
+                            type: 'div',
+                            props: {
+                              style: { display: 'flex', backgroundColor: palette.pill, fontSize: `${roleSz}px`, fontFamily: 'Saans', color: palette.pillText, lineHeight: 1.3, letterSpacing: '0.02em' },
+                              children: roleDisplay,
+                            },
+                          }],
+                        },
+                      } : null,
+                    ].filter(Boolean),
+                  },
+                },
+                // Quote
+                {
+                  type: 'div',
+                  props: {
+                    style: { display: 'flex', fontSize: `${qFont}px`, fontFamily: 'Serrif', color: palette.ctaText, lineHeight: 1.14, marginTop: '40px' },
+                    children: text,
+                  },
+                },
+              ].filter(Boolean),
+            },
+          },
+          // Headshot + Logo side by side
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', width: '100%', height: `${headshotH}px` },
+              children: [
+                // Headshot
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex', width: '50%', height: '100%', overflow: 'hidden',
+                      borderTop: `1.5px solid ${palette.lineColor}`,
+                      borderRight: `1.5px solid ${palette.lineColor}`,
+                      borderBottom: `1.5px solid ${palette.lineColor}`,
+                    },
+                    children: p.headshotImage ? [{
+                      type: 'img',
+                      props: { src: p.headshotImage, style: { display: 'flex', width: '100%', height: '100%', objectFit: 'cover' } },
+                    }] : [{
+                      type: 'div',
+                      props: { style: { display: 'flex', width: '100%', height: '100%', backgroundColor: palette.ctaText } },
+                    }],
+                  },
+                },
+                // Logo
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex', width: '50%', height: '100%', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: palette.bg,
+                      borderTop: `1.5px solid ${palette.lineColor}`,
+                      borderBottom: `1.5px solid ${palette.lineColor}`,
+                      padding: '20px 40px',
+                    },
+                    children: p.companyLogoImage ? [{
+                      type: 'img',
+                      props: { src: p.companyLogoImage, style: { display: 'flex', maxHeight: '80px', maxWidth: '250px', objectFit: 'contain' } },
+                    }] : [],
+                  },
+                },
+              ],
+            },
+          },
+          // AirOps logo at bottom
+          {
+            type: 'div',
+            props: {
+              style: { display: 'flex', flexGrow: 1, alignItems: 'flex-end', padding: `${pad}px` },
+              children: [{
+                type: 'div',
+                props: {
+                  style: { display: 'flex', color: palette.text, width: '220px', height: '70px' },
+                  children: [{ type: 'img', props: { src: `data:image/svg+xml;base64,${Buffer.from(AIROPS_LOGO_SVG.replace(/currentColor/g, palette.text)).toString('base64')}`, style: { display: 'flex', height: '70px' } } }],
+                },
+              }],
+            },
+          },
+        ],
+      },
+    }
+  }
+
+  // ── LANDSCAPE & SQUARE: content LEFT, headshot+logo RIGHT ──
+  const half = Math.floor(w / 2)
   const photoAreaH = h - logoAreaH
-
-  const leftChildren = [
-    // Headshot image
-    p.headshotImage ? {
-      type: 'div',
-      props: {
-        style: {
-          display: 'flex',
-          width: `${half}px`,
-          height: `${photoAreaH}px`,
-          overflow: 'hidden',
-        },
-        children: [{
-          type: 'img',
-          props: {
-            src: p.headshotImage,
-            width: half,
-            height: photoAreaH,
-            style: { display: 'flex', objectFit: 'cover', width: '100%', height: '100%' },
-          },
-        }],
-      },
-    } : {
-      type: 'div',
-      props: {
-        style: {
-          display: 'flex',
-          width: `${half}px`,
-          height: `${photoAreaH}px`,
-          backgroundColor: palette.pill,
-        },
-      },
-    },
-    // Company logo area
-    {
-      type: 'div',
-      props: {
-        style: {
-          display: 'flex',
-          width: `${half}px`,
-          height: `${logoAreaH}px`,
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px 40px',
-        },
-        children: p.companyLogoImage ? [{
-          type: 'img',
-          props: {
-            src: p.companyLogoImage,
-            height: Math.floor(logoAreaH * 0.5),
-            style: { display: 'flex', maxWidth: `${half - 80}px`, objectFit: 'contain' },
-          },
-        }] : [],
-      },
-    },
-  ].filter(Boolean)
 
   return {
     type: 'div',
     props: {
-      style: {
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        backgroundColor: palette.bg,
-        position: 'relative',
-      },
+      style: { display: 'flex', width: '100%', height: '100%', backgroundColor: palette.bg },
       children: [
-        // Vertical divider line at center
-        { type: 'div', props: { style: { position: 'absolute', left: `${half}px`, top: '0', bottom: '0', width: '2px', backgroundColor: palette.lineColor } } },
-        // Left column
+        // LEFT: Content
         {
           type: 'div',
           props: {
             style: {
-              display: 'flex',
-              flexDirection: 'column',
-              width: `${half}px`,
-              height: '100%',
-            },
-            children: leftChildren,
-          },
-        },
-        // Right column: name + role + quote
-        {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              width: `${half}px`,
-              height: '100%',
-              padding: `${contentPad}px ${contentPad}px`,
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              width: `${half}px`, height: '100%', padding: `${pad}px`,
             },
             children: [
-              // First name (serif)
-              firstName ? {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    fontSize: `${nameSz}px`,
-                    fontFamily: 'Serrif',
-                    color: palette.text,
-                    lineHeight: 0.84,
-                    letterSpacing: '-0.02em',
-                  },
-                  children: firstName,
-                },
-              } : null,
-              // Last name (sans)
-              lastName ? {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    fontSize: `${nameSz}px`,
-                    fontFamily: 'Saans',
-                    fontWeight: 700,
-                    color: palette.text,
-                    lineHeight: 0.84,
-                    letterSpacing: '-0.02em',
-                    marginBottom: '24px',
-                  },
-                  children: lastName,
-                },
-              } : null,
-              // Role
-              role ? {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    fontSize: '28px',
-                    fontFamily: 'Saans',
-                    fontWeight: 500,
-                    color: palette.text,
-                    lineHeight: 1.3,
-                    marginBottom: '24px',
-                  },
-                  children: role,
-                },
-              } : null,
-              // Quote text
+              // Top: name + role
               {
                 type: 'div',
                 props: {
-                  style: {
-                    display: 'flex',
-                    flexGrow: 1,
-                    alignItems: 'flex-end',
-                    fontSize: `${qFont}px`,
-                    fontFamily: 'Saans',
-                    fontWeight: 700,
-                    color: palette.text,
-                    lineHeight: 1.14,
-                  },
+                  style: { display: 'flex', flexDirection: 'column', gap: `${Math.round(20 * scale)}px` },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: { display: 'flex', flexDirection: 'column', gap: `${Math.round(3 * scale)}px` },
+                        children: [
+                          firstName ? { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Serrif', lineHeight: 0.84, letterSpacing: nameTrk, color: palette.text }, children: firstName } } : null,
+                          lastName ? { type: 'div', props: { style: { display: 'flex', fontSize: `${nameSz}px`, fontFamily: 'Saans', fontWeight: 400, lineHeight: 0.84, letterSpacing: nameTrk, color: palette.text }, children: lastName } } : null,
+                        ].filter(Boolean),
+                      },
+                    },
+                    roleDisplay ? {
+                      type: 'div',
+                      props: {
+                        style: { display: 'flex' },
+                        children: [{
+                          type: 'div',
+                          props: {
+                            style: { display: 'flex', backgroundColor: palette.pill, fontSize: `${roleSz}px`, fontFamily: 'Saans', color: palette.pillText, lineHeight: 1.3, letterSpacing: '0.02em' },
+                            children: roleDisplay,
+                          },
+                        }],
+                      },
+                    } : null,
+                  ].filter(Boolean),
+                },
+              },
+              // Bottom: quote
+              {
+                type: 'div',
+                props: {
+                  style: { display: 'flex', fontSize: `${qFont}px`, fontFamily: 'Serrif', color: palette.lineColor, lineHeight: 1.2 },
                   children: text,
                 },
               },
             ].filter(Boolean),
+          },
+        },
+        // RIGHT: headshot + logo
+        {
+          type: 'div',
+          props: {
+            style: { display: 'flex', flexDirection: 'column', width: `${half}px`, height: '100%', borderLeft: `1.5px solid ${palette.lineColor}` },
+            children: [
+              // Headshot
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex', width: '100%', height: `${photoAreaH}px`, overflow: 'hidden',
+                    backgroundColor: palette.text,
+                  },
+                  children: p.headshotImage ? [{
+                    type: 'img',
+                    props: { src: p.headshotImage, style: { display: 'flex', width: '100%', height: '100%', objectFit: 'cover' } },
+                  }] : [],
+                },
+              },
+              // Logo
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex', width: '100%', height: `${logoAreaH}px`,
+                    alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: palette.bg,
+                    borderTop: `1.5px solid ${palette.lineColor}`,
+                    padding: '20px 40px',
+                  },
+                  children: p.companyLogoImage ? [{
+                    type: 'img',
+                    props: { src: p.companyLogoImage, style: { display: 'flex', maxHeight: `${Math.round(logoAreaH * 0.5)}px`, maxWidth: `${half - 80}px`, objectFit: 'contain' } },
+                  }] : [],
+                },
+              },
+            ],
           },
         },
       ],
