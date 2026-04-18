@@ -264,6 +264,7 @@ export default function App() {
   const [batchFetching, setBatchFetching]     = useState(false)
   const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
   const [rtPhotoProcessing, setRtPhotoProcessing] = useState(false)
+  const [stippleError, setStippleError] = useState(null)
   const [airopsApiKey, setAiropsApiKey]   = useState(() => localStorage.getItem('airops-api-key') ?? '')
 
   const profileImageRef      = useRef(null)
@@ -445,6 +446,7 @@ export default function App() {
   const handleRtPhotoChange = useCallback(async (dataUrl) => {
     if (!dataUrl) { rtProfileImageRef.current = null; update('rtProfileImage', null); setRtPhotoProcessing(false); return }
     setRtPhotoProcessing(true)
+    setStippleError(null)
     let finalUrl = dataUrl
     try {
       const [header, base64] = dataUrl.split(',')
@@ -457,9 +459,16 @@ export default function App() {
       if (resp.ok) {
         const { image: stippled, mimeType: outMime } = await resp.json()
         finalUrl = `data:${outMime};base64,${stippled}`
+      } else {
+        const errBody = await resp.text().catch(() => '')
+        const msg = `Stipple failed (${resp.status}): ${errBody.slice(0, 200)}`
+        console.warn(msg)
+        setStippleError(msg)
       }
     } catch (e) {
-      console.warn('Stipple effect failed, using original', e)
+      const msg = `Stipple error: ${e.message}`
+      console.warn(msg, e)
+      setStippleError(msg)
     }
     const img = new Image()
     img.onload = () => {
@@ -692,6 +701,7 @@ export default function App() {
         onIJProfileImageChange={handleIJProfileImageChange}
         onRtPhotoChange={handleRtPhotoChange}
         rtPhotoProcessing={rtPhotoProcessing}
+        stippleError={stippleError}
         onWbPhotoChange={handleWbPhotoChange}
         wbPhotoProcessing={wbPhotoProcessing}
         onWbLogoChange={handleWbLogoChange}

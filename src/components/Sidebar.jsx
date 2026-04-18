@@ -40,7 +40,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRtPhotoChange, rtPhotoProcessing, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRtPhotoChange, rtPhotoProcessing, stippleError, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -741,6 +741,11 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <button className="btn-clear-photo" onClick={() => onRtPhotoChange(null)}>
                 ✕ Remove photo
               </button>
+            )}
+            {stippleError && !rtPhotoProcessing && (
+              <p style={{ color: '#802828', fontSize: 12, margin: '6px 0 0', lineHeight: 1.4 }}>
+                {stippleError}
+              </p>
             )}
           </div>
 
