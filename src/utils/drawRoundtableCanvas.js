@@ -150,3 +150,154 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
 
   ctx.letterSpacing = '0px'
 }
+
+export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
+  const cw = 1080, ch = 1080
+  const dpr = settings.dpr ?? 2
+  canvas.width  = cw * dpr
+  canvas.height = ch * dpr
+  const ctx = canvas.getContext('2d')
+  ctx.scale(dpr, dpr)
+
+  if (!fontsReady) {
+    ctx.fillStyle = '#eef9f3'
+    ctx.fillRect(0, 0, cw, ch)
+    return
+  }
+
+  const serif = "'Serrif VF', Georgia, serif"
+  const sans  = "'Saans', 'Helvetica Neue', sans-serif"
+  const mono  = "'Saans Mono', 'DM Mono', monospace"
+
+  // ── 1. Background: pale green base + radial green glow from bottom
+  ctx.fillStyle = '#eef9f3'
+  ctx.fillRect(0, 0, cw, ch)
+
+  const grad = ctx.createRadialGradient(cw / 2, ch + 100, 0, cw / 2, ch + 100, ch * 0.85)
+  grad.addColorStop(0,    'rgba(0,255,100,0.55)')
+  grad.addColorStop(0.15, 'rgba(60,254,136,0.4)')
+  grad.addColorStop(0.30, 'rgba(119,252,172,0.25)')
+  grad.addColorStop(0.50, 'rgba(179,251,207,0.12)')
+  grad.addColorStop(0.70, 'rgba(238,249,243,0.05)')
+  grad.addColorStop(1.0,  'rgba(238,249,243,0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, cw, ch)
+
+  // ── 2. Dot grid (24px spacing, 0.8px dots)
+  const dotSpacing = 24
+  const dotR = 0.8
+  ctx.fillStyle = 'rgba(212,232,218,0.6)'
+  ctx.beginPath()
+  for (let x = dotSpacing / 2; x < cw; x += dotSpacing) {
+    for (let y = dotSpacing / 2; y < ch; y += dotSpacing) {
+      ctx.moveTo(x + dotR, y)
+      ctx.arc(x, y, dotR, 0, Math.PI * 2)
+    }
+  }
+  ctx.fill()
+
+  // ── Layout constants
+  const lineX1   = 41
+  const lineX2   = 1037
+  const contentW = lineX2 - lineX1
+  const centerX  = lineX1 + contentW / 2
+
+  // ── 3. Vertical border lines
+  ctx.strokeStyle = '#002910'
+  ctx.lineWidth   = 1.2
+  ctx.beginPath()
+  ctx.moveTo(lineX1, 0); ctx.lineTo(lineX1, ch)
+  ctx.moveTo(lineX2, 0); ctx.lineTo(lineX2, ch)
+  ctx.stroke()
+
+  // ── 4. AirOps logo (centered, larger than speaker variant)
+  const logoH   = 104
+  const logoW   = Math.round(784 * logoH / 252)
+  const logoY   = 126
+  const logoBmp = buildLogo('#002910', Math.round(logoH * dpr))
+  ctx.drawImage(logoBmp, Math.round(centerX - logoW / 2), logoY, logoW, logoH)
+
+  // ── 5. Title — mixed serif/sans lines
+  const titleSize = 180
+  const titleLH   = Math.round(titleSize * 0.94)
+  const titleY    = logoY + logoH + 66
+  const maxTitleW = 939
+
+  ctx.fillStyle     = '#002910'
+  ctx.textBaseline  = 'top'
+  ctx.textAlign     = 'center'
+  ctx.letterSpacing = '-5.4px'
+
+  // Line 1: serif (e.g. "Exclusive")
+  const line1 = settings.rtEvSerifLine1 || 'Exclusive'
+  ctx.font = `400 ${titleSize}px ${serif}`
+  ctx.fillText(line1, centerX, titleY)
+
+  // Line 2+: mixed sans + serif on each line
+  const sansText  = settings.rtEvSansText  || 'Round Table'
+  const serifText = settings.rtEvSerifLine2 || 'Series'
+
+  // Render line 2 as "SansText SerifText" with mixed fonts
+  const lineY2 = titleY + titleLH
+  const fullLine2 = sansText + ' ' + serifText
+
+  // Measure sans portion to position correctly
+  ctx.font = `400 ${titleSize}px ${sans}`
+  const sansMetrics = ctx.measureText(sansText + ' ')
+  ctx.font = `400 ${titleSize}px ${serif}`
+  const serifMetrics = ctx.measureText(serifText)
+  const totalW = sansMetrics.width + serifMetrics.width
+
+  // Check if line 2 needs to wrap (sans on one line, serif on next)
+  if (totalW > maxTitleW) {
+    // Sans line
+    ctx.font = `400 ${titleSize}px ${sans}`
+    ctx.fillText(sansText, centerX, lineY2)
+    // Serif line
+    ctx.font = `400 ${titleSize}px ${serif}`
+    ctx.fillText(serifText, centerX, lineY2 + titleLH)
+  } else {
+    // Single line with mixed fonts, centered as a unit
+    const startX = centerX - totalW / 2
+    ctx.textAlign = 'left'
+    ctx.font = `400 ${titleSize}px ${sans}`
+    ctx.fillText(sansText + ' ', startX, lineY2)
+    ctx.font = `400 ${titleSize}px ${serif}`
+    ctx.fillText(serifText, startX + sansMetrics.width, lineY2)
+  }
+
+  // ── 6. Pill badge
+  const pillText = (settings.rtEvPillText || 'FOR MARKETING LEADERS').toUpperCase()
+  const pillFontSize = 41
+  ctx.font          = `500 ${pillFontSize}px ${mono}`
+  ctx.letterSpacing = '2.45px'
+  ctx.textAlign     = 'center'
+  ctx.textBaseline  = 'middle'
+
+  const pillMetrics = ctx.measureText(pillText)
+  const pillPadX    = 20
+  const pillPadY    = 10
+  const pillW       = pillMetrics.width + pillPadX * 2
+  const pillH       = pillFontSize + pillPadY * 2
+  // Position pill with gap below title block
+  const titleBlockLines = totalW > maxTitleW ? 3 : 2
+  const pillY = titleY + titleLH * titleBlockLines + 66
+  const pillX = centerX - pillW / 2
+
+  // Pill background + border
+  const pillR = 10
+  ctx.fillStyle   = '#ebfff3'
+  ctx.strokeStyle = '#057a28'
+  ctx.lineWidth   = 1.74
+  ctx.beginPath()
+  ctx.roundRect(pillX, pillY, pillW, pillH, pillR)
+  ctx.fill()
+  ctx.stroke()
+
+  // Pill text
+  ctx.fillStyle = '#057a28'
+  ctx.fillText(pillText, centerX, pillY + pillH / 2)
+
+  ctx.textAlign     = 'left'
+  ctx.letterSpacing = '0px'
+}

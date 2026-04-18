@@ -11,7 +11,7 @@ import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
 import { drawCEDCanvas } from './utils/drawCEDCanvas'
-import { drawRoundtableCanvas } from './utils/drawRoundtableCanvas'
+import { drawRoundtableCanvas, drawRoundtableEvergreenCanvas } from './utils/drawRoundtableCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
@@ -247,10 +247,16 @@ const DEFAULT_SETTINGS = {
   wbSpeaker4Logo:    null,
   wbExportSizes:     ['1920x1080', '1080x1080', '1080x1350', '1080x1920', 'blog'],
   // Roundtable template
+  rtStyle:           'speaker',
   rtTitle:           'Roundtable',
   rtName:            'Ali McCarty',
   rtRoleCompany:     'VP of Strategy\nNew Business Expansion,\nAirOps',
   rtProfileImage:    null,
+  // Roundtable Evergreen
+  rtEvSerifLine1:    'Exclusive',
+  rtEvSansText:      'Round Table',
+  rtEvSerifLine2:    'Series',
+  rtEvPillText:      'FOR MARKETING LEADERS',
 }
 
 export default function App() {
@@ -549,6 +555,7 @@ export default function App() {
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady)
     else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current)
     else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)

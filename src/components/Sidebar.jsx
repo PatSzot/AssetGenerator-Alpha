@@ -692,64 +692,116 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Content — Roundtable */}
         {settings.templateType === 'roundtable' && <>
-          <div className="sec">Content</div>
-
+          <div className="sec">Style</div>
           <div className="field">
-            <label>Title</label>
-            <input type="text" value={settings.rtTitle ?? 'Roundtable'} onChange={e => update('rtTitle', e.target.value)} />
+            <div className="mode-grid-wide" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              {[
+                { value: 'speaker',   label: 'Speaker' },
+                { value: 'evergreen', label: 'Evergreen' },
+              ].map(s => (
+                <button
+                  key={s.value}
+                  className={`mode-btn${(settings.rtStyle ?? 'speaker') === s.value ? ' active' : ''}`}
+                  onClick={() => update('rtStyle', s.value)}
+                >{s.label}</button>
+              ))}
+            </div>
           </div>
 
           <div className="div" />
-          <div className="sec">Speaker</div>
 
-          <div className="field">
-            <label>Name</label>
-            <input type="text" value={settings.rtName ?? ''} onChange={e => update('rtName', e.target.value)} />
-          </div>
+          {/* Speaker style fields */}
+          {(settings.rtStyle ?? 'speaker') === 'speaker' && <>
+            <div className="sec">Content</div>
 
-          <div className="field">
-            <label>Title &amp; Company</label>
-            <textarea
-              value={settings.rtRoleCompany ?? ''}
-              onChange={e => update('rtRoleCompany', e.target.value)}
-              rows={3}
-            />
-          </div>
+            <div className="field">
+              <label>Title</label>
+              <input type="text" value={settings.rtTitle ?? 'Roundtable'} onChange={e => update('rtTitle', e.target.value)} />
+            </div>
 
-          <div className="div" />
-          <div className="sec">Headshot Photo</div>
+            <div className="div" />
+            <div className="sec">Speaker</div>
 
-          <div className="field">
-            <input
-              ref={rtPhotoInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={e => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                const reader = new FileReader()
-                reader.onload = ev => onRtPhotoChange(ev.target.result)
-                reader.readAsDataURL(file)
-                e.target.value = ''
-              }}
-            />
-            <button className="btn-upload" onClick={() => rtPhotoInputRef.current?.click()} disabled={rtPhotoProcessing}>
-              {rtPhotoProcessing ? '⏳ Stippling...' : settings.rtProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
-            </button>
-            {settings.rtProfileImage && !rtPhotoProcessing && (
-              <button className="btn-clear-photo" onClick={() => onRtPhotoChange(null)}>
-                ✕ Remove photo
+            <div className="field">
+              <label>Name</label>
+              <input type="text" value={settings.rtName ?? ''} onChange={e => update('rtName', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Title &amp; Company</label>
+              <textarea
+                value={settings.rtRoleCompany ?? ''}
+                onChange={e => update('rtRoleCompany', e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="div" />
+            <div className="sec">Headshot Photo</div>
+
+            <div className="field">
+              <input
+                ref={rtPhotoInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const reader = new FileReader()
+                  reader.onload = ev => onRtPhotoChange(ev.target.result)
+                  reader.readAsDataURL(file)
+                  e.target.value = ''
+                }}
+              />
+              <button className="btn-upload" onClick={() => rtPhotoInputRef.current?.click()} disabled={rtPhotoProcessing}>
+                {rtPhotoProcessing ? '⏳ Stippling...' : settings.rtProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
               </button>
-            )}
-            {stippleError && !rtPhotoProcessing && (
-              <p style={{ color: '#802828', fontSize: 12, margin: '6px 0 0', lineHeight: 1.4 }}>
-                {stippleError}
-              </p>
-            )}
-          </div>
+              {settings.rtProfileImage && !rtPhotoProcessing && (
+                <button className="btn-clear-photo" onClick={() => onRtPhotoChange(null)}>
+                  ✕ Remove photo
+                </button>
+              )}
+              {stippleError && !rtPhotoProcessing && (
+                <p style={{ color: '#802828', fontSize: 12, margin: '6px 0 0', lineHeight: 1.4 }}>
+                  {stippleError}
+                </p>
+              )}
+            </div>
 
-          <div className="div" />
+            <div className="div" />
+          </>}
+
+          {/* Evergreen style fields */}
+          {settings.rtStyle === 'evergreen' && <>
+            <div className="sec">Title</div>
+
+            <div className="field">
+              <label>Serif Line 1</label>
+              <input type="text" value={settings.rtEvSerifLine1 ?? 'Exclusive'} onChange={e => update('rtEvSerifLine1', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Sans Text</label>
+              <input type="text" value={settings.rtEvSansText ?? 'Round Table'} onChange={e => update('rtEvSansText', e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label>Serif Line 2</label>
+              <input type="text" value={settings.rtEvSerifLine2 ?? 'Series'} onChange={e => update('rtEvSerifLine2', e.target.value)} />
+            </div>
+
+            <div className="div" />
+
+            <div className="sec">Badge</div>
+
+            <div className="field">
+              <label>Pill Text</label>
+              <input type="text" value={settings.rtEvPillText ?? 'FOR MARKETING LEADERS'} onChange={e => update('rtEvPillText', e.target.value)} />
+            </div>
+
+            <div className="div" />
+          </>}
         </>}
 
         {/* Content — Webinar */}
