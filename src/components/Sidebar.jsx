@@ -21,6 +21,7 @@ const TEMPLATES = [
   { value: 'certificate', label: 'Certificate',  icon: '/Icon-Certificate.jpg'  },
   { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
   { value: 'webinar',     label: 'Webinar',      icon: '/Icon-Webinar.jpg'      },
+  { value: 'roundtable', label: 'Roundtable',   icon: '/Icon-Roundtable.jpg'   },
 ]
 
 const WB_EXPORT_SIZES = [
@@ -39,12 +40,13 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRtPhotoChange, rtPhotoProcessing, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
   const richLogoInputRef    = useRef(null)
   const ijPhotoInputRef     = useRef(null)
+  const rtPhotoInputRef     = useRef(null)
   const wbPhotoInputRefs    = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const wbLogoInputRefs     = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const batchCsvInputRef    = useRef(null)
@@ -688,6 +690,63 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
+        {/* Content — Roundtable */}
+        {settings.templateType === 'roundtable' && <>
+          <div className="sec">Content</div>
+
+          <div className="field">
+            <label>Title</label>
+            <input type="text" value={settings.rtTitle ?? 'Roundtable'} onChange={e => update('rtTitle', e.target.value)} />
+          </div>
+
+          <div className="div" />
+          <div className="sec">Speaker</div>
+
+          <div className="field">
+            <label>Name</label>
+            <input type="text" value={settings.rtName ?? ''} onChange={e => update('rtName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Title &amp; Company</label>
+            <textarea
+              value={settings.rtRoleCompany ?? ''}
+              onChange={e => update('rtRoleCompany', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="div" />
+          <div className="sec">Headshot Photo</div>
+
+          <div className="field">
+            <input
+              ref={rtPhotoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onRtPhotoChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => rtPhotoInputRef.current?.click()} disabled={rtPhotoProcessing}>
+              {rtPhotoProcessing ? '⏳ Stippling...' : settings.rtProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            </button>
+            {settings.rtProfileImage && !rtPhotoProcessing && (
+              <button className="btn-clear-photo" onClick={() => onRtPhotoChange(null)}>
+                ✕ Remove photo
+              </button>
+            )}
+          </div>
+
+          <div className="div" />
+        </>}
+
         {/* Content — Webinar */}
         {settings.templateType === 'webinar' && (() => {
           const n = settings.wbNumSpeakers ?? 1
@@ -843,6 +902,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Color Mode — hidden for Certificate, I Joined, and CED webinar (dark-only) */}
         {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined'
+         && settings.templateType !== 'roundtable'
          && !(settings.templateType === 'webinar' && settings.wbStyle === 'ced') && <>
           <div className="sec">Color Mode</div>
           {(() => {
@@ -873,6 +933,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             {DIMS
               .filter(({ w, h }) => {
                 if (settings.templateType === 'ijoined') return w === 1920 && h === 1080
+                if (settings.templateType === 'roundtable') return w === 1080 && h === 1080
                 return true
               })
               .map(({ w, h, label, sub }) => (
@@ -889,7 +950,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
 
           <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
-          {settings.templateType === 'ijoined'
+          {settings.templateType === 'ijoined' || settings.templateType === 'roundtable'
             ? null
             : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
           }

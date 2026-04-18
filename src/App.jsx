@@ -11,11 +11,12 @@ import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
 import { drawCEDCanvas } from './utils/drawCEDCanvas'
+import { drawRoundtableCanvas } from './utils/drawRoundtableCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 // ── URL slug ↔ template type
-const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar'])
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable'])
 
 function templateFromPath() {
   const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
@@ -245,6 +246,11 @@ const DEFAULT_SETTINGS = {
   wbSpeaker4Image:   '/GTMGen-NicoleBaerPortrait.jpg',
   wbSpeaker4Logo:    null,
   wbExportSizes:     ['1920x1080', '1080x1080', '1080x1350', '1080x1920', 'blog'],
+  // Roundtable template
+  rtTitle:           'Roundtable',
+  rtName:            'Ali McCarty',
+  rtRoleCompany:     'VP of Strategy\nNew Business Expansion,\nAirOps',
+  rtProfileImage:    null,
 }
 
 export default function App() {
@@ -257,9 +263,11 @@ export default function App() {
   const [batchRows, setBatchRows]             = useState(null)
   const [batchFetching, setBatchFetching]     = useState(false)
   const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
+  const [rtPhotoProcessing, setRtPhotoProcessing] = useState(false)
   const [airopsApiKey, setAiropsApiKey]   = useState(() => localStorage.getItem('airops-api-key') ?? '')
 
   const profileImageRef      = useRef(null)
+  const rtProfileImageRef    = useRef(null)
   const richProfileImageRef  = useRef(null)
   const richCompanyLogoRef   = useRef(null)
   const certImageRef         = useRef(null)
@@ -384,6 +392,10 @@ export default function App() {
       if (key === 'templateType' && value === 'ijoined') {
         next.dims = { w: 1920, h: 1080 }
       }
+      // Roundtable is fixed to 1080×1080
+      if (key === 'templateType' && value === 'roundtable') {
+        next.dims = { w: 1080, h: 1080 }
+      }
       return next
     })
   }, [])
@@ -428,6 +440,34 @@ export default function App() {
     const img = new Image()
     img.onload = () => { ijProfileImageRef.current = img; update('ijProfileImage', dataUrl) }
     img.src = dataUrl
+  }, [update])
+
+  const handleRtPhotoChange = useCallback(async (dataUrl) => {
+    if (!dataUrl) { rtProfileImageRef.current = null; update('rtProfileImage', null); setRtPhotoProcessing(false); return }
+    setRtPhotoProcessing(true)
+    let finalUrl = dataUrl
+    try {
+      const [header, base64] = dataUrl.split(',')
+      const mimeType = header.match(/:(.*?);/)[1]
+      const resp = await fetch('/api/stipple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType }),
+      })
+      if (resp.ok) {
+        const { image: stippled, mimeType: outMime } = await resp.json()
+        finalUrl = `data:${outMime};base64,${stippled}`
+      }
+    } catch (e) {
+      console.warn('Stipple effect failed, using original', e)
+    }
+    const img = new Image()
+    img.onload = () => {
+      rtProfileImageRef.current = img
+      update('rtProfileImage', finalUrl)
+      setRtPhotoProcessing(false)
+    }
+    img.src = finalUrl
   }, [update])
 
   const handleWbPhotoChange = useCallback(async (idx, dataUrl) => {
@@ -500,6 +540,7 @@ export default function App() {
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
+    else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current)
     else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)
@@ -517,6 +558,7 @@ export default function App() {
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'ijoined'                 ? 'airops-ijoined'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
+      : settings.templateType === 'roundtable'              ? 'airops-roundtable'
       : 'airops-quote'
     const modeTag = settings.templateType === 'ijoined' ? settings.ijMode : settings.colorMode
     const a = document.createElement('a')
@@ -537,6 +579,7 @@ export default function App() {
       : settings.templateType === 'titlecard'               ? 'airops-titlecard'
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
+      : settings.templateType === 'roundtable'              ? 'airops-roundtable'
       : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(
@@ -647,6 +690,8 @@ export default function App() {
         onRichProfileImageChange={handleRichProfileImageChange}
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
+        onRtPhotoChange={handleRtPhotoChange}
+        rtPhotoProcessing={rtPhotoProcessing}
         onWbPhotoChange={handleWbPhotoChange}
         wbPhotoProcessing={wbPhotoProcessing}
         onWbLogoChange={handleWbLogoChange}
