@@ -261,7 +261,13 @@ const DEFAULT_SETTINGS = {
 
 export default function App() {
   const hashPayloadRef = useRef(parseHashData())
-  const [settings, setSettings]       = useState(() => applyHashPayload({ ...DEFAULT_SETTINGS, templateType: templateFromPath() }, hashPayloadRef.current))
+  const [settings, setSettings]       = useState(() => {
+    const initialTemplate = templateFromPath()
+    const base = { ...DEFAULT_SETTINGS, templateType: initialTemplate }
+    if (initialTemplate === 'roundtable') base.dims = { w: 1080, h: 1080 }
+    else if (initialTemplate === 'certificate' || initialTemplate === 'ijoined') base.dims = { w: 1920, h: 1080 }
+    return applyHashPayload(base, hashPayloadRef.current)
+  })
   const [fontsReady, setFontsReady]   = useState(false)
   const [uiMode, setUiMode]           = useState('light')
   const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
@@ -270,6 +276,9 @@ export default function App() {
   const [batchFetching, setBatchFetching]     = useState(false)
   const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
   const [rtPhotoProcessing, setRtPhotoProcessing] = useState(false)
+  const [tweetPhotoProcessing, setTweetPhotoProcessing] = useState(false)
+  const [richPhotoProcessing, setRichPhotoProcessing] = useState(false)
+  const [ijPhotoProcessing, setIjPhotoProcessing] = useState(false)
   const [stippleError, setStippleError] = useState(null)
   const [airopsApiKey, setAiropsApiKey]   = useState(() => localStorage.getItem('airops-api-key') ?? '')
 
@@ -376,7 +385,13 @@ export default function App() {
 
   // Sync browser back/forward to templateType
   useEffect(() => {
-    const onPop = () => setSettings(prev => ({ ...prev, templateType: templateFromPath() }))
+    const onPop = () => setSettings(prev => {
+      const t = templateFromPath()
+      const next = { ...prev, templateType: t }
+      if (t === 'roundtable') next.dims = { w: 1080, h: 1080 }
+      else if (t === 'certificate' || t === 'ijoined') next.dims = { w: 1920, h: 1080 }
+      return next
+    })
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
@@ -414,26 +429,53 @@ export default function App() {
     setFloraliaReady(v => v + 1)
   }, [fontsReady])
 
-  const handleProfileImageChange = useCallback((dataUrl) => {
+  const stippleDataUrl = useCallback(async (dataUrl) => {
+    const [header, base64] = dataUrl.split(',')
+    const mimeType = header.match(/:(.*?);/)[1]
+    const resp = await fetch('/api/stipple', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, mimeType }),
+    })
+    if (!resp.ok) throw new Error(`Stipple failed (${resp.status})`)
+    const { image: stippled, mimeType: outMime } = await resp.json()
+    return `data:${outMime};base64,${stippled}`
+  }, [])
+
+  const handleProfileImageChange = useCallback(async (dataUrl) => {
     if (!dataUrl) {
       profileImageRef.current = null
       update('tweetProfileImage', null)
+      setTweetPhotoProcessing(false)
       return
     }
+    setTweetPhotoProcessing(true)
+    let finalUrl = dataUrl
+    try { finalUrl = await stippleDataUrl(dataUrl) }
+    catch (e) { console.warn('Stipple effect failed, using original', e) }
     const img = new Image()
     img.onload = () => {
       profileImageRef.current = img
-      update('tweetProfileImage', dataUrl)
+      update('tweetProfileImage', finalUrl)
+      setTweetPhotoProcessing(false)
     }
-    img.src = dataUrl
-  }, [update])
+    img.src = finalUrl
+  }, [update, stippleDataUrl])
 
-  const handleRichProfileImageChange = useCallback((dataUrl) => {
-    if (!dataUrl) { richProfileImageRef.current = null; update('richProfileImage', null); return }
+  const handleRichProfileImageChange = useCallback(async (dataUrl) => {
+    if (!dataUrl) { richProfileImageRef.current = null; update('richProfileImage', null); setRichPhotoProcessing(false); return }
+    setRichPhotoProcessing(true)
+    let finalUrl = dataUrl
+    try { finalUrl = await stippleDataUrl(dataUrl) }
+    catch (e) { console.warn('Stipple effect failed, using original', e) }
     const img = new Image()
-    img.onload = () => { richProfileImageRef.current = img; update('richProfileImage', dataUrl) }
-    img.src = dataUrl
-  }, [update])
+    img.onload = () => {
+      richProfileImageRef.current = img
+      update('richProfileImage', finalUrl)
+      setRichPhotoProcessing(false)
+    }
+    img.src = finalUrl
+  }, [update, stippleDataUrl])
 
   const handleRichCompanyLogoChange = useCallback((dataUrl) => {
     if (!dataUrl) { richCompanyLogoRef.current = null; update('richCompanyLogo', null); return }
@@ -442,12 +484,20 @@ export default function App() {
     img.src = dataUrl
   }, [update])
 
-  const handleIJProfileImageChange = useCallback((dataUrl) => {
-    if (!dataUrl) { ijProfileImageRef.current = null; update('ijProfileImage', null); return }
+  const handleIJProfileImageChange = useCallback(async (dataUrl) => {
+    if (!dataUrl) { ijProfileImageRef.current = null; update('ijProfileImage', null); setIjPhotoProcessing(false); return }
+    setIjPhotoProcessing(true)
+    let finalUrl = dataUrl
+    try { finalUrl = await stippleDataUrl(dataUrl) }
+    catch (e) { console.warn('Stipple effect failed, using original', e) }
     const img = new Image()
-    img.onload = () => { ijProfileImageRef.current = img; update('ijProfileImage', dataUrl) }
-    img.src = dataUrl
-  }, [update])
+    img.onload = () => {
+      ijProfileImageRef.current = img
+      update('ijProfileImage', finalUrl)
+      setIjPhotoProcessing(false)
+    }
+    img.src = finalUrl
+  }, [update, stippleDataUrl])
 
   const handleRtPhotoChange = useCallback(async (dataUrl) => {
     if (!dataUrl) { rtProfileImageRef.current = null; update('rtProfileImage', null); setRtPhotoProcessing(false); return }
@@ -703,9 +753,12 @@ export default function App() {
         uiMode={uiMode}
         onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
         onProfileImageChange={handleProfileImageChange}
+        tweetPhotoProcessing={tweetPhotoProcessing}
         onRichProfileImageChange={handleRichProfileImageChange}
+        richPhotoProcessing={richPhotoProcessing}
         onRichCompanyLogoChange={handleRichCompanyLogoChange}
         onIJProfileImageChange={handleIJProfileImageChange}
+        ijPhotoProcessing={ijPhotoProcessing}
         onRtPhotoChange={handleRtPhotoChange}
         rtPhotoProcessing={rtPhotoProcessing}
         stippleError={stippleError}
