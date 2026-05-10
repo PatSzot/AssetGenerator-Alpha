@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" shape-rendering="geometricPrecision">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="115%" r="85%">
+      <stop offset="0%"  stop-color="#fea0dc" stop-opacity="0.55"/>
+      <stop offset="30%" stop-color="#fea0dc" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#fff7ff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#fff7ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" x="0" y="0" width="7" height="7" patternUnits="userSpaceOnUse">
+      <circle cx="3.5" cy="3.5" r="0.45" fill="#e7c8e4" opacity="0.7"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="300" height="300" fill="#fff7ff"/>
+  <rect width="300" height="300" fill="url(#glow)"/>
+  <rect width="300" height="300" fill="url(#dots)"/>
+
+  <!-- Vertical guide lines -->
+  <line x1="14"  y1="0" x2="14"  y2="300" stroke="#3a092c" stroke-width="0.7"/>
+  <line x1="286" y1="0" x2="286" y2="300" stroke="#3a092c" stroke-width="0.7"/>
+
+  <!-- Fleuron flourish (top-right corner, signature welcome decoration) -->
+  <g fill="#c54b9b" opacity="0.85">
+    <path d="M268 24 q-10 -6 -18 0 q8 4 14 12 q-2 -10 4 -12 z"/>
+    <path d="M254 38 q-12 -2 -16 8 q10 -2 16 6 q-4 -8 0 -14 z"/>
+    <circle cx="276" cy="20" r="2.2"/>
+    <circle cx="259" cy="29" r="1.6"/>
+    <circle cx="265" cy="44" r="1.4"/>
+    <circle cx="248" cy="46" r="1.2"/>
+    <circle cx="244" cy="34" r="1"/>
+  </g>
+
+  <!-- WELCOME TO eyebrow -->
+  <text x="150" y="78"
+        font-family="'Saans Mono','DM Mono',ui-monospace,monospace"
+        font-weight="500" font-size="11" letter-spacing="1.4"
+        fill="#c54b9b" text-anchor="middle">WELCOME TO</text>
+
+  <!-- airops wordmark (stylized to read at small size) -->
+  <text x="150" y="105"
+        font-family="'Saans','Helvetica Neue',sans-serif"
+        font-weight="500" font-size="20" letter-spacing="-0.3"
+        fill="#3a092c" text-anchor="middle">airops</text>
+
+  <!-- Serif title -->
+  <text x="150" y="172"
+        font-family="'Serrif VF',Georgia,serif"
+        font-weight="400" font-size="58" letter-spacing="-1.5"
+        fill="#3a092c" text-anchor="middle">Welcome</text>
+
+  <!-- Photo box (dark with screen-blended texture suggestion) -->
+  <rect x="40" y="208" width="74" height="74" fill="none" stroke="#3a092c" stroke-width="0.8"/>
+  <rect x="44" y="212" width="66" height="66" fill="#3a092c"/>
+  <g opacity="0.55" fill="#e7c8e4">
+    <circle cx="60" cy="232" r="1.2"/>
+    <circle cx="78" cy="226" r="1"/>
+    <circle cx="90" cy="240" r="1.4"/>
+    <circle cx="70" cy="252" r="1.1"/>
+    <circle cx="84" cy="262" r="1.3"/>
+    <circle cx="98" cy="248" r="1"/>
+    <circle cx="56" cy="262" r="1"/>
+    <circle cx="100" cy="228" r="0.9"/>
+    <circle cx="64" cy="244" r="0.8"/>
+    <circle cx="92" cy="222" r="0.7"/>
+  </g>
+
+  <!-- Name + title text lines -->
+  <rect x="128" y="218" width="118" height="9"  fill="#3a092c"/>
+  <rect x="128" y="234" width="92"  height="5"  fill="#3a092c" opacity="0.55"/>
+  <rect x="128" y="246" width="104" height="5"  fill="#3a092c" opacity="0.55"/>
+</svg>

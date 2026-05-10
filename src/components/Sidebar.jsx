@@ -22,7 +22,7 @@ const TEMPLATES = [
   { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
   { value: 'webinar',     label: 'Webinar',      icon: '/Icon-Webinar.jpg'      },
   { value: 'roundtable', label: 'Roundtable',   icon: '/Icon-Roundtable.jpg'   },
-  { value: 'welcome',    label: 'Welcome',      icon: '/Icon-Roundtable.jpg'   },
+  { value: 'welcome',    label: 'Welcome',      icon: '/Icon-Welcome.svg'      },
 ]
 
 const WELCOME_COLORS = [
