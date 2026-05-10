@@ -150,7 +150,7 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, fl
 
   // "WELCOME TO" eyebrow
   const welcomeText = (settings.welcomeWelcomeText || 'WELCOME TO').toUpperCase()
-  const welcomeY    = 196
+  const welcomeY    = 110
   const welcomeSize = 28
   ctx.font          = `500 ${welcomeSize}px ${mono}`
   ctx.fillStyle     = palette.accent
