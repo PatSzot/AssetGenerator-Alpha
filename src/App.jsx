@@ -660,7 +660,7 @@ export default function App() {
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady)
     else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current)
-    else if (s.templateType === 'welcome')     drawWelcomeCanvas(canvas, s, fontsReady, welcomeProfileImageRef.current)
+    else if (s.templateType === 'welcome')     drawWelcomeCanvas(canvas, s, fontsReady, welcomeProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)

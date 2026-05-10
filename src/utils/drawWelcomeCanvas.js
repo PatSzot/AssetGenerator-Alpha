@@ -1,13 +1,13 @@
 import { buildLogo, wrapText } from './drawCanvas.js'
 
 const PALETTE = {
-  green:  { base: '#eef9f3', glow: [0, 255, 100],   ink: '#002910', accent: '#057a28', dot: 'rgba(212,232,218,0.6)' },
-  pink:   { base: '#fff7ff', glow: [254, 160, 220], ink: '#3a092c', accent: '#c54b9b', dot: 'rgba(231,200,228,0.5)' },
-  indigo: { base: '#f5f6ff', glow: [140, 140, 255], ink: '#0f0f57', accent: '#1b1b8f', dot: 'rgba(200,200,240,0.55)' },
-  red:    { base: '#fff0f0', glow: [255, 160, 160], ink: '#331010', accent: '#802828', dot: 'rgba(232,200,200,0.55)' },
-  yellow: { base: '#fdfff3', glow: [238, 255, 140], ink: '#242603', accent: '#586605', dot: 'rgba(220,230,160,0.55)' },
-  purple: { base: '#f8f7ff', glow: [180, 150, 230], ink: '#2a084d', accent: '#5a3480', dot: 'rgba(220,210,240,0.55)' },
-  teal:   { base: '#f2fcff', glow: [150, 220, 235], ink: '#0a3945', accent: '#196c80', dot: 'rgba(200,225,232,0.55)' },
+  green:  { base: '#eef9f3', glow: [0, 255, 100],   ink: '#002910', accent: '#057a28', dot: 'rgba(212,232,218,0.6)', stipple: '#80CC9F' },
+  pink:   { base: '#fff7ff', glow: [254, 160, 220], ink: '#3a092c', accent: '#c54b9b', dot: 'rgba(231,200,228,0.5)',  stipple: '#CC86C0' },
+  indigo: { base: '#f5f6ff', glow: [140, 140, 255], ink: '#0f0f57', accent: '#1b1b8f', dot: 'rgba(200,200,240,0.55)', stipple: '#8080CC' },
+  red:    { base: '#fff0f0', glow: [255, 160, 160], ink: '#331010', accent: '#802828', dot: 'rgba(232,200,200,0.55)', stipple: '#CC8080' },
+  yellow: { base: '#fdfff3', glow: [238, 255, 140], ink: '#242603', accent: '#586605', dot: 'rgba(220,230,160,0.55)', stipple: '#B8BD30' },
+  purple: { base: '#f8f7ff', glow: [180, 150, 230], ink: '#2a084d', accent: '#5a3480', dot: 'rgba(220,210,240,0.55)', stipple: '#9F80CC' },
+  teal:   { base: '#f2fcff', glow: [150, 220, 235], ink: '#0a3945', accent: '#196c80', dot: 'rgba(200,225,232,0.55)', stipple: '#7AB5C0' },
 }
 
 function paintBackground(ctx, cw, ch, palette) {
@@ -58,7 +58,58 @@ function paintPattern(ctx, cw, ch, pattern, palette) {
   ctx.fill()
 }
 
-export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage) {
+function paintDecoration(ctx, cw, ch, palette, settings, floralia) {
+  if (!settings.showFloralia || !floralia?.insideDots) return
+
+  const scale    = Math.max(cw, ch) * 2.0
+  const dotR     = Math.max(cw, ch) * 0.0022
+  const stepNorm = 0.006
+
+  // Anchor — top-right corner (above the title block, mirrors title card)
+  const anchorX = cw * 0.97
+  const anchorY = ch * 0.03
+  const offX    = anchorX - scale / 2
+  const offY    = anchorY - scale / 2
+  const shiftX  = ((cw - 40 - offX) / scale) % stepNorm
+  const shiftY  = ((40 - offY) / scale) % stepNorm
+
+  const renderDots = (dots, alpha) => {
+    ctx.fillStyle   = palette.stipple
+    ctx.globalAlpha = alpha
+    ctx.beginPath()
+    dots.forEach(({ x, y }) => {
+      const px = offX + (x + shiftX) * scale
+      const py = offY + (y + shiftY) * scale
+      if (px > -dotR && px < cw + dotR && py > -dotR && py < ch + dotR) {
+        ctx.moveTo(px + dotR, py)
+        ctx.arc(px, py, dotR, 0, Math.PI * 2)
+      }
+    })
+    ctx.fill()
+    ctx.globalAlpha = 1
+  }
+
+  const renderGlyphs = () => {
+    ctx.fillStyle    = palette.base
+    ctx.textBaseline = 'middle'
+    ctx.textAlign    = 'center'
+    floralia.glyphs.forEach(({ char, fontSizeNorm, cxNorm, cyNorm }) => {
+      ctx.font = `${fontSizeNorm * scale}px Floralia`
+      ctx.fillText(char, offX + cxNorm * scale, offY + cyNorm * scale)
+    })
+    ctx.textAlign    = 'left'
+    ctx.textBaseline = 'top'
+  }
+
+  if (settings.decorationStyle === 'inverted') {
+    renderDots(floralia.outsideDots, 0.28)
+    renderGlyphs()
+  } else {
+    renderDots(floralia.insideDots, 0.35)
+  }
+}
+
+export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, floralia) {
   const cw = 1080, ch = 1080
   const dpr = settings.dpr ?? 2
   canvas.width  = cw * dpr
@@ -81,6 +132,7 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage) {
 
   paintBackground(ctx, cw, ch, palette)
   paintPattern(ctx, cw, ch, pattern, palette)
+  paintDecoration(ctx, cw, ch, palette, settings, floralia)
 
   // Layout constants
   const lineX1   = 41
