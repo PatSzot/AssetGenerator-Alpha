@@ -22,6 +22,23 @@ const TEMPLATES = [
   { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
   { value: 'webinar',     label: 'Webinar',      icon: '/Icon-Webinar.jpg'      },
   { value: 'roundtable', label: 'Roundtable',   icon: '/Icon-Roundtable.jpg'   },
+  { value: 'welcome',    label: 'Welcome',      icon: '/Icon-Roundtable.jpg'   },
+]
+
+const WELCOME_COLORS = [
+  { value: 'green',  label: 'Green',  swatch: '#eef9f3', border: '#057a28' },
+  { value: 'pink',   label: 'Pink',   swatch: '#fee7fd', border: '#c54b9b' },
+  { value: 'indigo', label: 'Indigo', swatch: '#e5e5ff', border: '#1b1b8f' },
+  { value: 'red',    label: 'Red',    swatch: '#ffe2e2', border: '#802828' },
+  { value: 'yellow', label: 'Yellow', swatch: '#eeff8c', border: '#586605' },
+  { value: 'purple', label: 'Purple', swatch: '#ddd3f2', border: '#5a3480' },
+  { value: 'teal',   label: 'Teal',   swatch: '#c9ebf2', border: '#196c80' },
+]
+
+const WELCOME_PATTERNS = [
+  { value: 'dots',  label: 'Dot Grid' },
+  { value: 'lines', label: 'Diagonal' },
+  { value: 'none',  label: 'Solid' },
 ]
 
 const WB_EXPORT_SIZES = [
@@ -40,13 +57,14 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, onRichProfileImageChange, onRichCompanyLogoChange, onIJProfileImageChange, onRtPhotoChange, rtPhotoProcessing, stippleError, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, tweetPhotoProcessing, onRichProfileImageChange, richPhotoProcessing, onRichCompanyLogoChange, onIJProfileImageChange, ijPhotoProcessing, onRtPhotoChange, rtPhotoProcessing, onWelcomePhotoChange, welcomePhotoProcessing, stippleError, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
   const richLogoInputRef    = useRef(null)
   const ijPhotoInputRef     = useRef(null)
   const rtPhotoInputRef     = useRef(null)
+  const welcomePhotoInputRef = useRef(null)
   const wbPhotoInputRefs    = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const wbLogoInputRefs     = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const batchCsvInputRef    = useRef(null)
@@ -179,8 +197,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 e.target.value = ''
               }}
             />
-            <button className="btn-upload" onClick={() => richPhotoInputRef.current?.click()}>
-              {settings.richProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            <button className="btn-upload" onClick={() => richPhotoInputRef.current?.click()} disabled={richPhotoProcessing}>
+              {richPhotoProcessing ? '⏳ Stippling...' : settings.richProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
             </button>
             {settings.richProfileImage && (
               <button className="btn-clear-photo" onClick={() => onRichProfileImageChange(null)}>
@@ -540,8 +558,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 e.target.value = ''
               }}
             />
-            <button className="btn-upload" onClick={() => fileInputRef.current?.click()}>
-              {settings.tweetProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            <button className="btn-upload" onClick={() => fileInputRef.current?.click()} disabled={tweetPhotoProcessing}>
+              {tweetPhotoProcessing ? '⏳ Stippling...' : settings.tweetProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
             </button>
             {settings.tweetProfileImage && (
               <button className="btn-clear-photo" onClick={() => onProfileImageChange(null)}>
@@ -637,8 +655,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 e.target.value = ''
               }}
             />
-            <button className="btn-upload" onClick={() => ijPhotoInputRef.current?.click()}>
-              {settings.ijProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            <button className="btn-upload" onClick={() => ijPhotoInputRef.current?.click()} disabled={ijPhotoProcessing}>
+              {ijPhotoProcessing ? '⏳ Stippling...' : settings.ijProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
             </button>
             {settings.ijProfileImage && (
               <button className="btn-clear-photo" onClick={() => onIJProfileImageChange(null)}>
@@ -804,6 +822,99 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           </>}
         </>}
 
+        {/* Content — Welcome graphic */}
+        {settings.templateType === 'welcome' && <>
+          <div className="sec">Color</div>
+          <div className="field">
+            <div className="mode-grid mode-grid-wide">
+              {WELCOME_COLORS.map(c => (
+                <button
+                  key={c.value}
+                  className={`mode-btn${(settings.welcomeColor ?? 'green') === c.value ? ' active' : ''}`}
+                  onClick={() => update('welcomeColor', c.value)}
+                  style={{ background: c.swatch, borderColor: c.border }}
+                >{c.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="div" />
+
+          <div className="sec">Pattern</div>
+          <div className="field">
+            <div className="mode-grid-wide" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+              {WELCOME_PATTERNS.map(p => (
+                <button
+                  key={p.value}
+                  className={`mode-btn${(settings.welcomePattern ?? 'dots') === p.value ? ' active' : ''}`}
+                  onClick={() => update('welcomePattern', p.value)}
+                >{p.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="div" />
+          <div className="sec">Content</div>
+
+          <div className="field">
+            <label>Eyebrow</label>
+            <input type="text" value={settings.welcomeWelcomeText ?? 'WELCOME TO'} onChange={e => update('welcomeWelcomeText', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Title</label>
+            <input type="text" value={settings.welcomeTitle ?? 'Welcome'} onChange={e => update('welcomeTitle', e.target.value)} />
+          </div>
+
+          <div className="div" />
+          <div className="sec">Person</div>
+
+          <div className="field">
+            <label>Name</label>
+            <input type="text" value={settings.welcomeName ?? ''} onChange={e => update('welcomeName', e.target.value)} />
+          </div>
+
+          <div className="field">
+            <label>Title</label>
+            <input type="text" value={settings.welcomeRole ?? ''} onChange={e => update('welcomeRole', e.target.value)} />
+          </div>
+
+          <div className="div" />
+          <div className="sec">Headshot Photo</div>
+
+          <div className="field">
+            <input
+              ref={welcomePhotoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => onWelcomePhotoChange(ev.target.result)
+                reader.readAsDataURL(file)
+                e.target.value = ''
+              }}
+            />
+            <button className="btn-upload" onClick={() => welcomePhotoInputRef.current?.click()} disabled={welcomePhotoProcessing}>
+              {welcomePhotoProcessing ? '⏳ Stippling...' : settings.welcomeProfileImage ? '↺ Replace Photo' : '↑ Upload Photo'}
+            </button>
+            {settings.welcomeProfileImage && !welcomePhotoProcessing && (
+              <button className="btn-clear-photo" onClick={() => onWelcomePhotoChange(null)}>
+                ✕ Remove photo
+              </button>
+            )}
+            {stippleError && !welcomePhotoProcessing && (
+              <p style={{ color: '#802828', fontSize: 12, margin: '6px 0 0', lineHeight: 1.4 }}>
+                {stippleError}
+              </p>
+            )}
+          </div>
+
+          <div className="div" />
+        </>}
+
         {/* Content — Webinar */}
         {settings.templateType === 'webinar' && (() => {
           const n = settings.wbNumSpeakers ?? 1
@@ -960,6 +1071,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {/* Color Mode — hidden for Certificate, I Joined, and CED webinar (dark-only) */}
         {settings.templateType !== 'certificate' && settings.templateType !== 'ijoined'
          && settings.templateType !== 'roundtable'
+         && settings.templateType !== 'welcome'
          && !(settings.templateType === 'webinar' && settings.wbStyle === 'ced') && <>
           <div className="sec">Color Mode</div>
           {(() => {
@@ -991,6 +1103,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               .filter(({ w, h }) => {
                 if (settings.templateType === 'ijoined') return w === 1920 && h === 1080
                 if (settings.templateType === 'roundtable') return w === 1080 && h === 1080
+                if (settings.templateType === 'welcome') return w === 1080 && h === 1080
                 return true
               })
               .map(({ w, h, label, sub }) => (
@@ -1007,7 +1120,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
 
           <button className="btn-ex" onClick={() => onExport()}>↓ Export JPEG</button>
-          {settings.templateType === 'ijoined' || settings.templateType === 'roundtable'
+          {settings.templateType === 'ijoined' || settings.templateType === 'roundtable' || settings.templateType === 'welcome'
             ? null
             : <button className="btn-all" onClick={onExportAll}>↓ Export All 4 Sizes</button>
           }

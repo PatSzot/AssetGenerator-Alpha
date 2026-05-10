@@ -12,11 +12,12 @@ import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
 import { drawCEDCanvas } from './utils/drawCEDCanvas'
 import { drawRoundtableCanvas, drawRoundtableEvergreenCanvas } from './utils/drawRoundtableCanvas'
+import { drawWelcomeCanvas } from './utils/drawWelcomeCanvas'
 import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 // ── URL slug ↔ template type
-const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable'])
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable', 'welcome'])
 
 function templateFromPath() {
   const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
@@ -257,6 +258,14 @@ const DEFAULT_SETTINGS = {
   rtEvSansText:      'Round Table',
   rtEvSerifLine2:    'Series',
   rtEvPillText:      'FOR MARKETING LEADERS',
+  // Welcome graphic
+  welcomeColor:        'green',
+  welcomePattern:      'dots',
+  welcomeWelcomeText:  'WELCOME TO',
+  welcomeTitle:        'Welcome',
+  welcomeName:         'Ali McCarty',
+  welcomeRole:         'VP of Strategy',
+  welcomeProfileImage: null,
 }
 
 export default function App() {
@@ -264,7 +273,7 @@ export default function App() {
   const [settings, setSettings]       = useState(() => {
     const initialTemplate = templateFromPath()
     const base = { ...DEFAULT_SETTINGS, templateType: initialTemplate }
-    if (initialTemplate === 'roundtable') base.dims = { w: 1080, h: 1080 }
+    if (initialTemplate === 'roundtable' || initialTemplate === 'welcome') base.dims = { w: 1080, h: 1080 }
     else if (initialTemplate === 'certificate' || initialTemplate === 'ijoined') base.dims = { w: 1920, h: 1080 }
     return applyHashPayload(base, hashPayloadRef.current)
   })
@@ -276,6 +285,7 @@ export default function App() {
   const [batchFetching, setBatchFetching]     = useState(false)
   const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
   const [rtPhotoProcessing, setRtPhotoProcessing] = useState(false)
+  const [welcomePhotoProcessing, setWelcomePhotoProcessing] = useState(false)
   const [tweetPhotoProcessing, setTweetPhotoProcessing] = useState(false)
   const [richPhotoProcessing, setRichPhotoProcessing] = useState(false)
   const [ijPhotoProcessing, setIjPhotoProcessing] = useState(false)
@@ -284,6 +294,7 @@ export default function App() {
 
   const profileImageRef      = useRef(null)
   const rtProfileImageRef    = useRef(null)
+  const welcomeProfileImageRef = useRef(null)
   const richProfileImageRef  = useRef(null)
   const richCompanyLogoRef   = useRef(null)
   const certImageRef         = useRef(null)
@@ -347,17 +358,19 @@ export default function App() {
     if (!hashImages[0]) {
       const portrait = new Image()
       portrait.onload = () => {
-        richProfileImageRef.current = portrait
-        ijProfileImageRef.current   = portrait
-        wbPhotoRefs.current         = [portrait, portrait, portrait, portrait]
+        richProfileImageRef.current   = portrait
+        ijProfileImageRef.current     = portrait
+        welcomeProfileImageRef.current = portrait
+        wbPhotoRefs.current           = [portrait, portrait, portrait, portrait]
         setSettings(prev => ({
           ...prev,
-          richProfileImage: '/GTMGen-NicoleBaerPortrait.jpg',
-          ijProfileImage:   '/GTMGen-NicoleBaerPortrait.jpg',
-          wbSpeaker1Image:  '/GTMGen-NicoleBaerPortrait.jpg',
-          wbSpeaker2Image:  '/GTMGen-NicoleBaerPortrait.jpg',
-          wbSpeaker3Image:  '/GTMGen-NicoleBaerPortrait.jpg',
-          wbSpeaker4Image:  '/GTMGen-NicoleBaerPortrait.jpg',
+          richProfileImage:    '/GTMGen-NicoleBaerPortrait.jpg',
+          ijProfileImage:      '/GTMGen-NicoleBaerPortrait.jpg',
+          welcomeProfileImage: '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker1Image:     '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker2Image:     '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker3Image:     '/GTMGen-NicoleBaerPortrait.jpg',
+          wbSpeaker4Image:     '/GTMGen-NicoleBaerPortrait.jpg',
         }))
       }
       portrait.src = '/GTMGen-NicoleBaerPortrait.jpg'
@@ -388,7 +401,7 @@ export default function App() {
     const onPop = () => setSettings(prev => {
       const t = templateFromPath()
       const next = { ...prev, templateType: t }
-      if (t === 'roundtable') next.dims = { w: 1080, h: 1080 }
+      if (t === 'roundtable' || t === 'welcome') next.dims = { w: 1080, h: 1080 }
       else if (t === 'certificate' || t === 'ijoined') next.dims = { w: 1920, h: 1080 }
       return next
     })
@@ -416,6 +429,10 @@ export default function App() {
       }
       // Roundtable is fixed to 1080×1080
       if (key === 'templateType' && value === 'roundtable') {
+        next.dims = { w: 1080, h: 1080 }
+      }
+      // Welcome graphic is fixed to 1080×1080
+      if (key === 'templateType' && value === 'welcome') {
         next.dims = { w: 1080, h: 1080 }
       }
       return next
@@ -535,6 +552,42 @@ export default function App() {
     img.src = finalUrl
   }, [update])
 
+  const handleWelcomePhotoChange = useCallback(async (dataUrl) => {
+    if (!dataUrl) { welcomeProfileImageRef.current = null; update('welcomeProfileImage', null); setWelcomePhotoProcessing(false); return }
+    setWelcomePhotoProcessing(true)
+    setStippleError(null)
+    let finalUrl = dataUrl
+    try {
+      const [header, base64] = dataUrl.split(',')
+      const mimeType = header.match(/:(.*?);/)[1]
+      const resp = await fetch('/api/stipple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType }),
+      })
+      if (resp.ok) {
+        const { image: stippled, mimeType: outMime } = await resp.json()
+        finalUrl = `data:${outMime};base64,${stippled}`
+      } else {
+        const errBody = await resp.text().catch(() => '')
+        const msg = `Stipple failed (${resp.status}): ${errBody.slice(0, 200)}`
+        console.warn(msg)
+        setStippleError(msg)
+      }
+    } catch (e) {
+      const msg = `Stipple error: ${e.message}`
+      console.warn(msg, e)
+      setStippleError(msg)
+    }
+    const img = new Image()
+    img.onload = () => {
+      welcomeProfileImageRef.current = img
+      update('welcomeProfileImage', finalUrl)
+      setWelcomePhotoProcessing(false)
+    }
+    img.src = finalUrl
+  }, [update])
+
   const handleWbPhotoChange = useCallback(async (idx, dataUrl) => {
     const key = `wbSpeaker${idx + 1}Image`
     if (!dataUrl) { wbPhotoRefs.current[idx] = null; update(key, null); return }
@@ -607,6 +660,7 @@ export default function App() {
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady)
     else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current)
+    else if (s.templateType === 'welcome')     drawWelcomeCanvas(canvas, s, fontsReady, welcomeProfileImageRef.current)
     else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)
     else                                       drawCanvas(canvas, s, fontsReady)
@@ -625,8 +679,11 @@ export default function App() {
       : settings.templateType === 'ijoined'                 ? 'airops-ijoined'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
       : settings.templateType === 'roundtable'              ? 'airops-roundtable'
+      : settings.templateType === 'welcome'                 ? 'airops-welcome'
       : 'airops-quote'
-    const modeTag = settings.templateType === 'ijoined' ? settings.ijMode : settings.colorMode
+    const modeTag = settings.templateType === 'ijoined' ? settings.ijMode
+      : settings.templateType === 'welcome' ? settings.welcomeColor
+      : settings.colorMode
     const a = document.createElement('a')
     a.download = filename ?? `${prefix}-${modeTag}-${ew}x${eh}.jpg`
     a.href = ec.toDataURL('image/jpeg', 0.95)
@@ -646,6 +703,7 @@ export default function App() {
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
       : settings.templateType === 'roundtable'              ? 'airops-roundtable'
+      : settings.templateType === 'welcome'                 ? 'airops-welcome'
       : 'airops-quote'
     presets.forEach(([w, h, label], i) => {
       setTimeout(
@@ -761,6 +819,8 @@ export default function App() {
         ijPhotoProcessing={ijPhotoProcessing}
         onRtPhotoChange={handleRtPhotoChange}
         rtPhotoProcessing={rtPhotoProcessing}
+        onWelcomePhotoChange={handleWelcomePhotoChange}
+        welcomePhotoProcessing={welcomePhotoProcessing}
         stippleError={stippleError}
         onWbPhotoChange={handleWbPhotoChange}
         wbPhotoProcessing={wbPhotoProcessing}
