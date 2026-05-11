@@ -174,7 +174,7 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, fl
   const lastName  = parts.slice(1).join(' ')
 
   // First name — large serif, auto-shrink to fit
-  const firstY        = logoY + logoH + 64
+  const firstY        = logoY + logoH + 40
   let   firstSize     = 194
   const maxFirstW     = contentW - 80
   ctx.font            = `400 ${firstSize}px ${serif}`
@@ -202,9 +202,9 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, fl
   ctx.letterSpacing = '0px'
 
   // Photo box — centered below last name
-  const photoSz  = 320
+  const photoSz  = 440
   const photoX   = Math.round(centerX - photoSz / 2)
-  const photoY   = lastY + lastH + 36
+  const photoY   = lastY + lastH + 32
 
   const bw  = 1.217
   const pad = 9.325
