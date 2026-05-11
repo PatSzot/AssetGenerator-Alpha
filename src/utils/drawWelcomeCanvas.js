@@ -1,4 +1,4 @@
-import { buildLogo, wrapText } from './drawCanvas.js'
+import { buildLogo } from './drawCanvas.js'
 
 const PALETTE = {
   green:  { base: '#eef9f3', glow: [0, 255, 100],   ink: '#002910', accent: '#057a28', dot: 'rgba(212,232,218,0.6)', stipple: '#80CC9F' },
@@ -167,26 +167,44 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, fl
   const logoBmp = buildLogo(palette.ink, Math.round(logoH * dpr))
   ctx.drawImage(logoBmp, Math.round(centerX - logoW / 2), logoY, logoW, logoH)
 
-  // Title text (large serif)
-  const titleY    = logoY + logoH + 80
-  const titleSize = 194
-  ctx.font          = `400 ${titleSize}px ${serif}`
+  // Split name into first / last
+  const fullName  = (settings.welcomeName || 'Ali McCarty').trim()
+  const parts     = fullName.split(/\s+/)
+  const firstName = parts[0] || ''
+  const lastName  = parts.slice(1).join(' ')
+
+  // First name — large serif, auto-shrink to fit
+  const firstY        = logoY + logoH + 64
+  let   firstSize     = 194
+  const maxFirstW     = contentW - 80
+  ctx.font            = `400 ${firstSize}px ${serif}`
+  let firstMetrics    = ctx.measureText(firstName)
+  if (firstMetrics.width > maxFirstW) {
+    firstSize = Math.floor(firstSize * maxFirstW / firstMetrics.width)
+    ctx.font  = `400 ${firstSize}px ${serif}`
+  }
   ctx.fillStyle     = palette.ink
-  ctx.letterSpacing = '-3.88px'
+  ctx.letterSpacing = `${-firstSize * 0.02}px`
   ctx.textBaseline  = 'top'
   ctx.textAlign     = 'center'
-  ctx.fillText(settings.welcomeTitle || 'Welcome', centerX, titleY)
+  ctx.fillText(firstName, centerX, firstY)
+  const firstH = Math.round(firstSize * 0.94)
+
+  // Last name — sans 64px, centered below first name
+  const lastSize = 64
+  const lastY    = firstY + firstH + 14
+  ctx.font          = `500 ${lastSize}px ${sans}`
+  ctx.letterSpacing = '-1.28px'
+  ctx.fillText(lastName, centerX, lastY)
+  const lastH = lastName ? Math.round(lastSize * 1.2) : 0
+
   ctx.textAlign     = 'left'
   ctx.letterSpacing = '0px'
 
-  // Bottom section: photo + name/title
-  const titleH   = Math.round(titleSize * 0.94)
-  const bottomY  = titleY + titleH + 78
-  const sectionW = 995
-  const sectionX = Math.round(centerX - sectionW / 2)
-  const photoSz  = 373
-  const photoX   = sectionX
-  const photoY   = bottomY
+  // Photo box — centered below last name
+  const photoSz  = 320
+  const photoX   = Math.round(centerX - photoSz / 2)
+  const photoY   = lastY + lastH + 36
 
   const bw  = 1.217
   const pad = 9.325
@@ -220,30 +238,4 @@ export function drawWelcomeCanvas(canvas, settings, fontsReady, profileImage, fl
     ctx.globalCompositeOperation = 'source-over'
     ctx.restore()
   }
-
-  // Name
-  const textGap  = 24
-  const textX    = photoX + photoSz + textGap
-  const textMaxW = sectionW - photoSz - textGap
-
-  const name = settings.welcomeName || 'Ali McCarty'
-  ctx.font          = `500 64px ${sans}`
-  ctx.fillStyle     = palette.ink
-  ctx.letterSpacing = '-1.28px'
-  ctx.textBaseline  = 'top'
-  const nameLines = wrapText(ctx, name, textMaxW)
-  const nameLH    = 64 * 1.2
-  nameLines.forEach((line, i) => ctx.fillText(line, textX, photoY + i * nameLH))
-
-  // Title (job title only, no company)
-  const roleY = photoY + nameLines.length * nameLH + 16
-  ctx.font          = `400 44px ${sans}`
-  ctx.letterSpacing = '-0.88px'
-  const roleLH = 44 * 1.2
-
-  const roleText  = settings.welcomeRole || 'VP of Strategy'
-  const roleLines = wrapText(ctx, roleText, textMaxW)
-  roleLines.forEach((line, i) => ctx.fillText(line, textX, roleY + i * roleLH))
-
-  ctx.letterSpacing = '0px'
 }

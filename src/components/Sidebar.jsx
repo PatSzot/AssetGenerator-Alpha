@@ -886,21 +886,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           </div>
 
           <div className="field">
-            <label>Title</label>
-            <input type="text" value={settings.welcomeTitle ?? 'Welcome'} onChange={e => update('welcomeTitle', e.target.value)} />
-          </div>
-
-          <div className="div" />
-          <div className="sec">Person</div>
-
-          <div className="field">
-            <label>Name</label>
+            <label>Name (First Last)</label>
             <input type="text" value={settings.welcomeName ?? ''} onChange={e => update('welcomeName', e.target.value)} />
-          </div>
-
-          <div className="field">
-            <label>Title</label>
-            <input type="text" value={settings.welcomeRole ?? ''} onChange={e => update('welcomeRole', e.target.value)} />
           </div>
 
           <div className="div" />
