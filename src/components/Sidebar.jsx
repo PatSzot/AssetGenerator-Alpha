@@ -25,7 +25,7 @@ const TEMPLATES = [
   { value: 'welcome',    label: 'Welcome',      icon: '/Icon-Welcome.svg'      },
 ]
 
-const WELCOME_COLORS = [
+const PALETTE_COLORS = [
   { value: 'green',  label: 'Green',  swatch: '#eef9f3', border: '#057a28' },
   { value: 'pink',   label: 'Pink',   swatch: '#fee7fd', border: '#c54b9b' },
   { value: 'indigo', label: 'Indigo', swatch: '#e5e5ff', border: '#1b1b8f' },
@@ -35,7 +35,7 @@ const WELCOME_COLORS = [
   { value: 'teal',   label: 'Teal',   swatch: '#c9ebf2', border: '#196c80' },
 ]
 
-const WELCOME_PATTERNS = [
+const PALETTE_PATTERNS = [
   { value: 'dots',  label: 'Dot Grid' },
   { value: 'lines', label: 'Diagonal' },
   { value: 'none',  label: 'Solid' },
@@ -728,6 +728,61 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
           <div className="div" />
 
+          <div className="sec">Color</div>
+          <div className="field">
+            <div className="mode-grid mode-grid-wide">
+              {PALETTE_COLORS.map(c => (
+                <button
+                  key={c.value}
+                  className={`mode-btn${(settings.rtColor ?? 'green') === c.value ? ' active' : ''}`}
+                  onClick={() => update('rtColor', c.value)}
+                  style={{ background: c.swatch, borderColor: c.border }}
+                >{c.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="div" />
+
+          <div className="sec">Pattern</div>
+          <div className="field">
+            <div className="mode-grid-wide" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+              {PALETTE_PATTERNS.map(p => (
+                <button
+                  key={p.value}
+                  className={`mode-btn${(settings.rtPattern ?? 'dots') === p.value ? ' active' : ''}`}
+                  onClick={() => update('rtPattern', p.value)}
+                >{p.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="div" />
+          <div className="sec">Decoration</div>
+          <div className="tog-row">
+            <label>Decoration</label>
+            <label className="toggle">
+              <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
+              <div className="ttrack" />
+              <div className="tthumb" />
+            </label>
+          </div>
+          {settings.showFloralia && (
+            <div style={{ paddingLeft: 12 }}>
+              <div className="tog-row">
+                <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
+                <label className="toggle">
+                  <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
+                  <div className="ttrack" />
+                  <div className="tthumb" />
+                </label>
+              </div>
+              <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
+            </div>
+          )}
+
+          <div className="div" />
+
           {/* Speaker style fields */}
           {(settings.rtStyle ?? 'speaker') === 'speaker' && <>
             <div className="sec">Content</div>
@@ -827,7 +882,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="sec">Color</div>
           <div className="field">
             <div className="mode-grid mode-grid-wide">
-              {WELCOME_COLORS.map(c => (
+              {PALETTE_COLORS.map(c => (
                 <button
                   key={c.value}
                   className={`mode-btn${(settings.welcomeColor ?? 'green') === c.value ? ' active' : ''}`}
@@ -843,7 +898,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="sec">Pattern</div>
           <div className="field">
             <div className="mode-grid-wide" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-              {WELCOME_PATTERNS.map(p => (
+              {PALETTE_PATTERNS.map(p => (
                 <button
                   key={p.value}
                   className={`mode-btn${(settings.welcomePattern ?? 'dots') === p.value ? ' active' : ''}`}

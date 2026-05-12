@@ -249,6 +249,8 @@ const DEFAULT_SETTINGS = {
   wbExportSizes:     ['1920x1080', '1080x1080', '1080x1350', '1080x1920', 'blog'],
   // Roundtable template
   rtStyle:           'speaker',
+  rtColor:           'green',
+  rtPattern:         'dots',
   rtTitle:           'Roundtable',
   rtName:            'Ali McCarty',
   rtRoleCompany:     'VP of Strategy\nNew Business Expansion,\nAirOps',
@@ -658,8 +660,8 @@ export default function App() {
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
-    else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady)
-    else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current)
+    else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'welcome')     drawWelcomeCanvas(canvas, s, fontsReady, welcomeProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'webinar' && s.wbStyle === 'ced') drawCEDCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current)
     else if (s.templateType === 'webinar')     drawWebinarCanvas(canvas, s, fontsReady, wbPhotoRefs.current, wbLogoRefs.current, floraliaDotsRef.current)

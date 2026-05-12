@@ -1,6 +1,7 @@
 import { buildLogo, wrapText } from './drawCanvas.js'
+import { WELCOME_PALETTE, paintWelcomeBackground, paintWelcomePattern, paintWelcomeDecoration } from './welcomePalette.js'
 
-export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage) {
+export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage, floralia) {
   const cw = 1080, ch = 1080
   const dpr = settings.dpr ?? 2
   canvas.width  = cw * dpr
@@ -8,8 +9,11 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   const ctx = canvas.getContext('2d')
   ctx.scale(dpr, dpr)
 
+  const palette = WELCOME_PALETTE[settings.rtColor] ?? WELCOME_PALETTE.green
+  const pattern = settings.rtPattern ?? 'dots'
+
   if (!fontsReady) {
-    ctx.fillStyle = '#eef9f3'
+    ctx.fillStyle = palette.base
     ctx.fillRect(0, 0, cw, ch)
     return
   }
@@ -17,32 +21,9 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   const serif = "'Serrif VF', Georgia, serif"
   const sans  = "'Saans', 'Helvetica Neue', sans-serif"
 
-  // ── 1. Background: pale green base + radial green glow from bottom
-  ctx.fillStyle = '#eef9f3'
-  ctx.fillRect(0, 0, cw, ch)
-
-  const grad = ctx.createRadialGradient(cw / 2, ch + 100, 0, cw / 2, ch + 100, ch * 0.85)
-  grad.addColorStop(0,    'rgba(0,255,100,0.55)')
-  grad.addColorStop(0.15, 'rgba(60,254,136,0.4)')
-  grad.addColorStop(0.30, 'rgba(119,252,172,0.25)')
-  grad.addColorStop(0.50, 'rgba(179,251,207,0.12)')
-  grad.addColorStop(0.70, 'rgba(238,249,243,0.05)')
-  grad.addColorStop(1.0,  'rgba(238,249,243,0)')
-  ctx.fillStyle = grad
-  ctx.fillRect(0, 0, cw, ch)
-
-  // ── 2. Dot grid (24px spacing, 0.8px dots)
-  const dotSpacing = 24
-  const dotR = 0.8
-  ctx.fillStyle = 'rgba(212,232,218,0.6)'
-  ctx.beginPath()
-  for (let x = dotSpacing / 2; x < cw; x += dotSpacing) {
-    for (let y = dotSpacing / 2; y < ch; y += dotSpacing) {
-      ctx.moveTo(x + dotR, y)
-      ctx.arc(x, y, dotR, 0, Math.PI * 2)
-    }
-  }
-  ctx.fill()
+  paintWelcomeBackground(ctx, cw, ch, palette)
+  paintWelcomePattern(ctx, cw, ch, pattern, palette)
+  paintWelcomeDecoration(ctx, cw, ch, palette, settings, floralia)
 
   // ── Layout constants
   const lineX1   = 41
@@ -50,26 +31,26 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   const contentW = lineX2 - lineX1              // 996
   const centerX  = lineX1 + contentW / 2        // 539
 
-  // ── 3. Vertical border lines
-  ctx.strokeStyle = '#002910'
+  // ── Vertical border lines
+  ctx.strokeStyle = palette.ink
   ctx.lineWidth   = 1.2
   ctx.beginPath()
   ctx.moveTo(lineX1, 0); ctx.lineTo(lineX1, ch)
   ctx.moveTo(lineX2, 0); ctx.lineTo(lineX2, ch)
   ctx.stroke()
 
-  // ── 4. AirOps logo (centered)
+  // ── AirOps logo (centered)
   const logoH   = 72
   const logoW   = Math.round(784 * logoH / 252)   // ≈224
   const logoY   = 126
-  const logoBmp = buildLogo('#002910', Math.round(logoH * dpr))
+  const logoBmp = buildLogo(palette.ink, Math.round(logoH * dpr))
   ctx.drawImage(logoBmp, Math.round(centerX - logoW / 2), logoY, logoW, logoH)
 
-  // ── 5. Title text (large serif)
+  // ── Title text (large serif)
   const titleY    = logoY + logoH + 104            // 302
   const titleSize = 194
   ctx.font          = `400 ${titleSize}px ${serif}`
-  ctx.fillStyle     = '#002910'
+  ctx.fillStyle     = palette.ink
   ctx.letterSpacing = '-3.88px'
   ctx.textBaseline  = 'top'
   ctx.textAlign     = 'center'
@@ -77,7 +58,7 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   ctx.textAlign     = 'left'
   ctx.letterSpacing = '0px'
 
-  // ── 6. Bottom section: photo + name/role
+  // ── Bottom section: photo + name/role
   const titleH   = Math.round(titleSize * 0.94)   // ≈182
   const bottomY  = titleY + titleH + 104           // ≈588
   const sectionW = 995
@@ -95,12 +76,12 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   const inH = inW
 
   // Border
-  ctx.strokeStyle = '#002910'
+  ctx.strokeStyle = palette.ink
   ctx.lineWidth   = bw
   ctx.strokeRect(photoX + bw / 2, photoY + bw / 2, photoSz - bw, photoSz - bw)
 
   // Dark background
-  ctx.fillStyle = '#002910'
+  ctx.fillStyle = palette.ink
   ctx.fillRect(inX, inY, inW, inH)
 
   // Stippled portrait (screen blend, aspect-fill)
@@ -120,21 +101,21 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
     ctx.restore()
   }
 
-  // ── 7. Name
+  // ── Name
   const textGap  = 24
   const textX    = photoX + photoSz + textGap
   const textMaxW = sectionW - photoSz - textGap
 
   const name = settings.rtName || 'Ali McCarty'
   ctx.font          = `500 64px ${sans}`
-  ctx.fillStyle     = '#002910'
+  ctx.fillStyle     = palette.ink
   ctx.letterSpacing = '-1.28px'
   ctx.textBaseline  = 'top'
   const nameLines = wrapText(ctx, name, textMaxW)
   const nameLH    = 64 * 1.2
   nameLines.forEach((line, i) => ctx.fillText(line, textX, photoY + i * nameLH))
 
-  // ── 8. Role & Company
+  // ── Role & Company
   const roleY = photoY + nameLines.length * nameLH + 16
   ctx.font          = `400 44px ${sans}`
   ctx.letterSpacing = '-0.88px'
@@ -151,7 +132,7 @@ export function drawRoundtableCanvas(canvas, settings, fontsReady, profileImage)
   ctx.letterSpacing = '0px'
 }
 
-export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
+export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady, floralia) {
   const cw = 1080, ch = 1080
   const dpr = settings.dpr ?? 2
   canvas.width  = cw * dpr
@@ -159,8 +140,11 @@ export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
   const ctx = canvas.getContext('2d')
   ctx.scale(dpr, dpr)
 
+  const palette = WELCOME_PALETTE[settings.rtColor] ?? WELCOME_PALETTE.green
+  const pattern = settings.rtPattern ?? 'dots'
+
   if (!fontsReady) {
-    ctx.fillStyle = '#eef9f3'
+    ctx.fillStyle = palette.base
     ctx.fillRect(0, 0, cw, ch)
     return
   }
@@ -169,32 +153,9 @@ export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
   const sans  = "'Saans', 'Helvetica Neue', sans-serif"
   const mono  = "'Saans Mono', 'DM Mono', monospace"
 
-  // ── 1. Background: pale green base + radial green glow from bottom
-  ctx.fillStyle = '#eef9f3'
-  ctx.fillRect(0, 0, cw, ch)
-
-  const grad = ctx.createRadialGradient(cw / 2, ch + 100, 0, cw / 2, ch + 100, ch * 0.85)
-  grad.addColorStop(0,    'rgba(0,255,100,0.55)')
-  grad.addColorStop(0.15, 'rgba(60,254,136,0.4)')
-  grad.addColorStop(0.30, 'rgba(119,252,172,0.25)')
-  grad.addColorStop(0.50, 'rgba(179,251,207,0.12)')
-  grad.addColorStop(0.70, 'rgba(238,249,243,0.05)')
-  grad.addColorStop(1.0,  'rgba(238,249,243,0)')
-  ctx.fillStyle = grad
-  ctx.fillRect(0, 0, cw, ch)
-
-  // ── 2. Dot grid (24px spacing, 0.8px dots)
-  const dotSpacing = 24
-  const dotR = 0.8
-  ctx.fillStyle = 'rgba(212,232,218,0.6)'
-  ctx.beginPath()
-  for (let x = dotSpacing / 2; x < cw; x += dotSpacing) {
-    for (let y = dotSpacing / 2; y < ch; y += dotSpacing) {
-      ctx.moveTo(x + dotR, y)
-      ctx.arc(x, y, dotR, 0, Math.PI * 2)
-    }
-  }
-  ctx.fill()
+  paintWelcomeBackground(ctx, cw, ch, palette)
+  paintWelcomePattern(ctx, cw, ch, pattern, palette)
+  paintWelcomeDecoration(ctx, cw, ch, palette, settings, floralia)
 
   // ── Layout constants
   const lineX1   = 41
@@ -202,28 +163,28 @@ export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
   const contentW = lineX2 - lineX1
   const centerX  = lineX1 + contentW / 2
 
-  // ── 3. Vertical border lines
-  ctx.strokeStyle = '#002910'
+  // ── Vertical border lines
+  ctx.strokeStyle = palette.ink
   ctx.lineWidth   = 1.2
   ctx.beginPath()
   ctx.moveTo(lineX1, 0); ctx.lineTo(lineX1, ch)
   ctx.moveTo(lineX2, 0); ctx.lineTo(lineX2, ch)
   ctx.stroke()
 
-  // ── 4. AirOps logo (centered, larger than speaker variant)
+  // ── AirOps logo (centered, larger than speaker variant)
   const logoH   = 104
   const logoW   = Math.round(784 * logoH / 252)
   const logoY   = 126
-  const logoBmp = buildLogo('#002910', Math.round(logoH * dpr))
+  const logoBmp = buildLogo(palette.ink, Math.round(logoH * dpr))
   ctx.drawImage(logoBmp, Math.round(centerX - logoW / 2), logoY, logoW, logoH)
 
-  // ── 5. Title — mixed serif/sans lines
+  // ── Title — mixed serif/sans lines
   const titleSize = 180
   const titleLH   = Math.round(titleSize * 0.94)
   const titleY    = logoY + logoH + 66
   const maxTitleW = 939
 
-  ctx.fillStyle     = '#002910'
+  ctx.fillStyle     = palette.ink
   ctx.textBaseline  = 'top'
   ctx.textAlign     = 'center'
   ctx.letterSpacing = '-5.4px'
@@ -286,8 +247,8 @@ export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
 
   // Pill background + border
   const pillR = 10
-  ctx.fillStyle   = '#ebfff3'
-  ctx.strokeStyle = '#057a28'
+  ctx.fillStyle   = palette.base
+  ctx.strokeStyle = palette.accent
   ctx.lineWidth   = 1.74
   ctx.beginPath()
   ctx.roundRect(pillX, pillY, pillW, pillH, pillR)
@@ -295,7 +256,7 @@ export function drawRoundtableEvergreenCanvas(canvas, settings, fontsReady) {
   ctx.stroke()
 
   // Pill text
-  ctx.fillStyle = '#057a28'
+  ctx.fillStyle = palette.accent
   ctx.fillText(pillText, centerX, pillY + pillH / 2)
 
   ctx.textAlign     = 'left'
