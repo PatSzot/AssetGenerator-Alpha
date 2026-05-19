@@ -299,13 +299,18 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, padBottom, settings, speak
   if (n === 1) {
     // ── 1 speaker: title flows, speaker block anchored below title
     const sp = speakers[0]
+    const photoSz  = 320
 
     const contentY = innerY + headerH + 24
-    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, 9999, 130, 36, sans)
+    const clauseH  = wbTitleClause ? Math.round(clauseSz * 0.94) + 24 : 0
+    const titleAvailableH = Math.max(
+      60,
+      logoY - contentY - clauseH - 24 - photoSz - 24,
+    )
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, titleAvailableH, 130, 36, sans)
     const titleBottomY = drawTitleBlock(ctx, innerX, contentY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
 
     const speakerY = titleBottomY + 24
-    const photoSz  = 320
     const bw       = 1.5
     ctx.strokeStyle = M.lineColor
     ctx.lineWidth   = bw
@@ -339,11 +344,23 @@ function drawPortraitLayout(ctx, cw, ch, pad, padTop, padBottom, settings, speak
     const nameSz   = Math.max(20, Math.round(blockW * 0.14))
     const roleSz   = Math.max(14, Math.round(blockW * 0.10))
 
-    const contentY     = innerY + headerH + 24
-    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, 9999, 90, 36, sans)
+    // Speaker block height: photo(square) + gap(16) + name line + 8 + role(up to 2 lines) + 12 + partner logo(32)
+    const speakerBlockH = blockW + 16 + Math.round(nameSz * 1.2) + 8 + Math.round(roleSz * 1.2) * 2 + 12 + 32
+
+    const contentY = innerY + headerH + 24
+    // Clause occupies `clauseSz * 0.94 + 24` at the top of the title block (when present).
+    const clauseH  = wbTitleClause ? Math.round(clauseSz * 0.94) + 24 : 0
+    // Title must fit between contentY and the AirOps logo, leaving room for clause, gap, speaker block, and a gap before the logo.
+    const titleGapToSpeakers = 24
+    const titleGapToLogo     = 24
+    const titleAvailableH    = Math.max(
+      60,
+      logoY - contentY - clauseH - titleGapToSpeakers - speakerBlockH - titleGapToLogo,
+    )
+    const { fontSize: mainSz } = sizeMainTitle(ctx, wbMainTitle, innerW, titleAvailableH, 90, 36, sans)
     const titleBottomY = drawTitleBlock(ctx, innerX, contentY, innerW, wbTitleClause, wbMainTitle, clauseSz, mainSz, M, serif, sans)
 
-    const speakerY = titleBottomY + 24
+    const speakerY = titleBottomY + titleGapToSpeakers
     speakers.forEach((sp, i) => {
       const bx = innerX + i * (blockW + blockGap)
       drawSpeakerBlock(ctx, bx, speakerY, blockW,
