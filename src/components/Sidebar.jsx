@@ -373,8 +373,52 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Content — Certificate (self-contained: all sections live here) */}
         {settings.templateType === 'certificate' && (() => {
+          const isAward  = settings.certStyle === 'award'
           const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
           return <>
+            {/* 0 ── Style toggle */}
+            <div className="sec">Style</div>
+            <div className="dim-grid" style={{ marginBottom: 12 }}>
+              {[['classic', 'Classic'], ['award', 'Special Award']].map(([val, label]) => (
+                <button
+                  key={val}
+                  className={`dim-btn${(settings.certStyle ?? 'classic') === val ? ' active' : ''}`}
+                  onClick={() => update('certStyle', val)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Special Award fields */}
+            {isAward && <>
+              <div className="sec">Award Details</div>
+              <div className="field">
+                <label>Recipient Name</label>
+                <input type="text" value={settings.saRecipient ?? ''} onChange={e => update('saRecipient', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Course Track</label>
+                <input type="text" placeholder="Content, Analytics…" value={settings.saTrack ?? ''} onChange={e => update('saTrack', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Certification Title</label>
+                <input type="text" placeholder="Engineering" value={settings.saCertTitle ?? ''} onChange={e => update('saCertTitle', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Level</label>
+                <input type="text" placeholder="Certification 3" value={settings.saCertLevel ?? ''} onChange={e => update('saCertLevel', e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Date</label>
+                <input type="text" placeholder="June 2026" value={settings.saDate ?? ''} onChange={e => update('saDate', e.target.value)} />
+              </div>
+              <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
+              <div className="div" />
+            </>}
+
+            {/* Classic certificate sections */}
+            {!isAward && <>
             {/* 1 ── Batch Export */}
             <div className="sec">Batch Export</div>
             <input
@@ -512,6 +556,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               </div>
               <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
               <div className="div" />
+            </>}
             </>}
           </>
         })()}

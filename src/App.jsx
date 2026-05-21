@@ -8,6 +8,7 @@ import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
 import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
+import { drawSpecialAwardCanvas } from './utils/drawSpecialAwardCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
 import { drawWebinarCanvas } from './utils/drawWebinarCanvas'
 import { drawCEDCanvas } from './utils/drawCEDCanvas'
@@ -196,10 +197,17 @@ const DEFAULT_SETTINGS = {
   richCompanyLogo:   null,
   richFlip:          false,
   // Certificate
+  certStyle:          'classic',
   certFullName:       'Firstname Lastname',
   certCohortLevel:    'Intermediate',
   certGraduationDate: 'March 2026',
   batchSheetUrl:      '',
+  // Special Award
+  saRecipient:        'Ariana Opera',
+  saTrack:            'Content',
+  saCertTitle:        'Engineering',
+  saCertLevel:        'Certification 3',
+  saDate:             'June 2026',
   // Title Card
   tcEyebrow:         'Deadline extended',
   tcShowEyebrow:     true,
@@ -658,6 +666,7 @@ export default function App() {
     if (s.templateType === 'twitter')          drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')   drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    else if (s.templateType === 'certificate' && s.certStyle === 'award') drawSpecialAwardCanvas(canvas, s, fontsReady)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
