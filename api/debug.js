@@ -53,5 +53,39 @@ export default async function handler(req, res) {
     report.imports.templates = { ok: false, error: e.message }
   }
 
+  // Try actually invoking the launch sequence — this is what /api/screenshot
+  // does at runtime, so any failure here will surface the real error.
+  if (req.query?.launch === '1') {
+    try {
+      const chromium = (await import('@sparticuz/chromium-min')).default
+      const puppeteer = (await import('puppeteer-core')).default
+      const CHROMIUM_URL =
+        'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.tar'
+      const t0 = Date.now()
+      const executablePath = await chromium.executablePath(CHROMIUM_URL)
+      report.launch = {
+        executablePathMs: Date.now() - t0,
+        executablePath,
+        chromiumHeadless: chromium.headless,
+        chromiumArgs: chromium.args?.length,
+      }
+      const t1 = Date.now()
+      const browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: { width: 800, height: 600 },
+        executablePath,
+        headless: chromium.headless,
+      })
+      report.launch.launchMs = Date.now() - t1
+      report.launch.ok = true
+      await browser.close()
+    } catch (e) {
+      report.launch = report.launch || {}
+      report.launch.ok = false
+      report.launch.error = e.message
+      report.launch.stack = e.stack?.split('\n').slice(0, 8)
+    }
+  }
+
   return res.status(200).json(report)
 }
