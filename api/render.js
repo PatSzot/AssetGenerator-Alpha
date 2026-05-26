@@ -80,6 +80,10 @@ function quoteCard(p, palette, w, h) {
   else if (len > 140) qFont = Math.max(64, baseQ - 18)
   else if (len > 80) qFont = Math.max(72, baseQ - 10)
 
+  // Attribution-row sizing — tuned to feel proportional under the quote.
+  const nameSz = isLand ? 56 : 48
+  const dashSz = nameSz
+  const pillSz = isLand ? 22 : 20
   const logoH = 72
 
   return {
