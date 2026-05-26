@@ -90,7 +90,7 @@ export default async function handler(req, res) {
       args,
       defaultViewport: { width: w, height: h },
       executablePath,
-      headless: 'shell',
+      headless: isLocalChrome ? true : chromium.headless,
     })
 
     const page = await browser.newPage()
