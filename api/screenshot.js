@@ -74,7 +74,7 @@ export default async function handler(req, res) {
   const targetUrl = `${appUrl}/${templateType}#data=${hashPayload}`
 
   const CHROMIUM_URL =
-    'https://github.com/Sparticuz/chromium/releases/download/v130.0.0/chromium-v130.0.0-pack.tar'
+    'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.tar'
   const executablePath =
     process.env.CHROMIUM_PATH ||
     (await chromium.executablePath(CHROMIUM_URL))

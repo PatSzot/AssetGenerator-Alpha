@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "@sparticuz/chromium-min": "^130.0.0",
+    "@sparticuz/chromium-min": "^148.0.0",
     "jszip": "^3.10.1",
     "lottie-web": "^5.13.0",
     "puppeteer-core": "^24.40.0",
