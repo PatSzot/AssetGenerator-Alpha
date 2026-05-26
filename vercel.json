@@ -11,6 +11,14 @@
     "api/render.js": {
       "memory": 1024,
       "maxDuration": 30
+    },
+    "api/screenshot.js": {
+      "memory": 2048,
+      "maxDuration": 60
+    },
+    "api/templates.js": {
+      "memory": 128,
+      "maxDuration": 10
     }
   },
   "rewrites": [

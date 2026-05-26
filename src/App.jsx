@@ -53,7 +53,7 @@ function ensureDataUrl(str) {
 function applyHashPayload(base, payload) {
   if (!payload) return base
   const { text, customerName, company, role, images } = payload
-  const next = { ...base }
+  let next = { ...base }
 
   if (text) {
     next.quote         = text
@@ -88,6 +88,15 @@ function applyHashPayload(base, payload) {
   if (images?.[0]) next.tweetProfileImage = ensureDataUrl(images[0])
   if (images?.[0]) next.ijProfileImage    = ensureDataUrl(images[0])
   if (images?.[1]) next.richCompanyLogo   = ensureDataUrl(images[1])
+
+  // Full settings override — used by /api/screenshot to hydrate any template.
+  // Applied LAST so it wins over the curated mappings above.
+  if (payload.settings && typeof payload.settings === 'object') {
+    next = { ...next, ...payload.settings }
+  }
+  if (payload.dims && payload.dims.w && payload.dims.h) {
+    next.dims = { w: payload.dims.w, h: payload.dims.h }
+  }
 
   return next
 }
@@ -326,38 +335,46 @@ export default function App() {
     setFloraliaReady(v => v + 1)
   }, [fontsReady])
 
-  // Load images from hash payload and clear the hash
+  // Load images from hash payload and clear the hash.
+  //
+  // Two payload shapes supported:
+  //   1. payload.images = [profileDataUrl, logoDataUrl]  (legacy 2-slot)
+  //   2. payload.settings = { richProfileImage: ..., welcomeProfileImage: ... }
+  //      (used by /api/screenshot to hydrate any template's image fields)
   useEffect(() => {
     const payload = hashPayloadRef.current
     if (!payload) return
 
-    // Clear the hash so it doesn't persist on refresh
     window.history.replaceState(null, '', window.location.pathname + window.location.search)
 
-    const { images } = payload
-    if (!images?.length) return
+    const settingsImages = payload.settings || {}
+    const images = payload.images || []
 
-    const src0 = ensureDataUrl(images[0])
-    if (src0) {
+    // (settings-field, refs[]) bindings — extend here for new templates.
+    const bindings = [
+      { field: 'richProfileImage',    refs: [richProfileImageRef],   legacyIdx: 0, shareTargets: ['ijProfileImage', 'tweetProfileImage'] },
+      { field: 'richCompanyLogo',     refs: [richCompanyLogoRef],    legacyIdx: 1 },
+      { field: 'ijProfileImage',      refs: [ijProfileImageRef],     legacyIdx: 0 },
+      { field: 'tweetProfileImage',   refs: [profileImageRef],       legacyIdx: 0 },
+      { field: 'welcomeProfileImage', refs: [welcomeProfileImageRef] },
+      { field: 'rtProfileImage',      refs: [rtProfileImageRef] },
+    ]
+
+    bindings.forEach(({ field, refs, legacyIdx, shareTargets }) => {
+      let src = settingsImages[field] ? ensureDataUrl(settingsImages[field]) : null
+      if (!src && legacyIdx != null && images[legacyIdx]) src = ensureDataUrl(images[legacyIdx])
+      if (!src) return
       const img = new Image()
       img.onload = () => {
-        richProfileImageRef.current = img
-        ijProfileImageRef.current   = img
-        profileImageRef.current     = img
-        setSettings(prev => ({ ...prev, richProfileImage: src0, ijProfileImage: src0, tweetProfileImage: src0 }))
+        refs.forEach(r => { r.current = img })
+        setSettings(prev => {
+          const patch = { [field]: src }
+          if (shareTargets) shareTargets.forEach(k => { patch[k] = src })
+          return { ...prev, ...patch }
+        })
       }
-      img.src = src0
-    }
-
-    const src1 = ensureDataUrl(images[1])
-    if (src1) {
-      const img = new Image()
-      img.onload = () => {
-        richCompanyLogoRef.current = img
-        setSettings(prev => ({ ...prev, richCompanyLogo: src1 }))
-      }
-      img.src = src1
-    }
+      img.src = src
+    })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Preload default Rich Quote + I Joined images from public folder
