@@ -25,6 +25,11 @@ const STANDARD_DIMS = [
 const PAPER_MODES = ['green', 'pink', 'yellow', 'blue', 'teal']
 const PAPER_AND_DARK = [...PAPER_MODES, 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
 
+// NOTE: This registry currently ships only templates that render correctly
+// through the Satori /api/render endpoint. Puppeteer-based templates
+// (certificate, ijoined, webinar, roundtable, welcome) are temporarily
+// removed until the headless-Chromium path is stable on Vercel.
+
 export const TEMPLATES = [
   {
     id: 'quote',
@@ -105,126 +110,21 @@ export const TEMPLATES = [
     needsImages: ['author headshot'],
   },
   {
-    id: 'certificate',
-    label: 'Certificate',
+    id: 'dataviz',
+    label: 'Data Visualization',
     description:
-      'AirOps course completion certificate. Fixed 1920×1080. Two variants: classic (course completion) and award (special award).',
+      'Chart / data viz card: bar, line, pie, table, ranked list, or stat card. Use for showcasing numbers, trends, comparisons, and benchmarks.',
     fields: {
-      certStyle:          { type: 'enum', values: ['classic', 'award'], description: 'classic = course completion; award = special award certificate.' },
-      certFullName:       { type: 'string', required: true, description: 'Recipient full name.' },
-      certCohortLevel:    { type: 'enum', values: ['Beginner', 'Intermediate', 'Advanced'], description: 'Course level (classic only).' },
-      certGraduationDate: { type: 'string', description: 'Graduation date string, e.g. "March 2026".' },
-      saRecipient:        { type: 'string', description: 'Recipient name (award variant).' },
-      saTrack:            { type: 'string', description: 'Track name (award variant).' },
-      saCertTitle:        { type: 'string', description: 'Certificate title (award variant).' },
-      saCertLevel:        { type: 'string', description: 'Certificate level (award variant).' },
-      saDate:             { type: 'string', description: 'Date (award variant).' },
+      type:     { type: 'enum', values: ['bar', 'line', 'pie', 'table', 'ranked', 'stat'], required: true, description: 'Chart type. bar=vertical bars; line=line chart with fill; ranked=horizontal ranking bars; stat=single big metric; table=data table; pie=pie chart.' },
+      title:    { type: 'string', description: 'Chart headline.' },
+      subtitle: { type: 'string', description: 'Source / attribution line.' },
+      subcopy:  { type: 'string', description: 'Body copy below the title.' },
+      data:     { type: 'string', required: true, description: 'Chart data. For bar/line/ranked/pie: "Label: Value" pairs, one per line. For stat: "Value: 42%\\nLabel: Conversion Rate\\nSub: vs 28%". For table: CSV with header row.' },
+      layout:   { type: 'enum', values: ['standard', 'split'], description: 'Layout. standard=full width chart, split=two-column stat panel + chart. Default: standard.' },
     },
-    colorModes: PAPER_MODES,
-    dimensions: [{ w: 1920, h: 1080, label: 'Landscape (fixed)' }],
-    defaultDims: { w: 1920, h: 1080 },
-    variants: ['classic', 'award'],
-    variantKey: 'certStyle',
-  },
-  {
-    id: 'ijoined',
-    label: 'I Joined Announcement',
-    description:
-      'New-hire / "I joined AirOps" announcement card with stippled headshot. Fixed 1920×1080.',
-    fields: {
-      ijName:         { type: 'string', required: true, description: 'Person\'s full name.' },
-      ijRole:         { type: 'string', description: 'Job title.' },
-      ijMode:         { type: 'enum', values: ['night', 'day', 'sunrise'], description: 'Color treatment.' },
-      ijShowHiring:   { type: 'boolean', description: 'Show "we\'re hiring" flag.' },
-      ijProfileImage: { type: 'image',  description: 'Stippled headshot (data URL).' },
-    },
-    colorModes: ['night', 'day', 'sunrise'],
-    colorModeKey: 'ijMode',
-    dimensions: [{ w: 1920, h: 1080, label: 'Landscape (fixed)' }],
-    defaultDims: { w: 1920, h: 1080 },
-    needsImages: ['headshot'],
-  },
-  {
-    id: 'webinar',
-    label: 'Webinar Promo',
-    description:
-      'Webinar / event promo with 1–4 speakers, each with headshot + company logo. Two variants: regular (numbered layout) and ced (Content Engineering Day style).',
-    fields: {
-      wbStyle:        { type: 'enum', values: ['regular', 'ced'], description: 'Layout variant.' },
-      wbNumSpeakers:  { type: 'integer', description: 'Speaker count (1–4).' },
-      wbEyebrow:      { type: 'string', description: 'Eyebrow text, e.g. "WEBINAR" or "EVENT".' },
-      wbTitleClause:  { type: 'string', description: 'First clause of the title.' },
-      wbMainTitle:    { type: 'string', required: true, description: 'Main title text.' },
-      wbDate:         { type: 'string', description: 'Date + time. Newline-separated for multi-line display.' },
-      wbSpeaker1Name: { type: 'string', description: 'Speaker 1 name.' },
-      wbSpeaker1Role: { type: 'string', description: 'Speaker 1 title + company.' },
-      wbSpeaker1Image:{ type: 'image',  description: 'Speaker 1 headshot.' },
-      wbSpeaker1Logo: { type: 'image',  description: 'Speaker 1 company logo.' },
-      wbSpeaker2Name: { type: 'string', description: 'Speaker 2 name (if any).' },
-      wbSpeaker2Role: { type: 'string', description: 'Speaker 2 role.' },
-      wbSpeaker2Image:{ type: 'image',  description: 'Speaker 2 headshot.' },
-      wbSpeaker2Logo: { type: 'image',  description: 'Speaker 2 logo.' },
-      wbSpeaker3Name: { type: 'string', description: 'Speaker 3 name.' },
-      wbSpeaker3Role: { type: 'string', description: 'Speaker 3 role.' },
-      wbSpeaker3Image:{ type: 'image',  description: 'Speaker 3 headshot.' },
-      wbSpeaker3Logo: { type: 'image',  description: 'Speaker 3 logo.' },
-      wbSpeaker4Name: { type: 'string', description: 'Speaker 4 name.' },
-      wbSpeaker4Role: { type: 'string', description: 'Speaker 4 role.' },
-      wbSpeaker4Image:{ type: 'image',  description: 'Speaker 4 headshot.' },
-      wbSpeaker4Logo: { type: 'image',  description: 'Speaker 4 logo.' },
-    },
-    colorModes: PAPER_AND_DARK,
+    colorModes: ['light', 'dark', 'lime', 'midnight'],
     dimensions: STANDARD_DIMS,
-    defaultDims: { w: 1920, h: 1080 },
-    variants: ['regular', 'ced'],
-    variantKey: 'wbStyle',
-    needsImages: ['speaker headshots', 'company logos'],
-  },
-  {
-    id: 'roundtable',
-    label: 'Roundtable',
-    description:
-      'Roundtable event card. Two variants: speaker (single host with photo) and evergreen (no photo, series branding).',
-    fields: {
-      rtStyle:        { type: 'enum', values: ['speaker', 'evergreen'], description: 'Layout variant.' },
-      rtColor:        { type: 'enum', values: PAPER_MODES, description: 'Color treatment.' },
-      rtPattern:      { type: 'enum', values: ['dots', 'flora', 'none'], description: 'Background pattern.' },
-      rtTitle:        { type: 'string', description: 'Event title text.' },
-      rtName:         { type: 'string', description: 'Host name (speaker variant).' },
-      rtRoleCompany:  { type: 'string', description: 'Host role + company (speaker variant). Newlines allowed.' },
-      rtProfileImage: { type: 'image',  description: 'Stippled host headshot (speaker variant).' },
-      rtEvSerifLine1: { type: 'string', description: 'Evergreen line 1 (serif).' },
-      rtEvSansText:   { type: 'string', description: 'Evergreen middle text (sans).' },
-      rtEvSerifLine2: { type: 'string', description: 'Evergreen line 2 (serif).' },
-      rtEvPillText:   { type: 'string', description: 'Evergreen pill label text.' },
-    },
-    colorModes: PAPER_MODES,
-    colorModeKey: 'rtColor',
-    dimensions: [{ w: 1080, h: 1080, label: '1:1 square (fixed)' }],
     defaultDims: { w: 1080, h: 1080 },
-    variants: ['speaker', 'evergreen'],
-    variantKey: 'rtStyle',
-    needsImages: ['host headshot (speaker variant)'],
-  },
-  {
-    id: 'welcome',
-    label: 'Welcome Graphic',
-    description:
-      'Welcome / new-teammate announcement with stippled photo and name. Fixed 1080×1080.',
-    fields: {
-      welcomeColor:        { type: 'enum', values: PAPER_MODES, description: 'Color treatment.' },
-      welcomePattern:      { type: 'enum', values: ['dots', 'flora', 'none'], description: 'Background pattern.' },
-      welcomeWelcomeText:  { type: 'string', description: 'Top label, default "WELCOME TO".' },
-      welcomeTitle:        { type: 'string', description: 'Big serif word, default "Welcome".' },
-      welcomeName:         { type: 'string', required: true, description: 'Person\'s full name.' },
-      welcomeRole:         { type: 'string', description: 'Job title.' },
-      welcomeProfileImage: { type: 'image',  description: 'Stippled headshot (data URL).' },
-    },
-    colorModes: PAPER_MODES,
-    colorModeKey: 'welcomeColor',
-    dimensions: [{ w: 1080, h: 1080, label: '1:1 square (fixed)' }],
-    defaultDims: { w: 1080, h: 1080 },
-    needsImages: ['headshot'],
   },
 ]
 
