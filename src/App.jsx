@@ -181,6 +181,43 @@ function parseCsvRows(csv) {
   }).filter(r => r.firstName || r.lastName)
 }
 
+// Map CSV category values to Title Card color modes (case-insensitive)
+const TC_CATEGORY_MAP = {
+  'green': 'green', 'pink': 'pink', 'yellow': 'yellow', 'blue': 'blue',
+  'dark green': 'dark-green', 'dark-green': 'dark-green',
+  'dark pink': 'dark-pink', 'dark-pink': 'dark-pink',
+  'dark yellow': 'dark-yellow', 'dark-yellow': 'dark-yellow',
+  'dark blue': 'dark-blue', 'dark-blue': 'dark-blue',
+}
+
+// Parse CSV into rows of { headline, category } for Title Card batch export
+function parseTitleCardCsvRows(csv) {
+  const lines = csv.split('\n').map(l => l.trim()).filter(Boolean)
+  if (lines.length < 2) return []
+  const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase())
+  const findCol = (...names) => {
+    for (const name of names) {
+      const i = headers.findIndex(h => h === name)
+      if (i !== -1) return i
+    }
+    for (const name of names) {
+      const i = headers.findIndex(h => h.includes(name))
+      if (i !== -1) return i
+    }
+    return -1
+  }
+  const headlineIdx = findCol('headline', 'sans title', 'title', 'text')
+  const categoryIdx = findCol('category', 'color', 'theme', 'mode')
+  return lines.slice(1).map(line => {
+    const cols = parseCsvLine(line)
+    const get  = i => (i !== -1 ? cols[i] ?? '' : '')
+    return {
+      headline: get(headlineIdx),
+      category: get(categoryIdx),
+    }
+  }).filter(r => r.headline)
+}
+
 const DEFAULT_SETTINGS = {
   templateType:     'quote',
   quote:            '\u201CThe most successful marketing teams in the AI era will be those who build content for how the internet actually works.\u201D',
@@ -301,6 +338,8 @@ export default function App() {
   const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
   const [batchExporting, setBatchExporting] = useState(false)
   const [batchRows, setBatchRows]             = useState(null)
+  const [tcBatchRows, setTcBatchRows]         = useState(null)
+  const [tcBatchExporting, setTcBatchExporting] = useState(false)
   const [batchFetching, setBatchFetching]     = useState(false)
   const [wbPhotoProcessing, setWbPhotoProcessing] = useState(new Set())
   const [rtPhotoProcessing, setRtPhotoProcessing] = useState(false)
@@ -794,6 +833,49 @@ export default function App() {
     setBatchRows(rows)
   }, [])
 
+  const handleTcBatchCsvUpload = useCallback((text) => {
+    setTcBatchRows(parseTitleCardCsvRows(text))
+  }, [])
+
+  const handleTcBatchExport = useCallback(async () => {
+    if (!tcBatchRows?.length) return
+    setTcBatchExporting(true)
+    try {
+      const JSZip = (await import('jszip')).default
+      const zip   = new JSZip()
+      const decorStyles = ['fill', 'inverted']
+      for (const row of tcBatchRows) {
+        const colorMode       = TC_CATEGORY_MAP[row.category.toLowerCase().trim()] ?? settings.colorMode
+        const decorationStyle = decorStyles[Math.floor(Math.random() * 2)]
+        const freshDots       = generateFleuronFontDots()
+        const s = {
+          ...settings,
+          tcSansTitle:      row.headline || settings.tcSansTitle,
+          tcShowSansTitle:  true,
+          colorMode,
+          decorationStyle,
+          showFloralia: true,
+          dpr: 1,
+        }
+        const ec = document.createElement('canvas')
+        drawTitleCardCanvas(ec, s, fontsReady, freshDots)
+        const base64 = ec.toDataURL('image/jpeg', 0.95).split(',')[1]
+        const slug   = row.headline.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 40)
+        zip.file(`titlecard-${colorMode}-${slug}.jpg`, base64, { base64: true })
+      }
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const a    = document.createElement('a')
+      a.download = 'titlecards.zip'
+      a.href     = URL.createObjectURL(blob)
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch (e) {
+      alert('Export failed: ' + e.message)
+    } finally {
+      setTcBatchExporting(false)
+    }
+  }, [tcBatchRows, settings, fontsReady])
+
   const handleBatchExport = useCallback(async () => {
     if (!batchRows?.length) return
     setBatchExporting(true)
@@ -863,6 +945,10 @@ export default function App() {
         onSetAiropsApiKey={handleSetAiropsApiKey}
         onBatchExport={handleBatchExport}
         batchExporting={batchExporting}
+        onTcBatchCsvUpload={handleTcBatchCsvUpload}
+        tcBatchRows={tcBatchRows}
+        onTcBatchExport={handleTcBatchExport}
+        tcBatchExporting={tcBatchExporting}
       />
       <CanvasPreview
         settings={settings}

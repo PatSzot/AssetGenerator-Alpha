@@ -57,7 +57,7 @@ const DIMS = [
 ]
 
 
-export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, tweetPhotoProcessing, onRichProfileImageChange, richPhotoProcessing, onRichCompanyLogoChange, onIJProfileImageChange, ijPhotoProcessing, onRtPhotoChange, rtPhotoProcessing, onWelcomePhotoChange, welcomePhotoProcessing, stippleError, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting }) {
+export default function Sidebar({ settings, update, fontsReady, onExport, onExportAll, uiMode, onToggleUiMode, onProfileImageChange, tweetPhotoProcessing, onRichProfileImageChange, richPhotoProcessing, onRichCompanyLogoChange, onIJProfileImageChange, ijPhotoProcessing, onRtPhotoChange, rtPhotoProcessing, onWelcomePhotoChange, welcomePhotoProcessing, stippleError, onWbPhotoChange, wbPhotoProcessing, onWbLogoChange, onWbExport, onRefleuron, onFetchBatch, onBatchCsvUpload, batchFetching, batchRows, airopsApiKey, onSetAiropsApiKey, onBatchExport, batchExporting, onTcBatchCsvUpload, tcBatchRows, onTcBatchExport, tcBatchExporting }) {
   const { dims } = settings
   const fileInputRef        = useRef(null)
   const richPhotoInputRef   = useRef(null)
@@ -68,8 +68,10 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
   const wbPhotoInputRefs    = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const wbLogoInputRefs     = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const batchCsvInputRef    = useRef(null)
+  const tcBatchCsvInputRef  = useRef(null)
   const [certManualOpen, setCertManualOpen] = useState(false)
   const [csvDragOver, setCsvDragOver]       = useState(false)
+  const [tcCsvDragOver, setTcCsvDragOver]   = useState(false)
 
   return (
     <div className="sidebar">
@@ -367,6 +369,58 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
             </div>
           )}
+
+          <div className="div" />
+          <div className="sec">Batch Export</div>
+
+          <input
+            ref={tcBatchCsvInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = ev => onTcBatchCsvUpload(ev.target.result)
+              reader.readAsText(file)
+              e.target.value = ''
+            }}
+          />
+          <div
+            className={`csv-dropzone${tcCsvDragOver ? ' over' : ''}`}
+            onClick={() => tcBatchCsvInputRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); setTcCsvDragOver(true) }}
+            onDragEnter={e => { e.preventDefault(); setTcCsvDragOver(true) }}
+            onDragLeave={() => setTcCsvDragOver(false)}
+            onDrop={e => {
+              e.preventDefault()
+              setTcCsvDragOver(false)
+              const file = e.dataTransfer.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = ev => onTcBatchCsvUpload(ev.target.result)
+              reader.readAsText(file)
+            }}
+          >
+            <span className="csv-dropzone-icon">↑</span>
+            <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
+          </div>
+          <p className="batch-hint" style={{ color: 'var(--text-dim)', margin: '0 0 6px', fontSize: 11 }}>
+            Columns: <code>headline</code>, <code>category</code> (green / pink / yellow / blue / dark-green…)
+          </p>
+          {tcBatchRows !== null && (
+            <p className="batch-hint" style={{ color: tcBatchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
+              {tcBatchRows.length > 0 ? `✓ ${tcBatchRows.length} rows loaded` : '✕ No rows found — check column names'}
+            </p>
+          )}
+          <button
+            className="btn-ex"
+            onClick={onTcBatchExport}
+            disabled={!tcBatchRows?.length || tcBatchExporting}
+          >
+            {tcBatchExporting ? 'Generating…' : tcBatchRows?.length ? `↓ Batch Export ZIP (${tcBatchRows.length})` : '↓ Batch Export ZIP'}
+          </button>
 
           <div className="div" />
         </>}
