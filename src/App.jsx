@@ -181,7 +181,7 @@ function parseCsvRows(csv) {
   }).filter(r => r.firstName || r.lastName)
 }
 
-const TC_COLOR_MODES = ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
+const TC_COLOR_MODES = ['green', 'pink', 'yellow', 'blue']
 
 // Parse CSV into rows of { headline } for Title Card batch export — reads "Name" column
 function parseTitleCardCsvRows(csv) {
@@ -829,8 +829,14 @@ export default function App() {
         const freshDots       = generateFleuronFontDots()
         const s = {
           ...settings,
-          tcSansTitle:      row.headline || settings.tcSansTitle,
-          tcShowSansTitle:  true,
+          tcSerifTitle:      row.headline || settings.tcSerifTitle,
+          tcShowSerifTitle:  true,
+          tcShowSansTitle:   false,
+          tcShowEyebrow:     false,
+          tcShowSubheadline: false,
+          tcShowBody:        false,
+          tcShowLogo:        false,
+          tcShowCTA:         false,
           colorMode,
           decorationStyle,
           showFloralia: true,
