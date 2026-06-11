@@ -407,7 +407,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
           </div>
           <p className="batch-hint" style={{ color: 'var(--text-dim)', margin: '0 0 6px', fontSize: 11 }}>
-            Columns: <code>headline</code>, <code>category</code> (green / pink / yellow / blue / dark-green…)
+            Required column: <code>Name</code> — color randomized per row
           </p>
           {tcBatchRows !== null && (
             <p className="batch-hint" style={{ color: tcBatchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>

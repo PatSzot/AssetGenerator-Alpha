@@ -181,40 +181,19 @@ function parseCsvRows(csv) {
   }).filter(r => r.firstName || r.lastName)
 }
 
-// Map CSV category values to Title Card color modes (case-insensitive)
-const TC_CATEGORY_MAP = {
-  'green': 'green', 'pink': 'pink', 'yellow': 'yellow', 'blue': 'blue',
-  'dark green': 'dark-green', 'dark-green': 'dark-green',
-  'dark pink': 'dark-pink', 'dark-pink': 'dark-pink',
-  'dark yellow': 'dark-yellow', 'dark-yellow': 'dark-yellow',
-  'dark blue': 'dark-blue', 'dark-blue': 'dark-blue',
-}
+const TC_COLOR_MODES = ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
 
-// Parse CSV into rows of { headline, category } for Title Card batch export
+// Parse CSV into rows of { headline } for Title Card batch export — reads "Name" column
 function parseTitleCardCsvRows(csv) {
   const lines = csv.split('\n').map(l => l.trim()).filter(Boolean)
   if (lines.length < 2) return []
   const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase())
-  const findCol = (...names) => {
-    for (const name of names) {
-      const i = headers.findIndex(h => h === name)
-      if (i !== -1) return i
-    }
-    for (const name of names) {
-      const i = headers.findIndex(h => h.includes(name))
-      if (i !== -1) return i
-    }
-    return -1
-  }
-  const headlineIdx = findCol('headline', 'sans title', 'title', 'text')
-  const categoryIdx = findCol('category', 'color', 'theme', 'mode')
+  const nameIdx = headers.findIndex(h => h === 'name') !== -1
+    ? headers.findIndex(h => h === 'name')
+    : headers.findIndex(h => h.includes('name'))
   return lines.slice(1).map(line => {
     const cols = parseCsvLine(line)
-    const get  = i => (i !== -1 ? cols[i] ?? '' : '')
-    return {
-      headline: get(headlineIdx),
-      category: get(categoryIdx),
-    }
+    return { headline: nameIdx !== -1 ? (cols[nameIdx] ?? '') : '' }
   }).filter(r => r.headline)
 }
 
@@ -845,7 +824,7 @@ export default function App() {
       const zip   = new JSZip()
       const decorStyles = ['fill', 'inverted']
       for (const row of tcBatchRows) {
-        const colorMode       = TC_CATEGORY_MAP[row.category.toLowerCase().trim()] ?? settings.colorMode
+        const colorMode       = TC_COLOR_MODES[Math.floor(Math.random() * TC_COLOR_MODES.length)]
         const decorationStyle = decorStyles[Math.floor(Math.random() * 2)]
         const freshDots       = generateFleuronFontDots()
         const s = {
