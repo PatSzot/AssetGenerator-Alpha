@@ -7,6 +7,7 @@ import { drawCanvas } from './utils/drawCanvas'
 import { drawTwitterCanvas } from './utils/drawTwitterCanvas'
 import { drawRichQuoteCanvas } from './utils/drawRichQuoteCanvas'
 import { drawTitleCardCanvas } from './utils/drawTitleCardCanvas'
+import { drawBlogArtCanvas } from './utils/drawBlogArtCanvas'
 import { drawCertificateCanvas } from './utils/drawCertificateCanvas'
 import { drawSpecialAwardCanvas } from './utils/drawSpecialAwardCanvas'
 import { drawIJoinedCanvas } from './utils/drawIJoinedCanvas'
@@ -18,7 +19,7 @@ import { generateFleuronFontDots } from './utils/drawFleurons'
 import './App.css'
 
 // ── URL slug ↔ template type
-const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable', 'welcome'])
+const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'blogart', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable', 'welcome'])
 
 function templateFromPath() {
   const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
@@ -701,6 +702,7 @@ export default function App() {
     if (s.templateType === 'twitter')          drawTwitterCanvas(canvas, s, fontsReady, profileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'richquote')   drawRichQuoteCanvas(canvas, s, fontsReady, richProfileImageRef.current, richCompanyLogoRef.current)
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
+    else if (s.templateType === 'blogart')     drawBlogArtCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate' && s.certStyle === 'award') drawSpecialAwardCanvas(canvas, s, fontsReady)
     else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
@@ -721,6 +723,7 @@ export default function App() {
     const prefix = settings.templateType === 'twitter'      ? 'airops-tweet'
       : settings.templateType === 'richquote'               ? 'airops-richquote'
       : settings.templateType === 'titlecard'               ? 'airops-titlecard'
+      : settings.templateType === 'blogart'                 ? 'airops-blogart'
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'ijoined'                 ? 'airops-ijoined'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
@@ -746,6 +749,7 @@ export default function App() {
     const prefix = settings.templateType === 'twitter'      ? 'airops-tweet'
       : settings.templateType === 'richquote'               ? 'airops-richquote'
       : settings.templateType === 'titlecard'               ? 'airops-titlecard'
+      : settings.templateType === 'blogart'                 ? 'airops-blogart'
       : settings.templateType === 'certificate'             ? 'airops-certificate'
       : settings.templateType === 'webinar'                 ? 'airops-webinar'
       : settings.templateType === 'roundtable'              ? 'airops-roundtable'

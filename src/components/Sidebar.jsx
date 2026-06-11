@@ -17,6 +17,7 @@ const TEMPLATES = [
   { value: 'quote',       label: 'Quote Block',  icon: '/Icon-BasicQuote.jpg'   },
   { value: 'richquote',   label: 'Rich Quote',   icon: '/Icon-RichQuote.jpg'    },
   { value: 'titlecard',   label: 'Title Card',   icon: '/Icon-TitleCard.jpg'    },
+  { value: 'blogart',     label: 'Blog Art',     icon: '/Icon-TitleCard.jpg'    },
   { value: 'twitter',     label: 'Twitter Post', icon: '/Icon-Twitter.jpg'      },
   { value: 'certificate', label: 'Certificate',  icon: '/Icon-Certificate.jpg'  },
   { value: 'ijoined',     label: 'I Joined',     icon: '/Icon-IJoined.jpg'      },
@@ -253,7 +254,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         </>}
 
         {/* Content — Title Card */}
-        {settings.templateType === 'titlecard' && <>
+        {(settings.templateType === 'titlecard' || settings.templateType === 'blogart') && <>
           <div className="sec">Content</div>
 
           <div className="tog-row">
@@ -1240,7 +1241,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
          && !(settings.templateType === 'webinar' && settings.wbStyle === 'ced') && <>
           <div className="sec">Color Mode</div>
           {(() => {
-            const modes = ['twitter', 'titlecard', 'webinar'].includes(settings.templateType)
+            const modes = ['twitter', 'titlecard', 'blogart', 'webinar'].includes(settings.templateType)
               ? ['green', 'pink', 'yellow', 'blue', 'dark-green', 'dark-pink', 'dark-yellow', 'dark-blue']
               : ['green', 'pink', 'yellow', 'blue']
             return (
