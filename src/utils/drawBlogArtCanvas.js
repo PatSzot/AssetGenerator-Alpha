@@ -34,16 +34,15 @@ export function drawBlogArtCanvas(canvas, settings, fontsReady, floralia) {
     tcSerifTitle      = 'Serif Title',
     tcShowSerifTitle  = true,
     tcSansTitle       = 'Sans Title',
-    tcShowSansTitle   = true,
     tcEmphasizeSans   = false,
     tcSubheadline     = 'Subheadline/Details',
-    tcShowSubheadline = true,
     tcBody: tcBodyRaw = '"LLM-sourced traffic has better time-to-conversions and sessions-to-conversions than organic traffic from Google."',
     tcShowBody        = true,
-    tcCTAText         = 'See AirOps in Action',
-    tcShowCTA         = true,
-    tcShowLogo        = true,
   } = settings
+  const tcShowSansTitle   = false
+  const tcShowSubheadline = false
+  const tcShowCTA         = false
+  const tcShowLogo        = false
   const tcBody = smartQuotes(tcBodyRaw)
 
   const { w: cw, h: ch } = dims

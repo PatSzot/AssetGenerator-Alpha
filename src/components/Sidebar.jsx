@@ -257,13 +257,13 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
         {(settings.templateType === 'titlecard' || settings.templateType === 'blogart') && <>
           <div className="sec">Content</div>
 
-          <div className="tog-row">
+          {settings.templateType === 'titlecard' && <div className="tog-row">
             <label>Logo &amp; CTA</label>
             <label className="toggle">
               <input type="checkbox" checked={settings.tcShowLogo} onChange={e => { update('tcShowLogo', e.target.checked); update('tcShowCTA', e.target.checked) }} />
               <div className="ttrack" /><div className="tthumb" />
             </label>
-          </div>
+          </div>}
 
           <div className="tog-row">
             <label>Eyebrow</label>
@@ -291,6 +291,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </div>
           )}
 
+          {settings.templateType === 'titlecard' && <>
           <div className="tog-row">
             <label>Sans Title</label>
             <label className="toggle">
@@ -325,6 +326,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
               <input type="text" value={settings.tcSubheadline} onChange={e => update('tcSubheadline', e.target.value)} />
             </div>
           )}
+          </>}
 
           <div className="tog-row">
             <label>Body</label>
@@ -339,7 +341,7 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             </div>
           )}
 
-          {settings.tcShowCTA && (
+          {settings.templateType === 'titlecard' && settings.tcShowCTA && (
             <div className="field">
               <label>CTA Text</label>
               <input type="text" value={settings.tcCTAText} onChange={e => update('tcCTAText', e.target.value)} />
