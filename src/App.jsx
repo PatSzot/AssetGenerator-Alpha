@@ -847,7 +847,8 @@ export default function App() {
           dpr: 1,
         }
         const ec = document.createElement('canvas')
-        drawTitleCardCanvas(ec, s, fontsReady, freshDots)
+        if (s.templateType === 'blogart') drawBlogArtCanvas(ec, s, fontsReady, freshDots)
+        else drawTitleCardCanvas(ec, s, fontsReady, freshDots)
         const base64 = ec.toDataURL('image/jpeg', 0.95).split(',')[1]
         const slug   = row.headline.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 40)
         zip.file(`titlecard-${colorMode}-${slug}.jpg`, base64, { base64: true })
