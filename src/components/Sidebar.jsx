@@ -430,8 +430,8 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
         {/* Content — Certificate */}
         {settings.templateType === 'certificate' && <>
-          {/* Program */}
-          <div className="sec">Program</div>
+          {/* Details */}
+          <div className="sec">Details</div>
           <div className="dim-grid" style={{ marginBottom: 12 }}>
             {[['aeo-analyst', 'AEO Analyst'], ['systems-builder', 'Systems Builder']].map(([val, label]) => (
               <button
@@ -442,6 +442,10 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
                 {label}
               </button>
             ))}
+          </div>
+          <div className="field">
+            <label>Graduation Date</label>
+            <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
           </div>
 
           <div className="div" />
