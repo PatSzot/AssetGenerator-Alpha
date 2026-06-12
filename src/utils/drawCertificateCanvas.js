@@ -51,15 +51,8 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
   const s = cW / 1011.115
 
-  // Draw certificate image
-  if (certImage) {
-    ctx.drawImage(certImage, cX, cY, cW, cH)
-  } else {
-    ctx.fillStyle = '#f8fffb'
-    ctx.fillRect(cX, cY, cW, cH)
-  }
+  // Decoration — drawn over background, under cert image
 
-  // Decoration — drawn over cert image, under text
   if (settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     if (rotAngle !== 0) {
@@ -113,6 +106,14 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     }
 
     if (rotAngle !== 0) ctx.restore()
+  }
+
+  // Draw certificate image — top layer over decoration
+  if (certImage) {
+    ctx.drawImage(certImage, cX, cY, cW, cH)
+  } else {
+    ctx.fillStyle = '#f8fffb'
+    ctx.fillRect(cX, cY, cW, cH)
   }
 
   // ── Name — centered, Saans Medium
