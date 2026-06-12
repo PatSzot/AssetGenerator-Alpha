@@ -444,6 +444,14 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
             ))}
           </div>
           <div className="field">
+            <label>First Name</label>
+            <input type="text" value={settings.certFirstName ?? ''} onChange={e => update('certFirstName', e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Last Name</label>
+            <input type="text" value={settings.certLastName ?? ''} onChange={e => update('certLastName', e.target.value)} />
+          </div>
+          <div className="field">
             <label>Graduation Date</label>
             <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
           </div>

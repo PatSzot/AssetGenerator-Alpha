@@ -225,6 +225,8 @@ const DEFAULT_SETTINGS = {
   // Certificate
   certStyle:          'classic',
   certProgram:        'aeo-analyst',
+  certFirstName:      'Firstname',
+  certLastName:       'Lastname',
   certFullName:       'Firstname Lastname',
   certCohortLevel:    'Intermediate',
   certGraduationDate: 'March 2026',
