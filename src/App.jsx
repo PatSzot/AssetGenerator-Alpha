@@ -315,7 +315,7 @@ export default function App() {
     return applyHashPayload(base, hashPayloadRef.current)
   })
   const [fontsReady, setFontsReady]   = useState(false)
-  const [uiMode, setUiMode]           = useState('light')
+  const uiMode = 'light'
   const [showSplash, setShowSplash]   = useState(() => window.location.pathname === '/' || window.location.pathname === '')
   const [batchExporting, setBatchExporting] = useState(false)
   const [batchRows, setBatchRows]             = useState(null)
@@ -926,7 +926,7 @@ export default function App() {
         onExport={exportJpeg}
         onExportAll={exportAll}
         uiMode={uiMode}
-        onToggleUiMode={() => setUiMode(m => m === 'dark' ? 'light' : 'dark')}
+        onToggleUiMode={null}
         onProfileImageChange={handleProfileImageChange}
         tweetPhotoProcessing={tweetPhotoProcessing}
         onRichProfileImageChange={handleRichProfileImageChange}

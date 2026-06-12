@@ -428,209 +428,91 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
           <div className="div" />
         </>}
 
-        {/* Content — Certificate (self-contained: all sections live here) */}
-        {settings.templateType === 'certificate' && (() => {
-          const isAward  = settings.certStyle === 'award'
-          const isAirOps = /app\.airops\.com/.test(settings.batchSheetUrl ?? '')
-          return <>
-            {/* 0 ── Style toggle */}
-            <div className="sec">Style</div>
-            <div className="dim-grid" style={{ marginBottom: 12 }}>
-              {[['classic', 'Classic'], ['award', 'Special Award']].map(([val, label]) => (
-                <button
-                  key={val}
-                  className={`dim-btn${(settings.certStyle ?? 'classic') === val ? ' active' : ''}`}
-                  onClick={() => update('certStyle', val)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+        {/* Content — Certificate */}
+        {settings.templateType === 'certificate' && <>
+          {/* Program */}
+          <div className="sec">Program</div>
+          <div className="dim-grid" style={{ marginBottom: 12 }}>
+            {[['aeo-analyst', 'AEO Analyst'], ['systems-builder', 'Systems Builder']].map(([val, label]) => (
+              <button
+                key={val}
+                className={`dim-btn${(settings.certProgram ?? 'aeo-analyst') === val ? ' active' : ''}`}
+                onClick={() => update('certProgram', val)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-            {/* Special Award fields */}
-            {isAward && <>
-              <div className="sec">Award Details</div>
-              <div className="field">
-                <label>Recipient Name</label>
-                <input type="text" value={settings.saRecipient ?? ''} onChange={e => update('saRecipient', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Course Track</label>
-                <input type="text" placeholder="Content, Analytics…" value={settings.saTrack ?? ''} onChange={e => update('saTrack', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Certification Title</label>
-                <input type="text" placeholder="Engineering" value={settings.saCertTitle ?? ''} onChange={e => update('saCertTitle', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Level</label>
-                <input type="text" placeholder="Certification 3" value={settings.saCertLevel ?? ''} onChange={e => update('saCertLevel', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Date</label>
-                <input type="text" placeholder="June 2026" value={settings.saDate ?? ''} onChange={e => update('saDate', e.target.value)} />
-              </div>
-              <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
-              <div className="div" />
-            </>}
+          <div className="div" />
 
-            {/* Classic certificate sections */}
-            {!isAward && <>
-            {/* 1 ── Batch Export */}
-            <div className="sec">Batch Export</div>
-            <input
-              ref={batchCsvInputRef}
-              type="file"
-              accept=".csv,text/csv"
-              style={{ display: 'none' }}
-              onChange={e => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                const reader = new FileReader()
-                reader.onload = ev => onBatchCsvUpload(ev.target.result)
-                reader.readAsText(file)
-                e.target.value = ''
-              }}
-            />
-            <div
-              className={`csv-dropzone${csvDragOver ? ' over' : ''}`}
-              onClick={() => batchCsvInputRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setCsvDragOver(true) }}
-              onDragEnter={e => { e.preventDefault(); setCsvDragOver(true) }}
-              onDragLeave={() => setCsvDragOver(false)}
-              onDrop={e => {
-                e.preventDefault()
-                setCsvDragOver(false)
-                const file = e.dataTransfer.files?.[0]
-                if (!file) return
-                const reader = new FileReader()
-                reader.onload = ev => onBatchCsvUpload(ev.target.result)
-                reader.readAsText(file)
-              }}
-            >
-              <span className="csv-dropzone-icon">↑</span>
-              <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
+          {/* Batch Export */}
+          <div className="sec">Batch Export</div>
+          <input
+            ref={batchCsvInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = ev => onBatchCsvUpload(ev.target.result)
+              reader.readAsText(file)
+              e.target.value = ''
+            }}
+          />
+          <div
+            className={`csv-dropzone${csvDragOver ? ' over' : ''}`}
+            onClick={() => batchCsvInputRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); setCsvDragOver(true) }}
+            onDragEnter={e => { e.preventDefault(); setCsvDragOver(true) }}
+            onDragLeave={() => setCsvDragOver(false)}
+            onDrop={e => {
+              e.preventDefault()
+              setCsvDragOver(false)
+              const file = e.dataTransfer.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = ev => onBatchCsvUpload(ev.target.result)
+              reader.readAsText(file)
+            }}
+          >
+            <span className="csv-dropzone-icon">↑</span>
+            <span className="csv-dropzone-label">Drop CSV here or click to upload</span>
+          </div>
+          {batchRows !== null && (
+            <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
+              {batchRows.length > 0 ? `✓ ${batchRows.length} recipients loaded` : '✕ No rows found — check column names'}
+            </p>
+          )}
+          <button
+            className="btn-ex"
+            onClick={onBatchExport}
+            disabled={!batchRows?.length || batchExporting}
+          >
+            {batchExporting ? 'Generating…' : batchRows?.length ? `↓ Batch Export ZIP (${batchRows.length})` : '↓ Batch Export ZIP'}
+          </button>
+
+          <div className="div" />
+
+          {/* Manual Input (collapsible) */}
+          <button className="sec-collapse" onClick={() => setCertManualOpen(v => !v)}>
+            Manual Input <span className="sec-collapse-chevron">{certManualOpen ? '▴' : '▾'}</span>
+          </button>
+          {certManualOpen && <>
+            <div className="field">
+              <label>Full Name</label>
+              <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
             </div>
             <div className="field">
-              <label>Sheet URL</label>
-              <input
-                type="text"
-                placeholder="https://app.airops.com/… or CSV URL"
-                value={settings.batchSheetUrl ?? ''}
-                onChange={e => update('batchSheetUrl', e.target.value)}
-              />
+              <label>Graduation Date</label>
+              <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
             </div>
-            {isAirOps && (
-              <div className="field">
-                <label>AirOps API Key</label>
-                <input
-                  type="password"
-                  placeholder="Paste your API key"
-                  value={airopsApiKey ?? ''}
-                  onChange={e => onSetAiropsApiKey(e.target.value)}
-                />
-              </div>
-            )}
-            <button
-              className="btn-all"
-              onClick={onFetchBatch}
-              disabled={!settings.batchSheetUrl || batchFetching || (isAirOps && !airopsApiKey)}
-              style={{ marginBottom: 5 }}
-            >
-              {batchFetching ? 'Fetching…' : 'Fetch'}
-            </button>
-            {batchRows !== null && (
-              <p className="batch-hint" style={{ color: batchRows.length ? 'var(--accent)' : 'var(--text-dim)', margin: '0 0 8px' }}>
-                {batchRows.length > 0 ? `✓ ${batchRows.length} recipients loaded` : '✕ No rows found — check column names'}
-              </p>
-            )}
-
+            <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
             <div className="div" />
-
-            {/* 2 ── Decoration */}
-            <div className="sec">Decoration</div>
-            <div className="tog-row">
-              <label>Decoration</label>
-              <label className="toggle">
-                <input type="checkbox" checked={settings.showFloralia} onChange={e => update('showFloralia', e.target.checked)} />
-                <div className="ttrack" /><div className="tthumb" />
-              </label>
-            </div>
-            {settings.showFloralia && (
-              <div style={{ paddingLeft: 12 }}>
-                <div className="tog-row">
-                  <label>Fill style — {settings.decorationStyle === 'inverted' ? 'Negative' : 'Positive'}</label>
-                  <label className="toggle">
-                    <input type="checkbox" checked={settings.decorationStyle === 'inverted'} onChange={e => update('decorationStyle', e.target.checked ? 'inverted' : 'fill')} />
-                    <div className="ttrack" /><div className="tthumb" />
-                  </label>
-                </div>
-                <button className="btn-all" onClick={onRefleuron} disabled={!fontsReady}>↻ Redecorate</button>
-              </div>
-            )}
-
-            <div className="div" />
-
-            {/* 3 ── Program */}
-            <div className="sec">Program</div>
-            <div className="dim-grid" style={{ marginBottom: 12 }}>
-              {[['aeo-analyst', 'AEO Analyst'], ['systems-builder', 'Systems Builder']].map(([val, label]) => (
-                <button
-                  key={val}
-                  className={`dim-btn${(settings.certProgram ?? 'aeo-analyst') === val ? ' active' : ''}`}
-                  onClick={() => update('certProgram', val)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* 4 ── Cohort Type (batch-level) */}
-            <div className="sec">Cohort Type</div>
-            <div className="dim-grid" style={{ marginBottom: 8 }}>
-              {['Intermediate', 'Advanced'].map(level => (
-                <button
-                  key={level}
-                  className={`dim-btn${(settings.certCohortLevel ?? 'Intermediate') === level ? ' active' : ''}`}
-                  onClick={() => update('certCohortLevel', level)}
-                >
-                  {level}
-                </button>
-              ))}
-            </div>
-            <button
-              className="btn-ex"
-              onClick={onBatchExport}
-              disabled={!batchRows?.length || batchExporting}
-            >
-              {batchExporting ? 'Generating…' : batchRows?.length ? `↓ Batch Export ZIP (${batchRows.length})` : '↓ Batch Export ZIP'}
-            </button>
-
-            <div className="div" />
-
-            {/* 6 ── Manual Input (collapsible) */}
-            <button className="sec-collapse" onClick={() => setCertManualOpen(v => !v)}>
-              Manual Input <span className="sec-collapse-chevron">{certManualOpen ? '▴' : '▾'}</span>
-            </button>
-            {certManualOpen && <>
-              <div className="field">
-                <label>Full Name</label>
-                <input type="text" value={settings.certFullName} onChange={e => update('certFullName', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Cohort Level</label>
-                <input type="text" value={settings.certCohortLevel ?? ''} onChange={e => update('certCohortLevel', e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Graduation Date</label>
-                <input type="text" value={settings.certGraduationDate ?? ''} onChange={e => update('certGraduationDate', e.target.value)} />
-              </div>
-              <button className="btn-ex" onClick={() => onExport()} style={{ marginTop: 4 }}>↓ Export JPEG</button>
-              <div className="div" />
-            </>}
-            </>}
-          </>
-        })()}
+          </>}
+        </>}
 
         {/* Content — Twitter Post */}
         {settings.templateType === 'twitter' && <>
@@ -1343,21 +1225,6 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
       </div>
 
-      {/* ── Footer: theme toggle */}
-      <div className="sidebar-footer">
-        <div className="tog-row">
-          <label>Light Mode</label>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={uiMode === 'light'}
-              onChange={onToggleUiMode}
-            />
-            <div className="ttrack" />
-            <div className="tthumb" />
-          </label>
-        </div>
-      </div>
     </div>
   )
 }
