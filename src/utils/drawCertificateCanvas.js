@@ -131,7 +131,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // Shadow: 2.733 2.733 5.466 white  AND  -2.733 2.283 2.954 rgba(0,0,0,0.15)
   const nameSz = Math.round(50.56 * s)
   const nameX  = cX + cW / 2
-  const nameY  = cY + Math.round(248 * s)
+  const nameY  = cY + Math.round(286 * s)
 
   ctx.font          = `400 ${nameSz}px ${serif}`
   ctx.letterSpacing = `${(-1.0112 * s).toFixed(2)}px`
