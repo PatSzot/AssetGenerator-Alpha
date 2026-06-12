@@ -312,8 +312,8 @@ export default function App() {
   const [settings, setSettings]       = useState(() => {
     const initialTemplate = templateFromPath()
     const base = { ...DEFAULT_SETTINGS, templateType: initialTemplate }
-    if (initialTemplate === 'roundtable' || initialTemplate === 'welcome') base.dims = { w: 1080, h: 1080 }
-    else if (initialTemplate === 'certificate' || initialTemplate === 'ijoined') base.dims = { w: 1920, h: 1080 }
+    if (initialTemplate === 'roundtable' || initialTemplate === 'welcome' || initialTemplate === 'certificate') base.dims = { w: 1080, h: 1080 }
+    else if (initialTemplate === 'ijoined') base.dims = { w: 1920, h: 1080 }
     return applyHashPayload(base, hashPayloadRef.current)
   })
   const [fontsReady, setFontsReady]   = useState(false)
@@ -457,8 +457,8 @@ export default function App() {
     const onPop = () => setSettings(prev => {
       const t = templateFromPath()
       const next = { ...prev, templateType: t }
-      if (t === 'roundtable' || t === 'welcome') next.dims = { w: 1080, h: 1080 }
-      else if (t === 'certificate' || t === 'ijoined') next.dims = { w: 1920, h: 1080 }
+      if (t === 'roundtable' || t === 'welcome' || t === 'certificate') next.dims = { w: 1080, h: 1080 }
+      else if (t === 'ijoined') next.dims = { w: 1920, h: 1080 }
       return next
     })
     window.addEventListener('popstate', onPop)
@@ -475,9 +475,9 @@ export default function App() {
       if (key === 'templateType' && ['quote', 'richquote'].includes(value) && next.colorMode.startsWith('dark-')) {
         next.colorMode = next.colorMode.replace('dark-', '')
       }
-      // Certificate is fixed to 1920×1080
+      // Certificate is fixed to 1080×1080
       if (key === 'templateType' && value === 'certificate') {
-        next.dims = { w: 1920, h: 1080 }
+        next.dims = { w: 1080, h: 1080 }
       }
       // I Joined is fixed to 1920×1080
       if (key === 'templateType' && value === 'ijoined') {
@@ -756,7 +756,7 @@ export default function App() {
 
   const exportAll = useCallback(() => {
     if (settings.templateType === 'certificate') {
-      exportJpeg(1920, 1080)
+      exportJpeg(1080, 1080)
       return
     }
     const presets = [

@@ -3,6 +3,10 @@ import { STIPPLE_COLORS } from './drawFleurons.js'
 const CARD_TEXT    = '#002910'
 const CANVAS_BG    = '#000d05'
 const COHORT_COLOR = '#008c44'
+const PROGRAM_BG   = {
+  'aeo-analyst':     '#008c44',
+  'systems-builder': '#0f2412',
+}
 
 export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage) {
   const {
@@ -33,7 +37,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
   // Background
-  ctx.fillStyle = CANVAS_BG
+  ctx.fillStyle = PROGRAM_BG[certProgram] ?? CANVAS_BG
   ctx.fillRect(0, 0, cw, ch)
 
   // Decoration
@@ -92,37 +96,14 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     if (rotAngle !== 0) ctx.restore()
   }
 
-  // ── Certificate composite geometry
-  // New programs (aeo-analyst, systems-builder): full-bleed 1920×1080
-  // Legacy: Figma 1080×1080 composite = 1011.115 × 568.752, centered
-  //         Figma 1920×1080 composite = 1612.004 × 906.752, left: 50%, top: 87px
-  const isNewProgram = certProgram === 'aeo-analyst' || certProgram === 'systems-builder'
-  let cX, cY, cW, cH
-  if (isNewProgram) {
-    cX = 0; cY = 0; cW = cw; cH = ch
-  } else if (isLand) {
-    cH = Math.round(ch * (906.752 / 1080))
-    cW = Math.round(cH * (1612.004 / 906.752))
-    cX = Math.round((cw - cW) / 2)
-    cY = Math.round(ch * (87 / 1080))
-  } else {
-    cW = Math.round(cw * (1011.115 / 1080))
-    cH = Math.round(cW * (568.752 / 1011.115))
-    cX = Math.round((cw - cW) / 2)
-    cY = Math.round((ch - cH) / 2)
-  }
+  // ── Certificate composite geometry — 1080×1080 canvas, cert image centered (16:9 letterbox)
+  const cW = cw
+  const cH = Math.round(cw * (1080 / 1920))
+  const cX = 0
+  const cY = Math.round((ch - cH) / 2)
 
   // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
   const s = cW / 1011.115
-
-  // Center vertical guideline (full canvas height, drawn before image)
-  ctx.strokeStyle = '#008c44'
-  ctx.lineWidth   = 2
-  ctx.beginPath()
-  ctx.moveTo(cw / 2, 0)
-  ctx.lineTo(cw / 2, ch)
-  ctx.stroke()
-  ctx.lineWidth = 1
 
   // Draw certificate image
   if (certImage) {
