@@ -145,14 +145,14 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // Figma 1080×1080 reference: fontSize=21.06, centerX=730.74, top=463.53
   if (certGraduationDate) {
     const subSz = Math.round(21.06 * s)
-    const subX  = cX + Math.round(693 * s)
+    const subX  = cX + Math.round(730.74 * s) + 32
 
     ctx.font          = `500 ${subSz}px ${mono}`
     ctx.letterSpacing = '1px'
     ctx.fillStyle     = COHORT_COLOR
     ctx.textBaseline  = 'top'
     ctx.textAlign     = 'center'
-    ctx.fillText(certGraduationDate.toUpperCase(), subX, cY + Math.round(369 * s))
+    ctx.fillText(certGraduationDate.toUpperCase(), subX, cY + Math.round(463.53 * s))
     ctx.letterSpacing = '0px'
   }
 
