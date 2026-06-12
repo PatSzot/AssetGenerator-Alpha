@@ -130,7 +130,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // ── Name — centered, Saans Medium
   const nameSz = Math.round(50.56 * s)
   const nameX  = cX + cW / 2
-  const nameY  = cY + Math.round(286 * s)
+  const nameY  = cY + Math.round(261 * s)
 
   ctx.font          = `500 ${nameSz}px ${sans}`
   ctx.letterSpacing = `${(-1.0112 * s).toFixed(2)}px`
