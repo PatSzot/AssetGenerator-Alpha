@@ -24,7 +24,8 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   const ctx = canvas.getContext('2d')
   if (dpr !== 1) ctx.scale(dpr, dpr)
 
-  const serif = fontsReady ? "'Serrif VF', Georgia, serif" : 'Georgia, serif'
+  const sans  = fontsReady ? "'Saans', sans-serif"                : 'sans-serif'
+  const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
   // Background
   ctx.fillStyle = CANVAS_BG
@@ -126,51 +127,33 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     ctx.fillRect(cX, cY, cW, cH)
   }
 
-  // ── Name — centered, Serrif VF, color:#002910, dual text shadow
-  // Figma 1080×1080 reference: fontSize=50.56, top=223.3, letterSpacing=-1.0112
-  // Shadow: 2.733 2.733 5.466 white  AND  -2.733 2.283 2.954 rgba(0,0,0,0.15)
+  // ── Name — centered, Saans Medium
   const nameSz = Math.round(50.56 * s)
   const nameX  = cX + cW / 2
   const nameY  = cY + Math.round(286 * s)
 
-  ctx.font          = `400 ${nameSz}px ${serif}`
+  ctx.font          = `500 ${nameSz}px ${sans}`
   ctx.letterSpacing = `${(-1.0112 * s).toFixed(2)}px`
   ctx.textBaseline  = 'top'
   ctx.textAlign     = 'center'
   ctx.fillStyle     = CARD_TEXT
-
-  // White shadow pass
-  ctx.shadowColor   = 'white'
-  ctx.shadowBlur    = 5.466 * s
-  ctx.shadowOffsetX = 2.733 * s
-  ctx.shadowOffsetY = 2.733 * s
   ctx.fillText(certFullName, nameX, nameY)
 
-  // Dark shadow pass
-  ctx.shadowColor   = 'rgba(0,0,0,0.15)'
-  ctx.shadowBlur    = 2.954 * s
-  ctx.shadowOffsetX = -2.733 * s
-  ctx.shadowOffsetY = 2.283 * s
-  ctx.fillText(certFullName, nameX, nameY)
+  ctx.letterSpacing = '0px'
 
-  // Clear shadows
-  ctx.shadowColor   = 'transparent'
-  ctx.shadowBlur    = 0
-  ctx.shadowOffsetX = 0
-  ctx.shadowOffsetY = 0
-
-  // ── Graduation Date — right-side, Serrif VF, color:#008c44
+  // ── Graduation Date — Saans Mono, full caps
   // Figma 1080×1080 reference: fontSize=21.06, centerX=730.74, top=463.53
   if (certGraduationDate) {
     const subSz = Math.round(21.06 * s)
     const subX  = cX + Math.round(730.74 * s)
 
-    ctx.font          = `400 ${subSz}px ${serif}`
-    ctx.letterSpacing = '0px'
+    ctx.font          = `500 ${subSz}px ${mono}`
+    ctx.letterSpacing = '1px'
     ctx.fillStyle     = COHORT_COLOR
     ctx.textBaseline  = 'top'
     ctx.textAlign     = 'center'
-    ctx.fillText(certGraduationDate, subX, cY + Math.round(463.53 * s))
+    ctx.fillText(certGraduationDate.toUpperCase(), subX, cY + Math.round(463.53 * s))
+    ctx.letterSpacing = '0px'
   }
 
   // Reset
