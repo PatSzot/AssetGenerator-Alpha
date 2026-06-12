@@ -137,12 +137,11 @@ export function drawBlogArtCanvas(canvas, settings, fontsReady, floralia) {
   const guideX = 40
 
   // ── Logo — bottom center, always on
-  const logoH    = isStory ? 80 : 56
+  const logoH    = 72
   const logoW    = Math.round(784 * logoH / 252)
   const logoBmp  = buildLogo(logoColor, Math.round(logoH * dpr))
-  const logoPadB = isStory ? 520 : guideX
   const logoX    = Math.round((cw - logoW) / 2)
-  const logoY    = ch - logoPadB - logoH
+  const logoY    = ch - 40 - logoH
   ctx.fillStyle = bg
   ctx.fillRect(logoX, logoY, logoW, logoH)
   ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
