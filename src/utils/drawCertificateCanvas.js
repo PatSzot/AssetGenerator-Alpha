@@ -97,9 +97,9 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   }
 
   // ── Certificate composite geometry — 1080×1080 canvas, cert image centered (16:9 letterbox)
-  const cW = cw
-  const cH = Math.round(cw * (1080 / 1920))
-  const cX = 0
+  const cW = Math.round(cw * 0.90)
+  const cH = Math.round(cW * (1080 / 1920))
+  const cX = Math.round((cw - cW) / 2)
   const cY = Math.round((ch - cH) / 2)
 
   // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
