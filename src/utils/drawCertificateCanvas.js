@@ -159,9 +159,9 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   ctx.shadowOffsetX = 0
   ctx.shadowOffsetY = 0
 
-  // ── Cohort Level + Graduation Date — right-side, Serrif VF, color:#008c44
-  // Figma 1080×1080 reference: fontSize=21.06, centerX=730.74, tops=382.62 / 463.53
-  if (certCohortLevel || certGraduationDate) {
+  // ── Graduation Date — right-side, Serrif VF, color:#008c44
+  // Figma 1080×1080 reference: fontSize=21.06, centerX=730.74, top=463.53
+  if (certGraduationDate) {
     const subSz = Math.round(21.06 * s)
     const subX  = cX + Math.round(730.74 * s)
 
@@ -170,14 +170,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     ctx.fillStyle     = COHORT_COLOR
     ctx.textBaseline  = 'top'
     ctx.textAlign     = 'center'
-
-    if (certCohortLevel) {
-      ctx.fillText(certCohortLevel, subX, cY + Math.round(382.62 * s))
-    }
-
-    if (certGraduationDate) {
-      ctx.fillText(certGraduationDate, subX, cY + Math.round(463.53 * s))
-    }
+    ctx.fillText(certGraduationDate, subX, cY + Math.round(463.53 * s))
   }
 
   // Reset
