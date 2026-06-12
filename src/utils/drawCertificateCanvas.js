@@ -11,6 +11,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     certFullName       = 'Firstname Lastname',
     certCohortLevel    = '',
     certGraduationDate = '',
+    certProgram        = '',
   } = settings
 
   const { w: cw, h: ch } = dims
@@ -86,16 +87,20 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   }
 
   // ── Certificate composite geometry
-  // Reference: Figma 1080×1080 composite = 1011.115 × 568.752, centered
-  //            Figma 1920×1080 composite = 1612.004 × 906.752, left: 50%, top: 87px
+  // New programs (aeo-analyst, systems-builder): full-bleed 1920×1080
+  // Legacy: Figma 1080×1080 composite = 1011.115 × 568.752, centered
+  //         Figma 1920×1080 composite = 1612.004 × 906.752, left: 50%, top: 87px
+  const isNewProgram = certProgram === 'aeo-analyst' || certProgram === 'systems-builder'
   let cX, cY, cW, cH
-  if (isLand) {
-    cH = Math.round(ch * (906.752 / 1080))   // 839.6% of canvas height
-    cW = Math.round(cH * (1612.004 / 906.752)) // 16:9 aspect
+  if (isNewProgram) {
+    cX = 0; cY = 0; cW = cw; cH = ch
+  } else if (isLand) {
+    cH = Math.round(ch * (906.752 / 1080))
+    cW = Math.round(cH * (1612.004 / 906.752))
     cX = Math.round((cw - cW) / 2)
-    cY = Math.round(ch * (87 / 1080))         // top padding from Figma
+    cY = Math.round(ch * (87 / 1080))
   } else {
-    cW = Math.round(cw * (1011.115 / 1080))   // 93.6% of canvas width
+    cW = Math.round(cw * (1011.115 / 1080))
     cH = Math.round(cW * (568.752 / 1011.115))
     cX = Math.round((cw - cW) / 2)
     cY = Math.round((ch - cH) / 2)

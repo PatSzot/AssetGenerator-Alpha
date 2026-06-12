@@ -224,6 +224,7 @@ const DEFAULT_SETTINGS = {
   richFlip:          false,
   // Certificate
   certStyle:          'classic',
+  certProgram:        'aeo-analyst',
   certFullName:       'Firstname Lastname',
   certCohortLevel:    'Intermediate',
   certGraduationDate: 'March 2026',
@@ -336,6 +337,8 @@ export default function App() {
   const richProfileImageRef  = useRef(null)
   const richCompanyLogoRef   = useRef(null)
   const certImageRef         = useRef(null)
+  const certAeoImageRef      = useRef(null)
+  const certSystemsImageRef  = useRef(null)
   const ijProfileImageRef    = useRef(null)
   const wbPhotoRefs          = useRef([null, null, null, null])
   const wbLogoRefs           = useRef([null, null, null, null])
@@ -432,14 +435,19 @@ export default function App() {
     }
   }, [])
 
-  // Preload certificate background image
+  // Preload certificate background images
   useEffect(() => {
-    const img = new Image()
-    img.onload = () => {
-      certImageRef.current = img
-      setSettings(prev => ({ ...prev }))
-    }
-    img.src = '/GTMGen-Certificate.jpg'
+    const old = new Image()
+    old.onload = () => { certImageRef.current = old; setSettings(prev => ({ ...prev })) }
+    old.src = '/GTMGen-Certificate.jpg'
+
+    const aeo = new Image()
+    aeo.onload = () => { certAeoImageRef.current = aeo; setSettings(prev => ({ ...prev })) }
+    aeo.src = '/AOU-Certificate-AEOAnalyst.jpg'
+
+    const sys = new Image()
+    sys.onload = () => { certSystemsImageRef.current = sys; setSettings(prev => ({ ...prev })) }
+    sys.src = '/AOU-Certificate-SystemsBuilder.jpg'
   }, [])
 
   // Sync browser back/forward to templateType
@@ -704,7 +712,12 @@ export default function App() {
     else if (s.templateType === 'titlecard')   drawTitleCardCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'blogart')     drawBlogArtCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'certificate' && s.certStyle === 'award') drawSpecialAwardCanvas(canvas, s, fontsReady)
-    else if (s.templateType === 'certificate') drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImageRef.current)
+    else if (s.templateType === 'certificate') {
+      const certImg = s.certProgram === 'aeo-analyst'      ? certAeoImageRef.current
+        : s.certProgram === 'systems-builder'              ? certSystemsImageRef.current
+        : certImageRef.current
+      drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImg)
+    }
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable')  drawRoundtableCanvas(canvas, s, fontsReady, rtProfileImageRef.current, floraliaDotsRef.current)
@@ -740,6 +753,10 @@ export default function App() {
   }, [settings, draw])
 
   const exportAll = useCallback(() => {
+    if (settings.templateType === 'certificate') {
+      exportJpeg(1920, 1080)
+      return
+    }
     const presets = [
       [1080, 1080, 'sq'],
       [1080, 1350, 'p45'],

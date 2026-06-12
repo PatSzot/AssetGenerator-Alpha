@@ -571,7 +571,21 @@ export default function Sidebar({ settings, update, fontsReady, onExport, onExpo
 
             <div className="div" />
 
-            {/* 3 ── Cohort Type (batch-level) */}
+            {/* 3 ── Program */}
+            <div className="sec">Program</div>
+            <div className="dim-grid" style={{ marginBottom: 12 }}>
+              {[['aeo-analyst', 'AEO Analyst'], ['systems-builder', 'Systems Builder']].map(([val, label]) => (
+                <button
+                  key={val}
+                  className={`dim-btn${(settings.certProgram ?? 'aeo-analyst') === val ? ' active' : ''}`}
+                  onClick={() => update('certProgram', val)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* 4 ── Cohort Type (batch-level) */}
             <div className="sec">Cohort Type</div>
             <div className="dim-grid" style={{ marginBottom: 8 }}>
               {['Intermediate', 'Advanced'].map(level => (
