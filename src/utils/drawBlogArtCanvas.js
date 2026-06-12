@@ -42,7 +42,6 @@ export function drawBlogArtCanvas(canvas, settings, fontsReady, floralia) {
   const tcShowSansTitle   = false
   const tcShowSubheadline = false
   const tcShowCTA         = false
-  const tcShowLogo        = false
   const tcBody = smartQuotes(tcBodyRaw)
 
   const { w: cw, h: ch } = dims
@@ -137,25 +136,21 @@ export function drawBlogArtCanvas(canvas, settings, fontsReady, floralia) {
   // ── No vertical guidelines (Blog Art omits them)
   const guideX = 40
 
-  // ── Logo (top center)
+  // ── Logo — bottom center, always on
   const logoH    = isStory ? 80 : 56
   const logoW    = Math.round(784 * logoH / 252)
   const logoBmp  = buildLogo(logoColor, Math.round(logoH * dpr))
-  const logoPadT = isStory ? 360 : guideX
+  const logoPadB = isStory ? 520 : guideX
   const logoX    = Math.round((cw - logoW) / 2)
-  const logoY    = logoPadT
-  if (tcShowLogo) {
-    ctx.fillStyle = bg
-    ctx.fillRect(logoX, logoY, logoW, logoH)
-    ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
-  }
+  const logoY    = ch - logoPadB - logoH
+  ctx.fillStyle = bg
+  ctx.fillRect(logoX, logoY, logoW, logoH)
+  ctx.drawImage(logoBmp, logoX, logoY, logoW, logoH)
 
-  // ── CTA zone geometry
+  // ── CTA zone geometry (CTA always off, kept for centering math)
   const ctaH    = 104
   const ctaR    = ctaH / 2
   const ctaPadB = isStory ? 520 : guideX
-  const ctaBotY = ch - ctaPadB
-  const ctaTopY = ctaBotY - ctaH
 
   // ── Typography scale
   const serifSz = isLand ? 148 : 112
@@ -214,8 +209,8 @@ export function drawBlogArtCanvas(canvas, settings, fontsReady, floralia) {
   const totalGroupH = sections.reduce((a, s) => a + s.h, 0)
     + Math.max(0, sections.length - 1) * GAP_SECTION
 
-  const zoneTop = tcShowLogo ? logoY + logoH : logoPadT
-  const zoneBot = tcShowCTA ? ctaTopY : ch - ctaPadB
+  const zoneTop = guideX
+  const zoneBot = logoY - 24
   let ty = Math.round((zoneTop + zoneBot) / 2 - totalGroupH / 2)
 
   ctx.textBaseline = 'top'
