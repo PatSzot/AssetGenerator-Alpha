@@ -36,11 +36,30 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   const sans  = fontsReady ? "'Saans', sans-serif"                : 'sans-serif'
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
+  const bg = PROGRAM_BG[certProgram] ?? CANVAS_BG
+
   // Background
-  ctx.fillStyle = PROGRAM_BG[certProgram] ?? CANVAS_BG
+  ctx.fillStyle = bg
   ctx.fillRect(0, 0, cw, ch)
 
-  // Decoration
+  // ── Certificate composite geometry — 1080×1080 canvas, cert image centered (16:9 letterbox)
+  const cW = Math.round(cw * 0.90)
+  const cH = Math.round(cW * (1080 / 1920))
+  const cX = Math.round((cw - cW) / 2)
+  const cY = Math.round((ch - cH) / 2)
+
+  // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
+  const s = cW / 1011.115
+
+  // Draw certificate image
+  if (certImage) {
+    ctx.drawImage(certImage, cX, cY, cW, cH)
+  } else {
+    ctx.fillStyle = '#f8fffb'
+    ctx.fillRect(cX, cY, cW, cH)
+  }
+
+  // Decoration — drawn over cert image, under text
   if (settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     if (rotAngle !== 0) {
@@ -78,7 +97,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
 
     if (settings.decorationStyle === 'inverted') {
       drawDots(floralia.outsideDots, 0.28)
-      ctx.fillStyle    = CANVAS_BG
+      ctx.fillStyle    = bg
       ctx.globalAlpha  = 1
       ctx.textBaseline = 'middle'
       ctx.textAlign    = 'center'
@@ -94,23 +113,6 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     }
 
     if (rotAngle !== 0) ctx.restore()
-  }
-
-  // ── Certificate composite geometry — 1080×1080 canvas, cert image centered (16:9 letterbox)
-  const cW = Math.round(cw * 0.90)
-  const cH = Math.round(cW * (1080 / 1920))
-  const cX = Math.round((cw - cW) / 2)
-  const cY = Math.round((ch - cH) / 2)
-
-  // Scale factor relative to Figma 1080×1080 composite (1011.115px wide)
-  const s = cW / 1011.115
-
-  // Draw certificate image
-  if (certImage) {
-    ctx.drawImage(certImage, cX, cY, cW, cH)
-  } else {
-    ctx.fillStyle = '#f8fffb'
-    ctx.fillRect(cX, cY, cW, cH)
   }
 
   // ── Name — centered, Saans Medium
