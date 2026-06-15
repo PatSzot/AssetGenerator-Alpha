@@ -8,7 +8,7 @@ const PROGRAM_BG   = {
   'systems-builder': '#03051A',
 }
 
-export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage) {
+export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage, aeoBgImage) {
   const {
     dims,
     colorMode          = 'green',
@@ -41,6 +41,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   // Background
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, cw, ch)
+  if (aeoBgImage) ctx.drawImage(aeoBgImage, 0, 0, cw, ch)
 
   // ── Certificate composite geometry — 1080×1080 canvas, cert image centered (16:9 letterbox)
   const cW = Math.round(cw * 0.90)

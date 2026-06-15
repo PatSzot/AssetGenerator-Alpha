@@ -341,6 +341,8 @@ export default function App() {
   const certImageRef         = useRef(null)
   const certAeoImageRef      = useRef(null)
   const certSystemsImageRef  = useRef(null)
+  const aeoBgRefs            = useRef([null, null, null, null, null, null, null, null])
+  const aeoBgIndexRef        = useRef(0)
   const ijProfileImageRef    = useRef(null)
   const wbPhotoRefs          = useRef([null, null, null, null])
   const wbLogoRefs           = useRef([null, null, null, null])
@@ -452,6 +454,25 @@ export default function App() {
     sys.src = '/AOU-Certificate-SystemsBuilder.jpg'
   }, [])
 
+  // Preload AEO Analyst background cycle images
+  useEffect(() => {
+    const srcs = [
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-1.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-2.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-3.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-4.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-5.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-6.jpg',
+      '/AEOAnalystBGs/AEOAnalyst-BG-1920x1920-7.jpg',
+    ]
+    srcs.forEach((src, i) => {
+      const img = new Image()
+      img.onload = () => { aeoBgRefs.current[i] = img; if (i === 0) setSettings(prev => ({ ...prev })) }
+      img.src = src
+    })
+  }, [])
+
   // Sync browser back/forward to templateType
   useEffect(() => {
     const onPop = () => setSettings(prev => {
@@ -497,10 +518,13 @@ export default function App() {
 
   const handleRefleuron = useCallback(() => {
     if (!fontsReady) return
+    if (settings.templateType === 'certificate' && settings.certProgram === 'aeo-analyst') {
+      aeoBgIndexRef.current = (aeoBgIndexRef.current + 1) % 8
+    }
     floraliaDotsRef.current = generateFleuronFontDots()
     setSettings(prev => ({ ...prev, showFloralia: true }))
     setFloraliaReady(v => v + 1)
-  }, [fontsReady])
+  }, [fontsReady, settings.templateType, settings.certProgram])
 
   const stippleDataUrl = useCallback(async (dataUrl) => {
     const [header, base64] = dataUrl.split(',')
@@ -718,7 +742,8 @@ export default function App() {
       const certImg = s.certProgram === 'aeo-analyst'      ? certAeoImageRef.current
         : s.certProgram === 'systems-builder'              ? certSystemsImageRef.current
         : certImageRef.current
-      drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImg)
+      const aeoBg = s.certProgram === 'aeo-analyst' ? aeoBgRefs.current[aeoBgIndexRef.current] : null
+      drawCertificateCanvas(canvas, s, fontsReady, floraliaDotsRef.current, certImg, aeoBg)
     }
     else if (s.templateType === 'ijoined')     drawIJoinedCanvas(canvas, s, fontsReady, ijProfileImageRef.current, floraliaDotsRef.current)
     else if (s.templateType === 'roundtable' && s.rtStyle === 'evergreen') drawRoundtableEvergreenCanvas(canvas, s, fontsReady, floraliaDotsRef.current)
