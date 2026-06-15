@@ -64,10 +64,10 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     }
 
     const guideX   = 40
-    const scale    = certProgram === 'systems-builder' ? Math.max(cw, ch) * 0.9 : Math.max(cw, ch) * 1.5
+    const scale    = certProgram === 'systems-builder' ? Math.max(cw, ch) * 3.0 : Math.max(cw, ch) * 1.5
     const offX     = (cw - scale) / 2
-    const offY     = (ch - scale) / 2 + (certProgram === 'systems-builder' ? ch * 0.12 : 0)
-    const dotR     = certProgram === 'systems-builder' ? Math.max(cw, ch) * 0.011 : Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
+    const offY     = (ch - scale) / 2
+    const dotR     = Math.max(cw, ch) * (isLand ? 0.0016 : 0.0022)
     const accent   = certProgram === 'systems-builder' ? '#00A642' : (STIPPLE_COLORS[colorMode] ?? STIPPLE_COLORS['green'])
     const stepNorm = 0.006
     const shiftX   = ((guideX - offX) / scale) % stepNorm
