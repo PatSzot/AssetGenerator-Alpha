@@ -20,10 +20,17 @@ import './App.css'
 
 // ── URL slug ↔ template type
 const VALID_TEMPLATES = new Set(['quote', 'richquote', 'titlecard', 'blogart', 'twitter', 'certificate', 'ijoined', 'webinar', 'roundtable', 'welcome'])
+const CERT_SLUGS = { 'aeo-analyst': 'aeo-analyst', 'systems-builder': 'systems-builder' }
 
-function templateFromPath() {
+function settingsFromPath() {
   const slug = window.location.pathname.replace(/^\//, '').toLowerCase()
-  return VALID_TEMPLATES.has(slug) ? slug : 'quote'
+  if (CERT_SLUGS[slug]) return { templateType: 'certificate', certProgram: slug }
+  return { templateType: VALID_TEMPLATES.has(slug) ? slug : 'quote' }
+}
+
+function slugForSettings(templateType, certProgram) {
+  if (templateType === 'certificate') return certProgram ?? 'aeo-analyst'
+  return templateType === 'quote' ? '' : templateType
 }
 
 // ── Hash-based pre-population
@@ -310,8 +317,9 @@ const DEFAULT_SETTINGS = {
 export default function App() {
   const hashPayloadRef = useRef(parseHashData())
   const [settings, setSettings]       = useState(() => {
-    const initialTemplate = templateFromPath()
+    const { templateType: initialTemplate, certProgram: initialProgram } = settingsFromPath()
     const base = { ...DEFAULT_SETTINGS, templateType: initialTemplate }
+    if (initialProgram) base.certProgram = initialProgram
     if (initialTemplate === 'roundtable' || initialTemplate === 'welcome' || initialTemplate === 'certificate') base.dims = { w: 1080, h: 1080 }
     else if (initialTemplate === 'ijoined') base.dims = { w: 1920, h: 1080 }
     return applyHashPayload(base, hashPayloadRef.current)
@@ -476,8 +484,9 @@ export default function App() {
   // Sync browser back/forward to templateType
   useEffect(() => {
     const onPop = () => setSettings(prev => {
-      const t = templateFromPath()
+      const { templateType: t, certProgram: p } = settingsFromPath()
       const next = { ...prev, templateType: t }
+      if (p) next.certProgram = p
       if (t === 'roundtable' || t === 'welcome' || t === 'certificate') next.dims = { w: 1080, h: 1080 }
       else if (t === 'ijoined') next.dims = { w: 1920, h: 1080 }
       return next
@@ -488,7 +497,11 @@ export default function App() {
 
   const update = useCallback((key, value) => {
     if (key === 'templateType') {
-      window.history.pushState({}, '', value === 'quote' ? '/' : `/${value}`)
+      const slug = slugForSettings(value, value === 'certificate' ? (settings.certProgram ?? 'aeo-analyst') : undefined)
+      window.history.pushState({}, '', slug ? `/${slug}` : '/')
+    }
+    if (key === 'certProgram' && settings.templateType === 'certificate') {
+      window.history.pushState({}, '', `/${value}`)
     }
     setSettings(prev => {
       const next = { ...prev, [key]: value }
