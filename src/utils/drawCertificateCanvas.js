@@ -5,7 +5,7 @@ const CANVAS_BG    = '#000d05'
 const COHORT_COLOR = '#008c44'
 const PROGRAM_BG   = {
   'aeo-analyst':     '#008c44',
-  'systems-builder': '#0f2412',
+  'systems-builder': '#03051A',
 }
 
 export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, certImage) {
