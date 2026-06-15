@@ -54,7 +54,7 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
 
   // Decoration — drawn over background, under cert image
 
-  if (settings.showFloralia && floralia?.insideDots) {
+  if (certProgram !== 'aeo-analyst' && settings.showFloralia && floralia?.insideDots) {
     const rotAngle = ((settings.decorationRotation ?? 0) * Math.PI) / 180
     if (rotAngle !== 0) {
       ctx.save()
