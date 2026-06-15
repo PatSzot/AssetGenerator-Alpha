@@ -26,12 +26,19 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
   const canvasRef    = useRef(null)
   const containerRef = useRef(null)
   const [scale, setScale] = useState(1)
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
+  const [apiKeyPassword, setApiKeyPassword] = useState('')
+  const [apiKeyLoading, setApiKeyLoading] = useState(false)
+  const [apiKeyError, setApiKeyError] = useState('')
+  const [generatedApiKey, setGeneratedApiKey] = useState('')
+  const [apiKeyCopied, setApiKeyCopied] = useState(false)
 
   // ── Webinar multi-canvas
   const wbRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
   const [wbZoom, setWbZoom] = useState(null)   // null = auto-fit on first render
 
   const isWebinar = settings.templateType === 'webinar'
+  const showApiKeyControl = settings.templateType === 'certificate'
 
   // ── Auto-fit scale for single canvas
   const updateScale = useCallback(() => {
@@ -102,12 +109,46 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
     ? IJ_MODE_LABELS[settings.ijMode]
     : MODE_LABELS[settings.colorMode]
 
+  const handleGenerateApiKey = useCallback(async (event) => {
+    event.preventDefault()
+    setApiKeyLoading(true)
+    setApiKeyError('')
+    setGeneratedApiKey('')
+    setApiKeyCopied(false)
+
+    try {
+      const response = await fetch('/api/api-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: apiKeyPassword }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`)
+      setGeneratedApiKey(data.apiKey)
+    } catch (error) {
+      setApiKeyError(error.message)
+    } finally {
+      setApiKeyLoading(false)
+    }
+  }, [apiKeyPassword])
+
+  const handleCopyApiKey = useCallback(async () => {
+    if (!generatedApiKey) return
+    await navigator.clipboard.writeText(generatedApiKey)
+    setApiKeyCopied(true)
+  }, [generatedApiKey])
+
   // ── Shared toolbar
   const toolbar = (
     <div className="canvas-toolbar">
       <span className="tl">Preview</span>
       {!isWebinar && <span className="dbadge">{settings.dims.w} × {settings.dims.h}</span>}
       <span className="mbadge">{TEMPLATE_LABELS[settings.templateType]} · {modeLabel}</span>
+      {showApiKeyControl && (
+        <button className="api-key-trigger" type="button" onClick={() => setShowApiKeyModal(true)}>
+          Generate API key
+        </button>
+      )}
       <span className={`fpill${fontsReady ? ' ready' : ''}`}>
         {fontsReady ? 'Fonts ready' : 'Loading fonts…'}
       </span>
@@ -123,11 +164,47 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
     </div>
   )
 
+  const apiKeyModal = showApiKeyControl && showApiKeyModal ? (
+    <div className="api-key-backdrop" role="presentation" onMouseDown={() => setShowApiKeyModal(false)}>
+      <div className="api-key-modal" role="dialog" aria-modal="true" aria-labelledby="api-key-title" onMouseDown={event => event.stopPropagation()}>
+        <div className="api-key-modal-head">
+          <h2 id="api-key-title">Generate API key</h2>
+          <button className="api-key-close" type="button" onClick={() => setShowApiKeyModal(false)} aria-label="Close">x</button>
+        </div>
+        <form onSubmit={handleGenerateApiKey}>
+          <label className="api-key-label" htmlFor="api-key-password">Password</label>
+          <input
+            id="api-key-password"
+            className="api-key-input"
+            type="password"
+            value={apiKeyPassword}
+            onChange={event => setApiKeyPassword(event.target.value)}
+            autoFocus
+          />
+          {apiKeyError && <div className="api-key-error">{apiKeyError}</div>}
+          <button className="api-key-submit" type="submit" disabled={apiKeyLoading}>
+            {apiKeyLoading ? 'Generating...' : 'Generate key'}
+          </button>
+        </form>
+        {generatedApiKey && (
+          <div className="api-key-result">
+            <label className="api-key-label" htmlFor="api-key-output">API key</label>
+            <textarea id="api-key-output" className="api-key-output" value={generatedApiKey} readOnly />
+            <button className="api-key-copy" type="button" onClick={handleCopyApiKey}>
+              {apiKeyCopied ? 'Copied' : 'Copy key'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null
+
   // ── Webinar multi-canvas view
   if (isWebinar) {
     return (
       <div className="canvas-area">
         {toolbar}
+        {apiKeyModal}
         <div className="canvas-wrap canvas-wrap-multi" ref={containerRef}>
           <div className="wb-canvas-row">
             {WEBINAR_CANVASES.map(({ w, h, label }, i) => (
@@ -161,6 +238,7 @@ export default function CanvasPreview({ settings, fontsReady, draw }) {
   return (
     <div className="canvas-area">
       {toolbar}
+      {apiKeyModal}
       <div className="canvas-wrap" ref={containerRef}>
         <div
           className="canvas-scaler"

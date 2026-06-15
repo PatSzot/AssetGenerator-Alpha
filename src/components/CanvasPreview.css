@@ -50,7 +50,6 @@
   padding: 2px 6px;
   border: 1px solid var(--border);
   color: var(--text-dim);
-  margin-left: auto;
   transition: color .3s, border-color .3s;
 }
 .fpill.ready {
@@ -63,6 +62,131 @@
   width: auto;
   color: var(--logo);
   flex-shrink: 0;
+}
+
+.api-key-trigger {
+  margin-left: auto;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  padding: 2px 8px;
+  height: 17px;
+  cursor: pointer;
+}
+.api-key-trigger:hover {
+  background: rgba(0, 140, 68, .08);
+}
+
+.api-key-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 56px 24px 24px;
+  background: rgba(0, 13, 5, .18);
+}
+
+.api-key-modal {
+  width: min(460px, calc(100vw - 48px));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0, 13, 5, .16);
+  padding: 18px;
+}
+
+.api-key-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.api-key-modal h2 {
+  margin: 0;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.api-key-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+}
+
+.api-key-label {
+  display: block;
+  margin: 0 0 6px;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.api-key-input,
+.api-key-output {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 10px;
+  outline: none;
+}
+
+.api-key-output {
+  min-height: 106px;
+  resize: vertical;
+  word-break: break-all;
+}
+
+.api-key-submit,
+.api-key-copy {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #001408;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  cursor: pointer;
+}
+
+.api-key-submit:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.api-key-error {
+  margin-top: 8px;
+  font-family: 'Saans Mono', 'DM Mono', monospace;
+  font-size: 10px;
+  color: #b00020;
+}
+
+.api-key-result {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Canvas display area */
@@ -170,5 +294,5 @@
 }
 
 .canvas-toolbar .fpill {
-  margin-left: auto;
+  margin-left: 0;
 }

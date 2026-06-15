@@ -15,7 +15,6 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
     certFirstName      = 'Firstname',
     certLastName       = 'Lastname',
     certFullName       = 'Firstname Lastname',
-    certCohortLevel    = '',
     certGraduationDate = '',
     certProgram        = '',
   } = settings
@@ -33,7 +32,6 @@ export function drawCertificateCanvas(canvas, settings, fontsReady, floralia, ce
   if (dpr !== 1) ctx.scale(dpr, dpr)
 
   const serif = fontsReady ? "'Serrif VF', Georgia, serif"        : 'Georgia, serif'
-  const sans  = fontsReady ? "'Saans', sans-serif"                : 'sans-serif'
   const mono  = fontsReady ? "'Saans Mono', 'DM Mono', monospace" : 'monospace'
 
   const bg = PROGRAM_BG[certProgram] ?? CANVAS_BG

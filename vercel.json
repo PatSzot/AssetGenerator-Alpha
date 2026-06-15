@@ -4,6 +4,10 @@
       "memory": 1024,
       "maxDuration": 45
     },
+    "api/api-key.js": {
+      "memory": 128,
+      "maxDuration": 10
+    },
     "api/stipple.js": {
       "memory": 1024,
       "maxDuration": 60
