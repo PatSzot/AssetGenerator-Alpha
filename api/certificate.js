@@ -49,6 +49,7 @@ export default async function handler(req, res) {
   }
 
   const { cohortLevel } = req.body ?? {}
+  const program = cleanString(req.body?.program) || 'systems-builder'
   const requestedFullName = cleanString(req.body?.fullName)
   const legacyFirstName   = cleanString(req.body?.firstName)
   const legacyLastName    = cleanString(req.body?.lastName)
@@ -82,7 +83,7 @@ export default async function handler(req, res) {
     cohortDate:   date,
     settings: {
       templateType:       'certificate',
-      certProgram:        'systems-builder',
+      certProgram:        program,
       certFirstName,
       certLastName,
       certFullName:       fullName,
@@ -92,8 +93,8 @@ export default async function handler(req, res) {
     dims: { w: 1080, h: 1080 },
   })
 
-  // Navigate to /systems-builder with the data hash - App.jsx reads this via parseHashData().
-  const targetUrl = `${appUrl}/systems-builder#data=${hashPayload}`
+  // Navigate to the program-specific route with the data hash - App.jsx reads this via parseHashData().
+  const targetUrl = `${appUrl}/${program}#data=${hashPayload}`
 
   const CHROMIUM_URL =
     'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.tar'
