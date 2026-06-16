@@ -70,16 +70,19 @@ function applyHashPayload(base, payload) {
   }
 
   if (customerName) {
-    const spaceIdx      = customerName.indexOf(' ')
-    const firstName     = spaceIdx === -1 ? customerName : customerName.slice(0, spaceIdx)
-    const lastName      = spaceIdx === -1 ? ''           : customerName.slice(spaceIdx + 1)
+    const cleanName      = String(customerName).trim()
+    const spaceIdx       = cleanName.indexOf(' ')
+    const firstName      = spaceIdx === -1 ? cleanName : cleanName.slice(0, spaceIdx)
+    const lastName       = spaceIdx === -1 ? ''        : cleanName.slice(spaceIdx + 1)
     next.firstName      = firstName
     next.lastName       = lastName
     next.richFirstName  = firstName
     next.richLastName   = lastName
-    next.tweetAuthorName = customerName
-    next.ijName         = customerName
-    next.certFullName   = customerName
+    next.tweetAuthorName = cleanName
+    next.ijName         = cleanName
+    next.certFirstName  = firstName
+    next.certLastName   = lastName
+    next.certFullName   = cleanName
   }
 
   if (role || company) {
@@ -860,7 +863,7 @@ export default function App() {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setBatchRows(parseCsvRows(await res.text()))
-    } catch (e) {
+    } catch {
       alert('Could not fetch the CSV. Make sure the URL is publicly accessible.')
       setBatchRows(null)
     } finally {
@@ -934,6 +937,8 @@ export default function App() {
         const fullName = [row.firstName, row.lastName].filter(Boolean).join(' ')
         const s = {
           ...settings,
+          certFirstName:      row.firstName || '',
+          certLastName:       row.lastName || '',
           certFullName:       fullName || 'Firstname Lastname',
           certGraduationDate: row.cohortDate || settings.certGraduationDate,
         }
